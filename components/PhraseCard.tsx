@@ -52,8 +52,7 @@ export default function PhraseCard({
   onNext,
 }: PhraseCardProps) {
   const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
-  const isBackDisabled =
-    !isChapterComplete && !isAllPhrasesComplete && currentIndex === 0;
+  const isBackDisabled = false;
 
   return (
     <View style={styles.phraseCardOuter}>

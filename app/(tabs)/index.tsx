@@ -14,6 +14,19 @@ type Phrase = {
   category: string;
 };
 
+type TestAnswer = { phraseId: number; correct: boolean };
+
+function shufflePhrases(phrases: Phrase[]): Phrase[] {
+  const a = [...phrases];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]!;
+    a[i] = a[j]!;
+    a[j] = t;
+  }
+  return a;
+}
+
 const SENTENCES: Phrase[] = require('../../data/sentences.json');
 const TOTAL_PHRASES = SENTENCES.length;
 
@@ -25,6 +38,11 @@ export default function HomeScreen() {
 
   const [currentChapter, setCurrentChapter] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [isTestMode, setIsTestMode] = useState(false);
+  const [testPhrases, setTestPhrases] = useState<Phrase[]>([]);
+  const [testIndex, setTestIndex] = useState(0);
+  const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
 
   const chPhrases = useMemo(
     () =>
@@ -76,6 +94,17 @@ export default function HomeScreen() {
     }
   };
 
+  const startTest = () => {
+    setTestPhrases(shufflePhrases(chPhrases));
+    setTestIndex(0);
+    setTestAnswers([]);
+    setIsTestMode(true);
+  };
+
+  const exitTest = () => {
+    setIsTestMode(false);
+  };
+
   const onNext = () => {
     if (isAllPhrasesComplete) {
       return;
@@ -91,7 +120,6 @@ export default function HomeScreen() {
     }
   };
 
-  const onStartTest = advanceToNextChapter;
   const onNextChapter = advanceToNextChapter;
   const onRepeatChapter = () => {
     setCurrentIndex(0);
@@ -104,6 +132,10 @@ export default function HomeScreen() {
     }
     if (isChapterComplete) {
       setCurrentIndex(chCount - 1);
+      return;
+    }
+    if (currentIndex === 0) {
+      setCurrentIndex(chCount);
       return;
     }
     if (currentIndex > 0) {
@@ -133,7 +165,7 @@ export default function HomeScreen() {
           category={phrase?.category ?? ''}
           currentIndex={currentIndex}
           completedChapterName={categoryTitle}
-          onStartTest={onStartTest}
+          onStartTest={startTest}
           onRepeatChapter={onRepeatChapter}
           onNextChapter={onNextChapter}
           onBack={onBack}

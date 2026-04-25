@@ -1,5 +1,6 @@
-import { Redirect } from 'expo-router';
+import { View } from 'react-native';
+import { BRAND } from '../constants/theme';
 
 export default function Index() {
-  return <Redirect href="/(tabs)" />;
+  return <View style={{ flex: 1, backgroundColor: BRAND }} />;
 }

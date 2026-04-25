@@ -1,0 +1,17 @@
+[
+  { "id": 1, "chapterId": 1, "english": "Where is the exit?", "german": "Wo ist der Ausgang?", "category": "Ankunft & Orientierung" },
+  { "id": 2, "chapterId": 1, "english": "I am looking for the ticket counter.", "german": "Ich suche den Schalter für die Fahrkarten.", "category": "Ankunft & Orientierung" },
+  { "id": 3, "chapterId": 1, "english": "Which platform does my train leave from?", "german": "Von welchem Bahnsteig fährt mein Zug?", "category": "Ankunft & Orientierung" },
+  { "id": 4, "chapterId": 1, "english": "Is this the right bus to the city centre?", "german": "Fährt dieser Bus in die Innenstadt?", "category": "Ankunft & Orientierung" },
+  { "id": 5, "chapterId": 1, "english": "Can you help me with this map?", "german": "Können Sie mir mit dieser Karte helfen?", "category": "Ankunft & Orientierung" },
+  { "id": 6, "chapterId": 1, "english": "How do I get to the hotel from here?", "german": "Wie komme ich von hier zum Hotel?", "category": "Ankunft & Orientierung" },
+  { "id": 7, "chapterId": 1, "english": "Where can I get a taxi?", "german": "Wo bekomme ich ein Taxi?", "category": "Ankunft & Orientierung" },
+  { "id": 8, "chapterId": 1, "english": "Is it far to walk?", "german": "Ist es weit zu Fuß?", "category": "Ankunft & Orientierung" },
+  { "id": 9, "chapterId": 1, "english": "Could you show me the way, please?", "german": "Könnten Sie mir bitte den Weg zeigen?", "category": "Ankunft & Orientierung" },
+  { "id": 10, "chapterId": 1, "english": "I think I am lost.", "german": "Ich glaube, ich habe mich verirrt.", "category": "Ankunft & Orientierung" },
+  { "id": 11, "chapterId": 1, "english": "Is there a tourist information office nearby?", "german": "Gibt es hier in der Nähe ein Reiseinformationsbüro?", "category": "Ankunft & Orientierung" },
+  { "id": 12, "chapterId": 1, "english": "What time is the last train?", "german": "Wann fährt der letzte Zug?", "category": "Ankunft & Orientierung" },
+  { "id": 13, "chapterId": 1, "english": "I need a ticket to …", "german": "Ich brauche ein Ticket nach …", "category": "Ankunft & Orientierung" },
+  { "id": 14, "chapterId": 1, "english": "Where do I get off?", "german": "Wo muss ich aussteigen?", "category": "Ankunft & Orientierung" },
+  { "id": 15, "chapterId": 1, "english": "Is this the right direction?", "german": "Ist das die richtige Richtung?", "category": "Ankunft & Orientierung" }
+]

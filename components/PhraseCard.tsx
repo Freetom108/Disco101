@@ -11,60 +11,133 @@ import {
 import SpeakerButton from './SpeakerButton';
 
 export type PhraseCardProps = {
+  chapterNumber: number;
   categoryTitle: string;
   isChapterComplete: boolean;
+  isAllPhrasesComplete: boolean;
   inChapterN: number;
   ch1Count: number;
-  chapterBarPct: number;
+  globalProgressText: string;
+  globalBarPct: number;
   english: string;
   german: string;
   category: string;
   currentIndex: number;
+  completedChapterName: string;
+  onStartTest: () => void;
+  onRepeatChapter: () => void;
+  onNextChapter: () => void;
   onBack: () => void;
   onNext: () => void;
 };
 
 export default function PhraseCard({
+  chapterNumber,
   categoryTitle,
   isChapterComplete,
+  isAllPhrasesComplete,
   inChapterN,
   ch1Count,
-  chapterBarPct,
+  globalProgressText,
+  globalBarPct,
   english,
   german,
   category,
   currentIndex,
+  completedChapterName,
+  onStartTest,
+  onRepeatChapter,
+  onNextChapter,
   onBack,
   onNext,
 }: PhraseCardProps) {
+  const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
+  const isBackDisabled =
+    !isChapterComplete && !isAllPhrasesComplete && currentIndex === 0;
+
   return (
     <View style={styles.phraseCardOuter}>
       <View style={styles.phraseCardShadow}>
         <View style={styles.phraseCard}>
           <View>
             <Text style={styles.cardChapter}>
-              KAPITEL 1 · {categoryTitle.toUpperCase()}
+              {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
             </Text>
             <View style={styles.cardGlobalRow}>
               <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
-              <Text style={styles.cardGlobalValue}>15/101</Text>
+              <Text style={styles.cardGlobalValue}>{globalProgressText}</Text>
             </View>
             <View style={styles.cardProgressTrack}>
               <View
                 style={[
                   styles.cardProgressFill,
-                  { width: `${chapterBarPct}%` },
+                  { width: `${globalBarPct}%` },
                 ]}
               />
             </View>
           </View>
 
           <View style={styles.cardMid}>
-            {isChapterComplete ? (
+            {showChapterMenu ? (
+              <View style={styles.chapterMenuBlock}>
+                <Text
+                  style={[
+                    styles.chapterMenuTitle,
+                    { fontFamily: FONT_DM_SERIF },
+                  ]}
+                >
+                  Kapitel abgeschlossen! 🎉
+                </Text>
+                <Text style={styles.chapterMenuSubtitle}>
+                  {completedChapterName}
+                </Text>
+                <View style={styles.chapterMenuButtons}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Test starten"
+                    style={({ pressed }) => [
+                      styles.chapterMenuBtnPrimary,
+                      pressed && { opacity: 0.92 },
+                    ]}
+                    onPress={onStartTest}
+                  >
+                    <Text style={styles.chapterMenuBtnPrimaryText}>
+                      📝 Test starten
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Kapitel wiederholen"
+                    style={({ pressed }) => [
+                      styles.chapterMenuBtnOutline,
+                      pressed && { opacity: 0.9 },
+                    ]}
+                    onPress={onRepeatChapter}
+                  >
+                    <Text style={styles.chapterMenuBtnOutlineText}>
+                      🔁 Kapitel wiederholen
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Nächstes Kapitel"
+                    style={({ pressed }) => [
+                      styles.chapterMenuBtnGhost,
+                      pressed && { opacity: 0.85 },
+                    ]}
+                    onPress={onNextChapter}
+                  >
+                    <Text style={styles.chapterMenuBtnGhostText}>
+                      Nächstes Kapitel →
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : isChapterComplete ? (
               <Text
                 style={[styles.cardCompleteTitle, { fontFamily: FONT_DM_SERIF }]}
               >
-                Kapitel abgeschlossen!
+                Alle 101 Phrasen gelernt!
               </Text>
             ) : (
               <>
@@ -120,40 +193,42 @@ export default function PhraseCard({
                 accessibilityRole="button"
                 accessibilityLabel="Zurück"
                 onPress={onBack}
-                disabled={currentIndex === 0}
+                disabled={isBackDisabled}
                 style={({ pressed }) => [
-                  pressed && currentIndex > 0 && { opacity: 0.7 },
+                  pressed && !isBackDisabled && { opacity: 0.7 },
                 ]}
               >
                 <Text
                   style={[
                     styles.cardBack,
-                    currentIndex === 0 && styles.cardBackDisabled,
+                    isBackDisabled && styles.cardBackDisabled,
                   ]}
                 >
                   Zurück
                 </Text>
               </Pressable>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.cardNext,
-                  isChapterComplete && styles.cardNextDisabled,
-                  pressed && !isChapterComplete && { opacity: 0.92 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Nächste Phrase"
-                onPress={onNext}
-                disabled={isChapterComplete}
-              >
-                <Text
-                  style={[
-                    styles.cardNextText,
-                    isChapterComplete && styles.cardNextTextDisabled,
+              {!(isChapterComplete && !isAllPhrasesComplete) ? (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.cardNext,
+                    isAllPhrasesComplete && styles.cardNextDisabled,
+                    pressed && !isAllPhrasesComplete && { opacity: 0.92 },
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Nächste Phrase"
+                  onPress={onNext}
+                  disabled={isAllPhrasesComplete}
                 >
-                  Nächste Phrase →
-                </Text>
-              </Pressable>
+                  <Text
+                    style={[
+                      styles.cardNextText,
+                      isAllPhrasesComplete && styles.cardNextTextDisabled,
+                    ]}
+                  >
+                    Nächste Phrase →
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           </View>
         </View>
@@ -324,5 +399,67 @@ const styles = StyleSheet.create({
     color: BUTTON_TEXT,
     fontSize: 16,
     fontWeight: '600',
+  },
+  chapterMenuBlock: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  chapterMenuTitle: {
+    color: ACTIVE,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  chapterMenuSubtitle: {
+    color: INACTIVE,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  chapterMenuButtons: {
+    width: '100%',
+    marginTop: 20,
+    gap: 10,
+  },
+  chapterMenuBtnPrimary: {
+    backgroundColor: ACTIVE,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  chapterMenuBtnPrimaryText: {
+    color: BUTTON_TEXT,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  chapterMenuBtnOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: INACTIVE,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  chapterMenuBtnOutlineText: {
+    color: INACTIVE,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  chapterMenuBtnGhost: {
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  chapterMenuBtnGhostText: {
+    color: INACTIVE,
+    fontSize: 16,
+    fontWeight: '500',
+    opacity: 0.7,
   },
 });

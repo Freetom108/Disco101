@@ -15,6 +15,7 @@ type Phrase = {
 };
 
 const SENTENCES: Phrase[] = require('../../data/sentences.json');
+const TOTAL_PHRASES = SENTENCES.length;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -22,20 +23,43 @@ export default function HomeScreen() {
     [FONT_DM_SERIF]: require('../../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
 
-  const ch1 = useMemo(
+  const [currentChapter, setCurrentChapter] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const chPhrases = useMemo(
     () =>
-      SENTENCES.filter((p) => p.chapterId === 1).sort(
+      SENTENCES.filter((p) => p.chapterId === currentChapter).sort(
         (a, b) => a.id - b.id,
       ) as Phrase[],
-    [],
+    [currentChapter],
   );
-  const ch1Count = ch1.length;
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const isChapterComplete = currentIndex >= ch1Count;
-  const categoryTitle = ch1[0]?.category ?? 'Kapitel 1';
-  const inChapterN = isChapterComplete ? ch1Count : currentIndex + 1;
-  const chapterBarPct =
-    ch1Count > 0 ? Math.round((inChapterN / ch1Count) * 10000) / 100 : 0;
+  const chCount = chPhrases.length;
+  const categoryTitle = chPhrases[0]?.category ?? `Kapitel ${currentChapter}`;
+
+  const phrasesBefore = useMemo(
+    () => SENTENCES.filter((p) => p.chapterId < currentChapter).length,
+    [currentChapter],
+  );
+
+  const isChapterComplete = chCount > 0 && currentIndex >= chCount;
+  const isAllPhrasesComplete = isChapterComplete && currentChapter === 7;
+  const inChapterN = isChapterComplete ? chCount : currentIndex + 1;
+
+  const completedForProgress =
+    phrasesBefore + (isChapterComplete ? chCount : currentIndex);
+  const globalBarPct =
+    TOTAL_PHRASES > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (completedForProgress / TOTAL_PHRASES) * 10000,
+          ) / 100,
+        )
+      : 0;
+  const globalProgressText = `${Math.min(
+    TOTAL_PHRASES,
+    completedForProgress,
+  )}/${TOTAL_PHRASES}`;
 
   if (!fontsLoaded) {
     return (
@@ -45,39 +69,73 @@ export default function HomeScreen() {
     );
   }
 
-  const onNext = () => {
-    if (isChapterComplete) {
-      return;
-    }
-    if (currentIndex < ch1Count - 1) {
-      setCurrentIndex((i) => i + 1);
-    } else {
-      setCurrentIndex(ch1Count);
+  const advanceToNextChapter = () => {
+    if (currentChapter < 7) {
+      setCurrentChapter((c) => c + 1);
+      setCurrentIndex(0);
     }
   };
 
+  const onNext = () => {
+    if (isAllPhrasesComplete) {
+      return;
+    }
+    if (isChapterComplete) {
+      advanceToNextChapter();
+      return;
+    }
+    if (currentIndex < chCount - 1) {
+      setCurrentIndex((i) => i + 1);
+    } else {
+      setCurrentIndex(chCount);
+    }
+  };
+
+  const onStartTest = advanceToNextChapter;
+  const onNextChapter = advanceToNextChapter;
+  const onRepeatChapter = () => {
+    setCurrentIndex(0);
+  };
+
   const onBack = () => {
+    if (isAllPhrasesComplete) {
+      setCurrentIndex(chCount - 1);
+      return;
+    }
+    if (isChapterComplete) {
+      setCurrentIndex(chCount - 1);
+      return;
+    }
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
     }
   };
 
-  const phrase = ch1[currentIndex];
+  const phrase = chPhrases[
+    isChapterComplete ? chCount - 1 : currentIndex
+  ] as Phrase | undefined;
 
   return (
     <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
       <Header />
       <View style={styles.homeBody}>
         <PhraseCard
+          chapterNumber={currentChapter}
           categoryTitle={categoryTitle}
           isChapterComplete={isChapterComplete}
+          isAllPhrasesComplete={isAllPhrasesComplete}
           inChapterN={inChapterN}
-          ch1Count={ch1Count}
-          chapterBarPct={chapterBarPct}
+          ch1Count={chCount}
+          globalProgressText={globalProgressText}
+          globalBarPct={globalBarPct}
           english={phrase?.english ?? ''}
           german={phrase?.german ?? ''}
           category={phrase?.category ?? ''}
           currentIndex={currentIndex}
+          completedChapterName={categoryTitle}
+          onStartTest={onStartTest}
+          onRepeatChapter={onRepeatChapter}
+          onNextChapter={onNextChapter}
           onBack={onBack}
           onNext={onNext}
         />

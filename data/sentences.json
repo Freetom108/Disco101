@@ -1,17 +1,709 @@
 [
-  { "id": 1, "chapterId": 1, "english": "Where is the exit?", "german": "Wo ist der Ausgang?", "category": "Ankunft & Orientierung" },
-  { "id": 2, "chapterId": 1, "english": "I am looking for the ticket counter.", "german": "Ich suche den Schalter für die Fahrkarten.", "category": "Ankunft & Orientierung" },
-  { "id": 3, "chapterId": 1, "english": "Which platform does my train leave from?", "german": "Von welchem Bahnsteig fährt mein Zug?", "category": "Ankunft & Orientierung" },
-  { "id": 4, "chapterId": 1, "english": "Is this the right bus to the city centre?", "german": "Fährt dieser Bus in die Innenstadt?", "category": "Ankunft & Orientierung" },
-  { "id": 5, "chapterId": 1, "english": "Can you help me with this map?", "german": "Können Sie mir mit dieser Karte helfen?", "category": "Ankunft & Orientierung" },
-  { "id": 6, "chapterId": 1, "english": "How do I get to the hotel from here?", "german": "Wie komme ich von hier zum Hotel?", "category": "Ankunft & Orientierung" },
-  { "id": 7, "chapterId": 1, "english": "Where can I get a taxi?", "german": "Wo bekomme ich ein Taxi?", "category": "Ankunft & Orientierung" },
-  { "id": 8, "chapterId": 1, "english": "Is it far to walk?", "german": "Ist es weit zu Fuß?", "category": "Ankunft & Orientierung" },
-  { "id": 9, "chapterId": 1, "english": "Could you show me the way, please?", "german": "Könnten Sie mir bitte den Weg zeigen?", "category": "Ankunft & Orientierung" },
-  { "id": 10, "chapterId": 1, "english": "I think I am lost.", "german": "Ich glaube, ich habe mich verirrt.", "category": "Ankunft & Orientierung" },
-  { "id": 11, "chapterId": 1, "english": "Is there a tourist information office nearby?", "german": "Gibt es hier in der Nähe ein Reiseinformationsbüro?", "category": "Ankunft & Orientierung" },
-  { "id": 12, "chapterId": 1, "english": "What time is the last train?", "german": "Wann fährt der letzte Zug?", "category": "Ankunft & Orientierung" },
-  { "id": 13, "chapterId": 1, "english": "I need a ticket to …", "german": "Ich brauche ein Ticket nach …", "category": "Ankunft & Orientierung" },
-  { "id": 14, "chapterId": 1, "english": "Where do I get off?", "german": "Wo muss ich aussteigen?", "category": "Ankunft & Orientierung" },
-  { "id": 15, "chapterId": 1, "english": "Is this the right direction?", "german": "Ist das die richtige Richtung?", "category": "Ankunft & Orientierung" }
+  {
+    "id": 1,
+    "chapterId": 1,
+    "english": "Where is the exit?",
+    "german": "Wo ist der Ausgang?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 2,
+    "chapterId": 1,
+    "english": "How do I get to the train station?",
+    "german": "Wie komme ich zum Bahnhof?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 3,
+    "chapterId": 1,
+    "english": "Where is the nearest subway?",
+    "german": "Wo ist die nächste U-Bahn?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 4,
+    "chapterId": 1,
+    "english": "Which bus goes to the city center?",
+    "german": "Welcher Bus fährt ins Zentrum?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 5,
+    "chapterId": 1,
+    "english": "How far is it?",
+    "german": "Wie weit ist das?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 6,
+    "chapterId": 1,
+    "english": "Can you call me a taxi?",
+    "german": "Können Sie mir ein Taxi rufen?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 7,
+    "chapterId": 1,
+    "english": "Please take me here.",
+    "german": "Bitte hierhin.",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 8,
+    "chapterId": 1,
+    "english": "How much is a ticket?",
+    "german": "Wie viel kostet ein Ticket?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 9,
+    "chapterId": 1,
+    "english": "Is it nearby?",
+    "german": "Ist das in der Nähe?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 10,
+    "chapterId": 1,
+    "english": "Where can I leave my luggage?",
+    "german": "Wo kann ich mein Gepäck lassen?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 11,
+    "chapterId": 1,
+    "english": "Which platform is the train from?",
+    "german": "Von welchem Gleis fährt der Zug?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 12,
+    "chapterId": 1,
+    "english": "Is this seat taken?",
+    "german": "Ist dieser Platz frei?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 13,
+    "chapterId": 1,
+    "english": "How long does it take?",
+    "german": "Wie lange dauert das?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 14,
+    "chapterId": 1,
+    "english": "Where is the schedule?",
+    "german": "Wo ist der Fahrplan?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 15,
+    "chapterId": 1,
+    "english": "Can I get off here?",
+    "german": "Kann ich hier aussteigen?",
+    "category": "Ankunft & Orientierung"
+  },
+  {
+    "id": 16,
+    "chapterId": 2,
+    "english": "I have a reservation.",
+    "german": "Ich habe eine Reservierung.",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 17,
+    "chapterId": 2,
+    "english": "What is my room number?",
+    "german": "Wie lautet meine Zimmernummer?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 18,
+    "chapterId": 2,
+    "english": "The heating doesn't work.",
+    "german": "Die Heizung funktioniert nicht.",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 19,
+    "chapterId": 2,
+    "english": "The room is too noisy.",
+    "german": "Das Zimmer ist zu laut.",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 20,
+    "chapterId": 2,
+    "english": "Can I check out later?",
+    "german": "Kann ich später auschecken?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 21,
+    "chapterId": 2,
+    "english": "Is there Wi-Fi?",
+    "german": "Gibt es WLAN?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 22,
+    "chapterId": 2,
+    "english": "When is breakfast?",
+    "german": "Wann gibt es Frühstück?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 23,
+    "chapterId": 2,
+    "english": "Can I get another room?",
+    "german": "Kann ich ein anderes Zimmer bekommen?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 24,
+    "chapterId": 2,
+    "english": "The TV doesn't work.",
+    "german": "Der Fernseher funktioniert nicht.",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 25,
+    "chapterId": 2,
+    "english": "Where is the safe?",
+    "german": "Wo ist der Safe?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 26,
+    "chapterId": 2,
+    "english": "Can I get an extra bed?",
+    "german": "Kann ich ein zusätzliches Bett bekommen?",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 27,
+    "chapterId": 2,
+    "english": "I'd like to check out.",
+    "german": "Ich möchte auschecken.",
+    "category": "Unterkunft"
+  },
+  {
+    "id": 28,
+    "chapterId": 3,
+    "english": "A table for two, please.",
+    "german": "Einen Tisch für zwei, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 29,
+    "chapterId": 3,
+    "english": "Can I see the menu?",
+    "german": "Kann ich die Karte haben?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 30,
+    "chapterId": 3,
+    "english": "What do you recommend?",
+    "german": "Was empfehlen Sie?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 31,
+    "chapterId": 3,
+    "english": "I'm a vegetarian.",
+    "german": "Ich bin Vegetarier.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 32,
+    "chapterId": 3,
+    "english": "Does this have nuts?",
+    "german": "Sind da Nüsse drin?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 33,
+    "chapterId": 3,
+    "english": "I'll have the same.",
+    "german": "Ich nehme das Gleiche.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 34,
+    "chapterId": 3,
+    "english": "A water, please.",
+    "german": "Ein Wasser, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 35,
+    "chapterId": 3,
+    "english": "A bottle of red wine, please.",
+    "german": "Eine Flasche Rotwein, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 36,
+    "chapterId": 3,
+    "english": "The bill, please.",
+    "german": "Die Rechnung, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 37,
+    "chapterId": 3,
+    "english": "Can I pay by card?",
+    "german": "Kann ich mit Karte zahlen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 38,
+    "chapterId": 3,
+    "english": "Do you have something vegetarian?",
+    "german": "Gibt es etwas Vegetarisches?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 39,
+    "chapterId": 3,
+    "english": "I don't eat meat.",
+    "german": "Ich esse kein Fleisch.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 40,
+    "chapterId": 3,
+    "english": "A coffee with milk, please.",
+    "german": "Einen Kaffee mit Milch, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 41,
+    "chapterId": 3,
+    "english": "Is it spicy?",
+    "german": "Ist das scharf?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 42,
+    "chapterId": 3,
+    "english": "To go, please.",
+    "german": "Zum Mitnehmen, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 43,
+    "chapterId": 3,
+    "english": "I didn't order this.",
+    "german": "Das habe ich nicht bestellt.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 44,
+    "chapterId": 3,
+    "english": "A glass of wine, please.",
+    "german": "Ein Glas Wein, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 45,
+    "chapterId": 3,
+    "english": "How much should I tip?",
+    "german": "Wie viel Trinkgeld gibt man?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 46,
+    "chapterId": 3,
+    "english": "Can you explain that again?",
+    "german": "Können Sie das nochmal erklären?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 47,
+    "chapterId": 3,
+    "english": "A dessert, please.",
+    "german": "Einen Nachtisch, bitte.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 48,
+    "chapterId": 4,
+    "english": "Hi, how are you?",
+    "german": "Hallo, wie geht's?",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 49,
+    "chapterId": 4,
+    "english": "Nice weather today.",
+    "german": "Schönes Wetter heute.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 50,
+    "chapterId": 4,
+    "english": "Where are you from?",
+    "german": "Woher kommen Sie?",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 51,
+    "chapterId": 4,
+    "english": "I'm from Austria.",
+    "german": "Ich komme aus Österreich.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 52,
+    "chapterId": 4,
+    "english": "This is a beautiful country.",
+    "german": "Das ist ein schönes Land.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 53,
+    "chapterId": 4,
+    "english": "It's my first time here.",
+    "german": "Ich bin zum ersten Mal hier.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 54,
+    "chapterId": 4,
+    "english": "Thanks a lot for your help.",
+    "german": "Vielen Dank für Ihre Hilfe.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 55,
+    "chapterId": 4,
+    "english": "Do you speak German?",
+    "german": "Sprechen Sie Deutsch?",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 56,
+    "chapterId": 4,
+    "english": "No problem.",
+    "german": "Kein Problem.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 57,
+    "chapterId": 4,
+    "english": "Sorry.",
+    "german": "Tut mir leid.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 58,
+    "chapterId": 4,
+    "english": "That's okay.",
+    "german": "Macht nichts.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 59,
+    "chapterId": 4,
+    "english": "Have a nice day.",
+    "german": "Schönen Tag noch.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 60,
+    "chapterId": 4,
+    "english": "I like this country.",
+    "german": "Ich mag dieses Land.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 61,
+    "chapterId": 4,
+    "english": "Your English is very good.",
+    "german": "Sie sprechen gut Englisch.",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 62,
+    "chapterId": 4,
+    "english": "What do you do?",
+    "german": "Was machen Sie beruflich?",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 63,
+    "chapterId": 4,
+    "english": "That's interesting!",
+    "german": "Interessant!",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 64,
+    "chapterId": 4,
+    "english": "Can I help?",
+    "german": "Kann ich helfen?",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 65,
+    "chapterId": 4,
+    "english": "Cheers!",
+    "german": "Prost!",
+    "category": "Small Talk & Höflichkeit"
+  },
+  {
+    "id": 66,
+    "chapterId": 5,
+    "english": "How much is this?",
+    "german": "Wie viel kostet das?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 67,
+    "chapterId": 5,
+    "english": "Do you have this in another size?",
+    "german": "Haben Sie das in einer anderen Größe?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 68,
+    "chapterId": 5,
+    "english": "In another color?",
+    "german": "In einer anderen Farbe?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 69,
+    "chapterId": 5,
+    "english": "Can I try this on?",
+    "german": "Kann ich das anprobieren?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 70,
+    "chapterId": 5,
+    "english": "That's too expensive.",
+    "german": "Das ist zu teuer.",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 71,
+    "chapterId": 5,
+    "english": "Is there a discount?",
+    "german": "Gibt es Rabatt?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 72,
+    "chapterId": 5,
+    "english": "I'm just looking.",
+    "german": "Ich schaue nur.",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 73,
+    "chapterId": 5,
+    "english": "I'll take it.",
+    "german": "Ich nehme es.",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 74,
+    "chapterId": 5,
+    "english": "Can I pay by card?",
+    "german": "Kann ich mit Karte zahlen?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 75,
+    "chapterId": 5,
+    "english": "Do you have change?",
+    "german": "Haben Sie Wechselgeld?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 76,
+    "chapterId": 5,
+    "english": "Where is the fitting room?",
+    "german": "Wo ist die Umkleide?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 77,
+    "chapterId": 5,
+    "english": "I'd like to return this.",
+    "german": "Ich möchte das zurückgeben.",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 78,
+    "chapterId": 5,
+    "english": "Where is the pharmacy?",
+    "german": "Wo ist die Apotheke?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 79,
+    "chapterId": 5,
+    "english": "A haircut, please.",
+    "german": "Einen Haarschnitt, bitte.",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 80,
+    "chapterId": 5,
+    "english": "Can I exchange money here?",
+    "german": "Kann ich hier Geld wechseln?",
+    "category": "Shoppen & Service"
+  },
+  {
+    "id": 81,
+    "chapterId": 6,
+    "english": "I need a doctor.",
+    "german": "Ich brauche einen Arzt.",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 82,
+    "chapterId": 6,
+    "english": "Call the police!",
+    "german": "Rufen Sie die Polizei!",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 83,
+    "chapterId": 6,
+    "english": "I lost my passport.",
+    "german": "Ich habe meinen Pass verloren.",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 84,
+    "chapterId": 6,
+    "english": "I feel sick.",
+    "german": "Mir ist schlecht.",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 85,
+    "chapterId": 6,
+    "english": "Where is the hospital?",
+    "german": "Wo ist das Krankenhaus?",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 86,
+    "chapterId": 6,
+    "english": "I need a dentist.",
+    "german": "Ich brauche einen Zahnarzt.",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 87,
+    "chapterId": 6,
+    "english": "Leave me alone!",
+    "german": "Lassen Sie mich in Ruhe!",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 88,
+    "chapterId": 6,
+    "english": "There was an accident.",
+    "german": "Es gab einen Unfall.",
+    "category": "Notfall & Gesundheit"
+  },
+  {
+    "id": 89,
+    "chapterId": 7,
+    "english": "Can you speak more slowly?",
+    "german": "Können Sie langsamer sprechen?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 90,
+    "chapterId": 7,
+    "english": "Can you repeat that?",
+    "german": "Können Sie das wiederholen?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 91,
+    "chapterId": 7,
+    "english": "Can you write that down?",
+    "german": "Können Sie das aufschreiben?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 92,
+    "chapterId": 7,
+    "english": "How do you say that in English?",
+    "german": "Wie sagt man das auf Englisch?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 93,
+    "chapterId": 7,
+    "english": "What does that mean?",
+    "german": "Was bedeutet das?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 94,
+    "chapterId": 7,
+    "english": "I don't understand.",
+    "german": "Ich verstehe nicht.",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 95,
+    "chapterId": 7,
+    "english": "Can you help me?",
+    "german": "Können Sie mir helfen?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 96,
+    "chapterId": 7,
+    "english": "Can you speak louder?",
+    "german": "Können Sie lauter sprechen?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 97,
+    "chapterId": 7,
+    "english": "Do you mean this?",
+    "german": "Meinen Sie das?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 98,
+    "chapterId": 7,
+    "english": "Is that correct?",
+    "german": "Ist das richtig?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 99,
+    "chapterId": 7,
+    "english": "Can you spell that?",
+    "german": "Können Sie das buchstabieren?",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 100,
+    "chapterId": 7,
+    "english": "I'm still learning English.",
+    "german": "Ich lerne noch Englisch.",
+    "category": "Verstehen & Nachfragen"
+  },
+  {
+    "id": 101,
+    "chapterId": 7,
+    "english": "Sorry, I'm still learning – can you speak a bit more slowly?",
+    "german": "Entschuldigung, ich lerne noch – können Sie bitte langsamer sprechen?",
+    "category": "Bonus"
+  }
 ]

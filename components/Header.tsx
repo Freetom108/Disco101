@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
   headerLogoMask: {
     width: 56,
     height: 56,
-    borderRadius: 0,
     flexShrink: 0,
   },
   headerLogo: {

@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
   };
 
   const onWeiter = () => {
-    if (slideIndex < 2) {
+    if (slideIndex < 1) {
       goToSlide(slideIndex + 1);
     }
   };
@@ -112,41 +112,23 @@ export default function OnboardingScreen() {
                   { fontFamily: FONT_DM_SERIF },
                 ]}
               >
-                So lernst du
+                So funktioniert's
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
                   · 🃏 Englischer Satz oben, deutsche Übersetzung darunter
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🔊 M oder F antippen → Aussprache anhören
-                </Text>
-                <Text style={[styles.listItem, styles.listItemLast]}>
-                  · 🗣️ Nachsprechen und zur nächsten Phrase weiter
-                </Text>
-              </View>
-            </View>
-          </View>
-          <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={styles.slideInnerCentered}>
-              <Text
-                style={[
-                  styles.titleSection,
-                  styles.titleSectionSpaced,
-                  { fontFamily: FONT_DM_SERIF },
-                ]}
-              >
-                Nach jedem Kapitel
-              </Text>
-              <View style={styles.list}>
-                <Text style={styles.listItem}>
-                  · 📝 Teste dein Wissen mit einem kurzen Quiz
+                  · 🔊 M oder F antippen → Satz auf Englisch anhören
                 </Text>
                 <Text style={styles.listItem}>
-                  · 📌 Markiere schwierige Karten zur Wiederholung
-                  {'\n'}
-                  📍 Tippe den blauen Pin → er wird rot und die Karte{'\n'}
-                  landet im Repeat-Stapel
+                  · 🔁 Wiederhole so oft du möchtest – wenn es für dich richtig klingt, weiter zur nächsten Phrase
+                </Text>
+                <Text style={styles.listItem}>
+                  · 📝 Nach jedem Kapitel: Teste dein Wissen mit einem kurzen Quiz
+                </Text>
+                <Text style={styles.listItem}>
+                  · 📍 Schwierige Karte? Tippe den PIN oben rechts – er wird rot und die Karte landet im Repeat-Stapel
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
                   · ⚙️ Alles jederzeit in Settings nachlesen
@@ -159,14 +141,14 @@ export default function OnboardingScreen() {
           style={[styles.footerFixed, { paddingBottom: Math.max(insets.bottom, 12) }]}
         >
           <View style={styles.dotsRow}>
-            {[0, 1, 2].map((i) => (
+            {[0, 1].map((i) => (
               <View
                 key={i}
                 style={[styles.dot, i === slideIndex && styles.dotActive]}
               />
             ))}
           </View>
-          {slideIndex < 2 ? (
+          {slideIndex < 1 ? (
             <Pressable
               onPress={onWeiter}
               style={({ pressed }) => [

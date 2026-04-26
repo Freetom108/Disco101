@@ -76,7 +76,7 @@ export default function PhraseCard({
                 onPress={() => setPinned((p) => !p)}
               >
                 <Ionicons
-                  name="location"
+                  name="pin"
                   size={20}
                   color={pinned ? '#CF142B' : '#00247D'}
                 />

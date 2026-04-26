@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '../../components/Header';
@@ -31,6 +32,38 @@ function shufflePhrases(phrases: Phrase[]): Phrase[] {
 const SENTENCES: Phrase[] = require('../../data/sentences.json');
 const TOTAL_PHRASES = SENTENCES.length;
 
+const LAST_POSITION_KEY = 'last_position';
+const CHAPTER_PROGRESS_KEY = 'chapter_progress';
+
+function saveLastPosition(chapterId: number, phraseIndex: number) {
+  AsyncStorage.setItem(
+    LAST_POSITION_KEY,
+    JSON.stringify({ chapterId, phraseIndex }),
+  );
+}
+
+function applyChapterProgress(
+  updates: Array<{ chapterId: number; phraseIndex: number }>,
+) {
+  AsyncStorage.getItem(CHAPTER_PROGRESS_KEY).then((val) => {
+    try {
+      const progress: Record<string, number> = val ? JSON.parse(val) : {};
+      for (const { chapterId, phraseIndex } of updates) {
+        const key = String(chapterId);
+        progress[key] = Math.max(progress[key] ?? 0, phraseIndex);
+      }
+      AsyncStorage.setItem(CHAPTER_PROGRESS_KEY, JSON.stringify(progress));
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+function persistOnNext(chapterId: number, phraseIndex: number) {
+  saveLastPosition(chapterId, phraseIndex);
+  applyChapterProgress([{ chapterId, phraseIndex }]);
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [fontsLoaded] = useFonts({
@@ -46,11 +79,32 @@ export default function HomeScreen() {
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
 
-  useEffect(() => {
-    AsyncStorage.getItem('pinned_phrases').then((val) => {
-      if (val) setPinnedIds(JSON.parse(val));
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem('pinned_phrases').then((val) => {
+        if (val) setPinnedIds(JSON.parse(val));
+      });
+      AsyncStorage.getItem(LAST_POSITION_KEY).then((val) => {
+        if (!val) return;
+        try {
+          const { chapterId, phraseIndex } = JSON.parse(val) as {
+            chapterId?: unknown;
+            phraseIndex?: unknown;
+          };
+          const ch = Number(chapterId);
+          const idx = Number(phraseIndex);
+          if (!Number.isFinite(ch) || !Number.isFinite(idx)) return;
+          if (ch < 1 || ch > 7) return;
+          const maxInCh = SENTENCES.filter((p) => p.chapterId === ch).length;
+          const clampedIdx = Math.min(Math.max(0, idx), maxInCh);
+          setCurrentChapter(ch);
+          setCurrentIndex(clampedIdx);
+        } catch {
+          /* ignore invalid stored position */
+        }
+      });
+    }, []),
+  );
 
   const chPhrases = useMemo(
     () =>
@@ -118,13 +172,25 @@ export default function HomeScreen() {
       return;
     }
     if (isChapterComplete) {
-      advanceToNextChapter();
+      if (currentChapter < 7) {
+        const nextCh = currentChapter + 1;
+        setCurrentChapter(nextCh);
+        setCurrentIndex(0);
+        saveLastPosition(nextCh, 0);
+        applyChapterProgress([
+          { chapterId: currentChapter, phraseIndex: chCount },
+          { chapterId: nextCh, phraseIndex: 0 },
+        ]);
+      }
       return;
     }
     if (currentIndex < chCount - 1) {
-      setCurrentIndex((i) => i + 1);
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      persistOnNext(currentChapter, nextIdx);
     } else {
       setCurrentIndex(chCount);
+      persistOnNext(currentChapter, chCount);
     }
   };
 
@@ -184,6 +250,7 @@ export default function HomeScreen() {
           }}
           onStartTest={startTest}
           onRepeatChapter={onRepeatChapter}
+          onRestartChapter={() => setCurrentIndex(0)}
           onNextChapter={onNextChapter}
           onBack={onBack}
           onNext={onNext}

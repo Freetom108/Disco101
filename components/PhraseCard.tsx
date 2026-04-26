@@ -30,6 +30,7 @@ export type PhraseCardProps = {
   onTogglePin: (id: number) => void;
   onStartTest: () => void;
   onRepeatChapter: () => void;
+  onRestartChapter: () => void;
   onNextChapter: () => void;
   onBack: () => void;
   onNext: () => void;
@@ -54,6 +55,7 @@ export default function PhraseCard({
   onTogglePin,
   onStartTest,
   onRepeatChapter,
+  onRestartChapter,
   onNextChapter,
   onBack,
   onNext,
@@ -65,6 +67,23 @@ export default function PhraseCard({
     <View style={styles.phraseCardOuter}>
       <View style={styles.phraseCardShadow}>
         <View style={styles.phraseCard}>
+          {!isChapterComplete ? (
+            <Pressable
+              style={styles.pinFloating}
+              accessibilityRole="button"
+              accessibilityLabel={isPinned ? 'Markierung entfernen' : 'Markieren'}
+              hitSlop={12}
+              onPress={() => {
+                if (phraseId) onTogglePin(phraseId);
+              }}
+            >
+              <Ionicons
+                name="pin"
+                size={20}
+                color={isPinned ? '#CF142B' : '#00247D'}
+              />
+            </Pressable>
+          ) : null}
           <View>
             <View style={styles.cardHeaderTop}>
               <Text
@@ -73,20 +92,6 @@ export default function PhraseCard({
               >
                 {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
               </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isPinned ? 'Markierung entfernen' : 'Markieren'}
-                hitSlop={8}
-                onPress={() => {
-                  if (phraseId) onTogglePin(phraseId);
-                }}
-              >
-                <Ionicons
-                  name="pin"
-                  size={20}
-                  color={isPinned ? '#CF142B' : '#00247D'}
-                />
-              </Pressable>
             </View>
             <View style={styles.cardGlobalRow}>
               <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
@@ -202,16 +207,36 @@ export default function PhraseCard({
             ]}
           >
             {!isChapterComplete ? (
-              <View style={styles.cardMFRow}>
-                <SpeakerButton
-                  accessibilityLabel="Male speaker"
-                  letter="M"
-                />
-                <SpeakerButton
-                  accessibilityLabel="Female speaker"
-                  letter="F"
-                />
-              </View>
+              <>
+                <View style={styles.cardMFRow}>
+                  <SpeakerButton
+                    accessibilityLabel="Male speaker"
+                    letter="M"
+                  />
+                  <SpeakerButton
+                    accessibilityLabel="Female speaker"
+                    letter="F"
+                  />
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Kapitel wiederholen"
+                  onPress={onRestartChapter}
+                  style={({ pressed }) => [
+                    styles.restartChapterRow,
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <Ionicons
+                    name="refresh-outline"
+                    size={14}
+                    color="#AAAAAA"
+                  />
+                  <Text style={styles.restartChapterText}>
+                    Kapitel wiederholen
+                  </Text>
+                </Pressable>
+              </>
             ) : null}
             <View style={styles.cardFooterRow}>
               <Pressable
@@ -293,11 +318,19 @@ const styles = StyleSheet.create({
     backgroundColor: CARD_BG,
     padding: 20,
     justifyContent: 'space-between',
+    position: 'relative',
+  },
+  pinFloating: {
+    position: 'absolute',
+    right: 16,
+    top: '45%',
+    zIndex: 2,
+    marginTop: -10,
   },
   cardHeaderTop: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     gap: 8,
   },
   cardChapter: {
@@ -407,6 +440,17 @@ const styles = StyleSheet.create({
   cardMFRow: {
     flexDirection: 'row',
     gap: 12,
+  },
+  restartChapterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  restartChapterText: {
+    fontSize: 12,
+    color: '#AAAAAA',
   },
   cardFooterRow: {
     flexDirection: 'row',

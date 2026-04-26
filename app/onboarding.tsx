@@ -98,7 +98,7 @@ export default function OnboardingScreen() {
                   Willkommen bei Disco 101
                 </Text>
                 <Text style={styles.subtitle}>
-                  101 wichtige Redewendungen für deinen Urlaub
+                  Essential English Phrases.{'\n'}Effizient lernen, sicher sprechen.
                 </Text>
               </View>
             </View>
@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 160,
+    height: 160,
     marginBottom: 48,
     backgroundColor: 'transparent',
   },

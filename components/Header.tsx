@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   headerLogoMask: {
-    width: 56,
-    height: 56,
+    width: 72,
+    height: 72,
     flexShrink: 0,
   },
   headerLogo: {

@@ -1,11 +1,11 @@
-export const HEADER_DARK = '#163D28';
-export const CARD_BG = '#1A4731';
-export const ACTIVE = '#FFDC3E';
-export const INACTIVE = '#FFFFFF';
-export const SCREEN_BG = '#F5F2EC';
-export const BUTTON_TEXT = '#1B3A20';
-export const BRAND = '#1B5E38';
-export const HEADER_TEXT_SUB = 'rgba(255, 255, 255, 0.6)';
-export const CARD_DE = 'rgba(255, 255, 255, 0.55)';
+export const HEADER_DARK = '#EDE9E3';
+export const CARD_BG = '#F5F0E8';
+export const ACTIVE = '#00247D';
+export const INACTIVE = 'rgba(0,0,0,0.28)';
+export const SCREEN_BG = '#FFFFFF';
+export const BUTTON_TEXT = '#FFFFFF';
+export const BRAND = '#00247D';
+export const HEADER_TEXT_SUB = 'rgba(0,0,0,0.38)';
+export const CARD_DE = 'rgba(0,0,0,0.45)';
 
 export const FONT_DM_SERIF = 'DMSerifDisplay';

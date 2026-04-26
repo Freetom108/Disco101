@@ -1,3 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   ACTIVE,
@@ -51,6 +53,7 @@ export default function PhraseCard({
   onBack,
   onNext,
 }: PhraseCardProps) {
+  const [pinned, setPinned] = useState(false);
   const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
   const isBackDisabled = false;
 
@@ -59,9 +62,26 @@ export default function PhraseCard({
       <View style={styles.phraseCardShadow}>
         <View style={styles.phraseCard}>
           <View>
-            <Text style={styles.cardChapter}>
-              {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
-            </Text>
+            <View style={styles.cardHeaderTop}>
+              <Text
+                style={[styles.cardChapter, styles.cardChapterFlex]}
+                numberOfLines={2}
+              >
+                {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={pinned ? 'Markierung entfernen' : 'Markieren'}
+                hitSlop={8}
+                onPress={() => setPinned((p) => !p)}
+              >
+                <Ionicons
+                  name="location"
+                  size={20}
+                  color={pinned ? '#CF142B' : '#00247D'}
+                />
+              </Pressable>
+            </View>
             <View style={styles.cardGlobalRow}>
               <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
               <Text style={styles.cardGlobalValue}>{globalProgressText}</Text>
@@ -268,10 +288,19 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'space-between',
   },
+  cardHeaderTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   cardChapter: {
     color: INACTIVE,
     fontSize: 11,
     letterSpacing: 0.4,
+  },
+  cardChapterFlex: {
+    flex: 1,
   },
   cardGlobalRow: {
     flexDirection: 'row',
@@ -280,7 +309,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   cardGlobalLabel: {
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(0, 0, 0, 0.55)',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -293,7 +322,7 @@ const styles = StyleSheet.create({
     height: 4,
     marginTop: 8,
     borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.12)',
     overflow: 'hidden',
   },
   cardProgressFill: {
@@ -345,13 +374,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   cardEnglish: {
-    color: INACTIVE,
+    color: '#1A1A1A',
     fontSize: 26,
     lineHeight: 34,
     marginTop: 12,
   },
   cardGerman: {
-    color: CARD_DE,
+    color: '#999999',
     fontSize: 16,
     lineHeight: 24,
     marginTop: 8,
@@ -362,10 +391,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
   },
   categoryPillText: {
-    color: INACTIVE,
+    color: '#1A1A1A',
     fontSize: 13,
     fontWeight: '500',
   },
@@ -388,14 +417,14 @@ const styles = StyleSheet.create({
   cardNext: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: ACTIVE,
+    backgroundColor: '#CF142B',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   cardNextText: {
-    color: BUTTON_TEXT,
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

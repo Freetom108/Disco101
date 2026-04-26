@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { ACTIVE, HEADER_DARK, INACTIVE } from '../../constants/theme';
+import { ACTIVE, HEADER_DARK } from '../../constants/theme';
 
 const styles = StyleSheet.create({
   wiederholenIconRow: {
@@ -31,8 +31,8 @@ export default function TabLayout() {
           position: 'absolute',
           elevation: 8,
         },
-        tabBarActiveTintColor: ACTIVE,
-        tabBarInactiveTintColor: INACTIVE,
+        tabBarActiveTintColor: '#00247D',
+        tabBarInactiveTintColor: 'rgba(0,0,0,0.28)',
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '500',

@@ -17,15 +17,13 @@ import {
 } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import {
-  ACTIVE,
-  BRAND,
-  BUTTON_TEXT,
-  FONT_DM_SERIF,
-  INACTIVE,
-} from '../constants/theme';
+import { FONT_DM_SERIF } from '../constants/theme';
 
+const ONBOARDING_BG = '#EDE9E3';
 const ONBOARDING_KEY = 'onboarding_done';
+const TITLE_DARK = '#1A1A1A';
+const BODY_GRAY = '#444444';
+const DOT_INACTIVE = '#AAAAAA';
 
 /** Space reserved for dots + primary/ghost button + padding (fixed bottom bar). */
 const FOOTER_ZONE = 140;
@@ -146,6 +144,9 @@ export default function OnboardingScreen() {
                 </Text>
                 <Text style={styles.listItem}>
                   · 📌 Markiere schwierige Karten zur Wiederholung
+                  {'\n'}
+                  📍 Tippe den blauen Pin → er wird rot und die Karte{'\n'}
+                  landet im Repeat-Stapel
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
                   · ⚙️ Alles jederzeit in Settings nachlesen
@@ -199,10 +200,10 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: BRAND,
+    backgroundColor: ONBOARDING_BG,
   },
   loadingOnly: {
-    backgroundColor: BRAND,
+    backgroundColor: ONBOARDING_BG,
   },
   safe: {
     flex: 1,
@@ -237,23 +238,24 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     marginBottom: 48,
+    backgroundColor: 'transparent',
   },
   titleWelcome: {
-    color: ACTIVE,
+    color: TITLE_DARK,
     fontSize: 30,
     lineHeight: 38,
     fontWeight: '600',
     textAlign: 'center',
   },
   subtitle: {
-    color: INACTIVE,
+    color: BODY_GRAY,
     fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
     marginTop: 0,
   },
   titleSection: {
-    color: INACTIVE,
+    color: TITLE_DARK,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: '600',
@@ -266,7 +268,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   listItem: {
-    color: INACTIVE,
+    color: BODY_GRAY,
     fontSize: 18,
     lineHeight: 26,
     marginBottom: 32,
@@ -292,10 +294,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: DOT_INACTIVE,
   },
   dotActive: {
-    backgroundColor: INACTIVE,
+    backgroundColor: TITLE_DARK,
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -307,12 +309,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnGhostText: {
-    color: INACTIVE,
+    color: TITLE_DARK,
     fontSize: 18,
     fontWeight: '600',
   },
   btnPrimary: {
-    backgroundColor: ACTIVE,
+    backgroundColor: '#CF142B',
     borderRadius: 12,
     paddingVertical: 16,
     marginHorizontal: 24,
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnPrimaryText: {
-    color: BUTTON_TEXT,
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '600',
   },

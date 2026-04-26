@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '../../components/Header';
@@ -43,6 +44,13 @@ export default function HomeScreen() {
   const [testPhrases, setTestPhrases] = useState<Phrase[]>([]);
   const [testIndex, setTestIndex] = useState(0);
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
+  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem('pinned_phrases').then((val) => {
+      if (val) setPinnedIds(JSON.parse(val));
+    });
+  }, []);
 
   const chPhrases = useMemo(
     () =>
@@ -165,6 +173,15 @@ export default function HomeScreen() {
           category={phrase?.category ?? ''}
           currentIndex={currentIndex}
           completedChapterName={categoryTitle}
+          phraseId={phrase?.id ?? 0}
+          isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
+          onTogglePin={(id) => {
+            const updated = pinnedIds.includes(id)
+              ? pinnedIds.filter((x) => x !== id)
+              : [...pinnedIds, id];
+            setPinnedIds(updated);
+            AsyncStorage.setItem('pinned_phrases', JSON.stringify(updated));
+          }}
           onStartTest={startTest}
           onRepeatChapter={onRepeatChapter}
           onNextChapter={onNextChapter}

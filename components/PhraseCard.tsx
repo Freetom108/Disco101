@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   ACTIVE,
@@ -26,6 +25,9 @@ export type PhraseCardProps = {
   category: string;
   currentIndex: number;
   completedChapterName: string;
+  phraseId: number;
+  isPinned: boolean;
+  onTogglePin: (id: number) => void;
   onStartTest: () => void;
   onRepeatChapter: () => void;
   onNextChapter: () => void;
@@ -47,13 +49,15 @@ export default function PhraseCard({
   category,
   currentIndex,
   completedChapterName,
+  phraseId,
+  isPinned,
+  onTogglePin,
   onStartTest,
   onRepeatChapter,
   onNextChapter,
   onBack,
   onNext,
 }: PhraseCardProps) {
-  const [pinned, setPinned] = useState(false);
   const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
   const isBackDisabled = false;
 
@@ -71,14 +75,16 @@ export default function PhraseCard({
               </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={pinned ? 'Markierung entfernen' : 'Markieren'}
+                accessibilityLabel={isPinned ? 'Markierung entfernen' : 'Markieren'}
                 hitSlop={8}
-                onPress={() => setPinned((p) => !p)}
+                onPress={() => {
+                  if (phraseId) onTogglePin(phraseId);
+                }}
               >
                 <Ionicons
                   name="pin"
                   size={20}
-                  color={pinned ? '#CF142B' : '#00247D'}
+                  color={isPinned ? '#CF142B' : '#00247D'}
                 />
               </Pressable>
             </View>

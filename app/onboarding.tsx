@@ -125,10 +125,10 @@ export default function OnboardingScreen() {
                   · 🔁 Wiederhole so oft du möchtest – wenn es für dich richtig klingt, weiter zur nächsten Phrase
                 </Text>
                 <Text style={styles.listItem}>
-                  · 📝 Nach jedem Kapitel: Teste dein Wissen mit einem kurzen Quiz
+                  · 📝 Nach jedem Kapitel: Mache einen freiwilligen Test oder gehe direkt zum nächsten Kapitel weiter
                 </Text>
                 <Text style={styles.listItem}>
-                  · 📍 Schwierige Karte? Tippe den PIN oben rechts – er wird rot und die Karte landet im Repeat-Stapel
+                  · 📍 Schwierige Karte? Tippe den PIN oben rechts – er wird rot und die Karte landet im Repeat-Stapel, wo du sie jederzeit wiederholen kannst bis sie sitzt
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
                   · ⚙️ Alles jederzeit in Settings nachlesen

@@ -317,10 +317,12 @@ export default function RepeatSessionScreen() {
                     <SpeakerButton
                       accessibilityLabel="Male speaker"
                       letter="M"
+                      phraseId={currentPhrase.id}
                     />
                     <SpeakerButton
                       accessibilityLabel="Female speaker"
                       letter="F"
+                      phraseId={currentPhrase.id}
                     />
                   </View>
                   <View style={styles.sessionFooterRow}>

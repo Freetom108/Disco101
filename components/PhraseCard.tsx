@@ -295,10 +295,12 @@ export default function PhraseCard({
                   <SpeakerButton
                     accessibilityLabel="Male speaker"
                     letter="M"
+                    phraseId={phraseId}
                   />
                   <SpeakerButton
                     accessibilityLabel="Female speaker"
                     letter="F"
+                    phraseId={phraseId}
                   />
                 </View>
                 <Pressable

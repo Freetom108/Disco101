@@ -1,5 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   ACTIVE,
   BUTTON_TEXT,
@@ -10,6 +19,10 @@ import {
   SCREEN_BG,
 } from '../constants/theme';
 import SpeakerButton from './SpeakerButton';
+
+const SLIDE_OFFSET = 400;
+const SLIDE_DURATION_MS = 280;
+const SLIDE_EASING = Easing.out(Easing.quad);
 
 export type PhraseCardProps = {
   chapterNumber: number;
@@ -63,9 +76,79 @@ export default function PhraseCard({
   const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
   const isBackDisabled = false;
 
+  const slideX = useRef(new Animated.Value(0)).current;
+  const [isSlideAnimating, setIsSlideAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!isSlideAnimating) {
+      slideX.setValue(0);
+    }
+  }, [phraseId, slideX, isSlideAnimating]);
+
+  const runAnimatedNext = useCallback(() => {
+    if (isSlideAnimating || isAllPhrasesComplete) return;
+    setIsSlideAnimating(true);
+    Animated.timing(slideX, {
+      toValue: SLIDE_OFFSET,
+      duration: SLIDE_DURATION_MS,
+      easing: SLIDE_EASING,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (!finished) {
+        setIsSlideAnimating(false);
+        return;
+      }
+      slideX.setValue(-SLIDE_OFFSET);
+      onNext();
+      requestAnimationFrame(() => {
+        Animated.timing(slideX, {
+          toValue: 0,
+          duration: SLIDE_DURATION_MS,
+          easing: SLIDE_EASING,
+          useNativeDriver: true,
+        }).start(() => {
+          setIsSlideAnimating(false);
+        });
+      });
+    });
+  }, [slideX, onNext, isAllPhrasesComplete, isSlideAnimating]);
+
+  const runAnimatedBack = useCallback(() => {
+    if (isSlideAnimating || isBackDisabled) return;
+    setIsSlideAnimating(true);
+    Animated.timing(slideX, {
+      toValue: -SLIDE_OFFSET,
+      duration: SLIDE_DURATION_MS,
+      easing: SLIDE_EASING,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (!finished) {
+        setIsSlideAnimating(false);
+        return;
+      }
+      slideX.setValue(SLIDE_OFFSET);
+      onBack();
+      requestAnimationFrame(() => {
+        Animated.timing(slideX, {
+          toValue: 0,
+          duration: SLIDE_DURATION_MS,
+          easing: SLIDE_EASING,
+          useNativeDriver: true,
+        }).start(() => {
+          setIsSlideAnimating(false);
+        });
+      });
+    });
+  }, [slideX, onBack, isBackDisabled, isSlideAnimating]);
+
   return (
     <View style={styles.phraseCardOuter}>
-      <View style={styles.phraseCardShadow}>
+      <Animated.View
+        style={[
+          styles.phraseCardShadow,
+          { transform: [{ translateX: slideX }] },
+        ]}
+      >
         <View style={styles.phraseCard}>
           {!isChapterComplete ? (
             <Pressable
@@ -221,7 +304,12 @@ export default function PhraseCard({
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Kapitel wiederholen"
-                  onPress={onRestartChapter}
+                  onPress={() => {
+                    slideX.stopAnimation();
+                    slideX.setValue(0);
+                    setIsSlideAnimating(false);
+                    onRestartChapter();
+                  }}
                   style={({ pressed }) => [
                     styles.restartChapterRow,
                     pressed && { opacity: 0.75 },
@@ -242,8 +330,8 @@ export default function PhraseCard({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Zurück"
-                onPress={onBack}
-                disabled={isBackDisabled}
+                onPress={runAnimatedBack}
+                disabled={isBackDisabled || isSlideAnimating}
                 style={({ pressed }) => [
                   pressed && !isBackDisabled && { opacity: 0.7 },
                 ]}
@@ -266,8 +354,8 @@ export default function PhraseCard({
                   ]}
                   accessibilityRole="button"
                   accessibilityLabel="Nächste Phrase"
-                  onPress={onNext}
-                  disabled={isAllPhrasesComplete}
+                  onPress={runAnimatedNext}
+                  disabled={isAllPhrasesComplete || isSlideAnimating}
                 >
                   <Text
                     style={[
@@ -282,7 +370,7 @@ export default function PhraseCard({
             </View>
           </View>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -291,6 +379,7 @@ const styles = StyleSheet.create({
   phraseCardOuter: {
     flex: 1,
     minHeight: 0,
+    overflow: 'hidden',
   },
   phraseCardShadow: {
     flex: 1,

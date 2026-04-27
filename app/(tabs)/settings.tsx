@@ -1,8 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AUDIO_REPEAT_KEY,
+  AUDIO_SPEED_KEY,
+  type AudioRepeatStored,
+  type AudioSpeedStored,
+  DEFAULT_AUDIO_REPEAT,
+  DEFAULT_AUDIO_SPEED,
+  parseAudioRepeat,
+  parseAudioSpeed,
+} from '../../constants/audioSettingsStorage';
+import {
+  ACTIVE,
   BUTTON_TEXT,
   HEADER_DARK,
   HEADER_TEXT_SUB,
@@ -12,9 +34,56 @@ import {
 
 const SECTION_LABEL = '#888';
 
+const SPEED_OPTIONS: AudioSpeedStored[] = ['0.75', '1.0', '1.25'];
+const REPEAT_OPTIONS: AudioRepeatStored[] = ['1', '2'];
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [audioSpeed, setAudioSpeed] = useState<AudioSpeedStored>(
+    DEFAULT_AUDIO_SPEED,
+  );
+  const [audioRepeat, setAudioRepeat] = useState<AudioRepeatStored>(
+    DEFAULT_AUDIO_REPEAT,
+  );
+
+  const loadAudioSettings = useCallback(async () => {
+    try {
+      const [speedRaw, repeatRaw] = await Promise.all([
+        AsyncStorage.getItem(AUDIO_SPEED_KEY),
+        AsyncStorage.getItem(AUDIO_REPEAT_KEY),
+      ]);
+      setAudioSpeed(parseAudioSpeed(speedRaw));
+      setAudioRepeat(parseAudioRepeat(repeatRaw));
+    } catch {
+      setAudioSpeed(DEFAULT_AUDIO_SPEED);
+      setAudioRepeat(DEFAULT_AUDIO_REPEAT);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadAudioSettings();
+    }, [loadAudioSettings]),
+  );
+
+  const persistSpeed = async (value: AudioSpeedStored) => {
+    setAudioSpeed(value);
+    try {
+      await AsyncStorage.setItem(AUDIO_SPEED_KEY, value);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const persistRepeat = async (value: AudioRepeatStored) => {
+    setAudioRepeat(value);
+    try {
+      await AsyncStorage.setItem(AUDIO_REPEAT_KEY, value);
+    } catch {
+      /* ignore */
+    }
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
@@ -47,6 +116,81 @@ export default function SettingsScreen() {
           <Row label="Version" value="1.0.0" />
           <Row label="Phrasen" value="101" />
           <Row label="Kapitel" value="7" last />
+        </View>
+
+        <Text style={styles.sectionLabel}>Wiedergabe</Text>
+        <View style={styles.group}>
+          <View style={styles.playbackBlock}>
+            <Text style={styles.playbackLabel}>Wiedergabegeschwindigkeit</Text>
+            <View style={styles.segmentRow}>
+              {SPEED_OPTIONS.map((v) => {
+                const active = audioSpeed === v;
+                const label = v === '1.0' ? '1.0x' : `${v}x`;
+                return (
+                  <Pressable
+                    key={v}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={`Geschwindigkeit ${label}`}
+                    onPress={() => void persistSpeed(v)}
+                    style={({ pressed }) => [
+                      styles.segmentBtn,
+                      active ? styles.segmentBtnActive : styles.segmentBtnInactive,
+                      pressed && { opacity: 0.88 },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.segmentBtnText,
+                        active
+                          ? styles.segmentBtnTextActive
+                          : styles.segmentBtnTextInactive,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          <View style={styles.playbackDivider} />
+
+          <View style={styles.playbackBlock}>
+            <Text style={styles.playbackLabel}>Phrase wiederholen</Text>
+            <View style={styles.segmentRow}>
+              {REPEAT_OPTIONS.map((v) => {
+                const active = audioRepeat === v;
+                const label = v === '1' ? '1x' : '2x';
+                return (
+                  <Pressable
+                    key={v}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={`Wiederholung ${label}`}
+                    onPress={() => void persistRepeat(v)}
+                    style={({ pressed }) => [
+                      styles.segmentBtn,
+                      active ? styles.segmentBtnActive : styles.segmentBtnInactive,
+                      pressed && { opacity: 0.88 },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.segmentBtnText,
+                        active
+                          ? styles.segmentBtnTextActive
+                          : styles.segmentBtnTextInactive,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         <Text style={styles.sectionLabel}>Lernen</Text>
@@ -198,6 +342,52 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
       },
     }),
+  },
+  playbackBlock: {
+    padding: 16,
+  },
+  playbackLabel: {
+    fontSize: 16,
+    color: BUTTON_TEXT,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  segmentRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  segmentBtnActive: {
+    backgroundColor: ACTIVE,
+    borderWidth: 0,
+  },
+  segmentBtnInactive: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 0, 0, 0.22)',
+  },
+  segmentBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  segmentBtnTextActive: {
+    color: BUTTON_TEXT,
+  },
+  segmentBtnTextInactive: {
+    color: '#1A1A1A',
+  },
+  playbackDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C6C6C8',
+    marginHorizontal: 16,
   },
   row: {
     flexDirection: 'row',

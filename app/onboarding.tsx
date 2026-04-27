@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
   };
 
   const onWeiter = () => {
-    if (slideIndex < 1) {
+    if (slideIndex < 3) {
       goToSlide(slideIndex + 1);
     }
   };
@@ -95,10 +95,10 @@ export default function OnboardingScreen() {
                 <Text
                   style={[styles.titleWelcome, { fontFamily: FONT_DM_SERIF }]}
                 >
-                  Willkommen bei Disco 101
+                  Disco 101
                 </Text>
                 <Text style={styles.subtitle}>
-                  Essential English Phrases.{'\n'}Effizient lernen, sicher sprechen.
+                  Englisch für den Urlaub{'\n'}Effizient lernen, sicher sprechen.
                 </Text>
               </View>
             </View>
@@ -112,26 +112,83 @@ export default function OnboardingScreen() {
                   { fontFamily: FONT_DM_SERIF },
                 ]}
               >
-                So funktioniert's
+                So lernst du
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
-                  · 🃏 Englischer Satz oben, deutsche Übersetzung darunter
+                  · 🃏 Auf der Übungskarte erscheint eine englische Redewendung
+                  mit der deutschen Übersetzung darunter
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🔊 M oder F antippen → Satz auf Englisch anhören
-                </Text>
-                <Text style={styles.listItem}>
-                  · 🔁 Wiederhole so oft du möchtest – wenn es für dich richtig klingt, weiter zur nächsten Phrase
-                </Text>
-                <Text style={styles.listItem}>
-                  · 📝 Nach jedem Kapitel: Mache einen freiwilligen Test oder gehe direkt zum nächsten Kapitel weiter
-                </Text>
-                <Text style={styles.listItem}>
-                  · 📍 Schwierige Karte? Tippe den PIN oben rechts – er wird rot und die Karte landet im Repeat-Stapel, wo du sie jederzeit wiederholen kannst bis sie sitzt
+                  · 🔊 Hör dir bei Chris und Ann die richtige Aussprache an und
+                  wiederhole den Satz laut so oft du möchtest – mit der großen
+                  roten Taste kommst du zur nächsten Phrase
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
-                  · ⚙️ Alles jederzeit in Settings nachlesen
+                  · 📌 Übungskarten bei denen du noch nicht sicher bist markierst
+                  du mit der blauen Stecknadel – sie wandern in den Repeat-Stapel
+                  wo du sie üben kannst bis sie sicher sitzen
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={[styles.slide, { width, height: slideHeight }]}>
+            <View style={styles.slideInnerCentered}>
+              <Text
+                style={[
+                  styles.titleSection,
+                  styles.titleSectionSpaced,
+                  { fontFamily: FONT_DM_SERIF },
+                ]}
+              >
+                Testen & Wiederholen
+              </Text>
+              <View style={styles.list}>
+                <Text style={styles.listItem}>
+                  · 🎯 Am Ende jeden Kapitels kannst du deinen Wissensstand auf
+                  zwei Arten überprüfen oder gleich zum nächsten Kapitel
+                  weitergehen
+                </Text>
+                <Text style={styles.listItem}>
+                  · 🎧 Test 1: Drei englische Sätze erscheinen – Chris und Ann
+                  geben dir einen Satz und du ordnest ihn einem der drei Sätze
+                  oben zu
+                </Text>
+                <Text style={styles.listItem}>
+                  · 🇩🇪 Test 2: Drei deutsche Sätze erscheinen – Chris und Ann
+                  geben dir einen englischen Satz und du ordnest ihn einem der
+                  drei Sätze oben zu
+                </Text>
+                <Text style={[styles.listItem, styles.listItemLast]}>
+                  · 🔄 Karten die du nicht richtig zugeordnet hast landen
+                  automatisch im Repeat-Stapel – so kannst du jederzeit üben wann
+                  immer du möchtest
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={[styles.slide, { width, height: slideHeight }]}>
+            <View style={styles.slideInnerCentered}>
+              <Text
+                style={[
+                  styles.titleSection,
+                  styles.titleSectionSpaced,
+                  { fontFamily: FONT_DM_SERIF },
+                ]}
+              >
+                Dein Lernplan
+              </Text>
+              <View style={styles.list}>
+                <Text style={styles.listItem}>
+                  · 📚 Im Learn Tab siehst du deinen Fortschritt und kannst
+                  jederzeit in jedes Kapitel einsteigen
+                </Text>
+                <Text style={styles.listItem}>
+                  · ⚙️ In Settings kannst du Geschwindigkeit und Anzahl der
+                  Wiederholungen der Stimmen anpassen
+                </Text>
+                <Text style={[styles.listItem, styles.listItemLast]}>
+                  · 💡 Alles jederzeit in Settings nachlesen
                 </Text>
               </View>
             </View>
@@ -141,14 +198,14 @@ export default function OnboardingScreen() {
           style={[styles.footerFixed, { paddingBottom: Math.max(insets.bottom, 12) }]}
         >
           <View style={styles.dotsRow}>
-            {[0, 1].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <View
                 key={i}
                 style={[styles.dot, i === slideIndex && styles.dotActive]}
               />
             ))}
           </View>
-          {slideIndex < 1 ? (
+          {slideIndex < 3 ? (
             <Pressable
               onPress={onWeiter}
               style={({ pressed }) => [
@@ -217,15 +274,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 160,
-    height: 160,
-    marginBottom: 48,
+    width: 200,
+    height: 200,
+    marginBottom: 32,
     backgroundColor: 'transparent',
   },
   titleWelcome: {
     color: TITLE_DARK,
-    fontSize: 30,
-    lineHeight: 38,
+    fontSize: 42,
+    lineHeight: 50,
     fontWeight: '600',
     textAlign: 'center',
   },

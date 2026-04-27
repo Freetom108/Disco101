@@ -1,12 +1,44 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import type { AudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useFonts } from 'expo-font';
-import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  AUDIO_SPEED_KEY,
+  audioSpeedToRate,
+  parseAudioSpeed,
+} from '../../constants/audioSettingsStorage';
 import Header from '../../components/Header';
 import PhraseCard from '../../components/PhraseCard';
-import { BRAND, FONT_DM_SERIF, SCREEN_BG } from '../../constants/theme';
+import {
+  ACTIVE,
+  BRAND,
+  BUTTON_TEXT,
+  CARD_BG,
+  CARD_DE,
+  FONT_DM_SERIF,
+  INACTIVE,
+  SCREEN_BG,
+} from '../../constants/theme';
+import { audioAssets } from '../../utils/audioAssets';
+import {
+  safePlayerPause,
+  safePlayerPlay,
+  safePlayerReplace,
+  safePlayerSetPlaybackRate,
+} from '../../utils/safeAudioPlayer';
 
 type Phrase = {
   id: number;
@@ -15,8 +47,6 @@ type Phrase = {
   german: string;
   category: string;
 };
-
-type TestAnswer = { phraseId: number; correct: boolean };
 
 function shufflePhrases(phrases: Phrase[]): Phrase[] {
   const a = [...phrases];
@@ -27,6 +57,119 @@ function shufflePhrases(phrases: Phrase[]): Phrase[] {
     a[j] = t;
   }
   return a;
+}
+
+/** Zwei Distraktoren + korrekte Phrase, gemischt als A/B/C. */
+function buildTestOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
+  const others = shufflePhrases(pool.filter((p) => p.id !== correct.id));
+  const w1 = others[0] ?? correct;
+  const w2 = others[1] ?? others[0] ?? correct;
+  return shufflePhrases([correct, w1, w2]);
+}
+
+function testPhraseAudioSource(phraseId: number, gender: 'm' | 'f') {
+  const key = `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
+  return audioAssets[key] ?? null;
+}
+
+function TestChrisAnnButtons({
+  player,
+  phraseId,
+  showOptions,
+  onOpenOptionsAfterFirstVoice,
+  compact,
+}: {
+  player: AudioPlayer;
+  phraseId: number;
+  showOptions: boolean;
+  onOpenOptionsAfterFirstVoice: () => void;
+  compact: boolean;
+}) {
+  const showOptionsRef = useRef(showOptions);
+  useEffect(() => {
+    showOptionsRef.current = showOptions;
+  }, [showOptions]);
+
+  useEffect(() => {
+    return () => {
+      safePlayerPause(player);
+    };
+  }, [player]);
+
+  const playVoice = useCallback(
+    async (gender: 'm' | 'f') => {
+      const src = testPhraseAudioSource(phraseId, gender);
+      if (!src) return;
+      if (!showOptionsRef.current) {
+        onOpenOptionsAfterFirstVoice();
+      }
+      let speedRaw: string | null = null;
+      try {
+        speedRaw = await AsyncStorage.getItem(AUDIO_SPEED_KEY);
+      } catch {
+        /* default rate */
+      }
+      const rate = audioSpeedToRate(parseAudioSpeed(speedRaw));
+      try {
+        safePlayerPause(player);
+        safePlayerReplace(player, src);
+        for (let i = 0; i < 60; i++) {
+          if (player.currentStatus.duration > 0) break;
+          await new Promise<void>((r) => setTimeout(r, 40));
+        }
+        if (player.currentStatus.duration <= 0) return;
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: false,
+          interruptionMode: 'duckOthers',
+          shouldPlayInBackground: false,
+          shouldRouteThroughEarpiece: false,
+        });
+        safePlayerPause(player);
+        await player.seekTo(0);
+        safePlayerSetPlaybackRate(player, rate, 'medium');
+        safePlayerPlay(player);
+      } catch (e) {
+        console.log('Player already released', e);
+        safePlayerPause(player);
+      }
+    },
+    [onOpenOptionsAfterFirstVoice, player, phraseId],
+  );
+
+  const btnStyle = compact ? styles.testVoiceBtnCompact : styles.testVoiceBtn;
+
+  return (
+    <View
+      style={[
+        styles.testVoiceRow,
+        compact && styles.testVoiceRowCompact,
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Chris (männliche Stimme)"
+        onPress={() => void playVoice('m')}
+        style={({ pressed }) => [
+          btnStyle,
+          pressed && { opacity: 0.9 },
+        ]}
+      >
+        <Text style={styles.testVoiceBtnText}>Chris</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Ann (weibliche Stimme)"
+        onPress={() => void playVoice('f')}
+        style={({ pressed }) => [
+          btnStyle,
+          pressed && { opacity: 0.9 },
+        ]}
+      >
+        <Text style={styles.testVoiceBtnText}>Ann</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 const SENTENCES: Phrase[] = require('../../data/sentences.json');
@@ -76,8 +219,25 @@ export default function HomeScreen() {
   const [isTestMode, setIsTestMode] = useState(false);
   const [testPhrases, setTestPhrases] = useState<Phrase[]>([]);
   const [testIndex, setTestIndex] = useState(0);
-  const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
+  const [wrongAnswers, setWrongAnswers] = useState<number[]>([]);
+  const [currentOptions, setCurrentOptions] = useState<Phrase[]>([]);
+  const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const [answerLocked, setAnswerLocked] = useState(false);
+  const [activeTestKind, setActiveTestKind] = useState<1 | 2 | null>(null);
+  const [showTestDone, setShowTestDone] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [showTestSelection, setShowTestSelection] = useState(false);
+  const activeTestKindRef = useRef<1 | 2 | null>(null);
+  const showOptionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  const testPlaybackPlayer = useAudioPlayer(null, { updateInterval: 100 });
+
+  useEffect(() => {
+    setShowTestSelection(false);
+  }, [currentChapter]);
 
   useFocusEffect(
     useCallback(() => {
@@ -121,6 +281,70 @@ export default function HomeScreen() {
     [currentChapter],
   );
 
+  const mergeWrongIntoPinned = useCallback(async (wrongIds: number[]) => {
+    try {
+      const raw = await AsyncStorage.getItem('pinned_phrases');
+      const parsed = raw ? JSON.parse(raw) : [];
+      const existing = Array.isArray(parsed)
+        ? parsed.filter((x: unknown) => typeof x === 'number')
+        : [];
+      const merged = Array.from(new Set([...existing, ...wrongIds]));
+      setPinnedIds(merged);
+      await AsyncStorage.setItem('pinned_phrases', JSON.stringify(merged));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isTestMode || showTestSelection) return;
+    if (testPhrases.length === 0) return;
+    if (testIndex >= testPhrases.length) return;
+    const correct = testPhrases[testIndex];
+    if (!correct) return;
+    if (showOptionsTimerRef.current) {
+      clearTimeout(showOptionsTimerRef.current);
+      showOptionsTimerRef.current = null;
+    }
+    setCurrentOptions(buildTestOptions(correct, chPhrases));
+    setSelectedOptionId(null);
+    setShowOptions(false);
+    setAnswerLocked(false);
+  }, [isTestMode, showTestSelection, testIndex, testPhrases, chPhrases]);
+
+  const onOpenOptionsAfterFirstVoice = useCallback(() => {
+    setShowOptions(true);
+  }, []);
+
+  const onPickTestOption = useCallback(
+    (optionPhraseId: number) => {
+      if (answerLocked) return;
+      const correct = testPhrases[testIndex];
+      if (!correct) return;
+      setAnswerLocked(true);
+      setSelectedOptionId(optionPhraseId);
+      const isCorrect = optionPhraseId === correct.id;
+      const delay = isCorrect ? 1000 : 2000;
+
+      setWrongAnswers((prev) => {
+        const nextWrong = isCorrect ? prev : [...prev, correct.id];
+        setTimeout(() => {
+          setTestIndex((currentIdx) => {
+            if (currentIdx + 1 >= testPhrases.length) {
+              setIsTestMode(false);
+              setShowTestDone(true);
+              void mergeWrongIntoPinned(nextWrong);
+              return testPhrases.length;
+            }
+            return currentIdx + 1;
+          });
+        }, delay);
+        return nextWrong;
+      });
+    },
+    [answerLocked, mergeWrongIntoPinned, testIndex, testPhrases],
+  );
+
   const isChapterComplete = chCount > 0 && currentIndex >= chCount;
   const isAllPhrasesComplete = isChapterComplete && currentChapter === 7;
   const inChapterN = isChapterComplete ? chCount : currentIndex + 1;
@@ -141,14 +365,6 @@ export default function HomeScreen() {
     completedForProgress,
   )}/${TOTAL_PHRASES}`;
 
-  if (!fontsLoaded) {
-    return (
-      <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={BRAND} />
-      </View>
-    );
-  }
-
   const advanceToNextChapter = () => {
     if (currentChapter < 7) {
       setCurrentChapter((c) => c + 1);
@@ -156,15 +372,41 @@ export default function HomeScreen() {
     }
   };
 
-  const startTest = () => {
+  const startTest = (testNumber: 1 | 2) => {
+    if (showOptionsTimerRef.current) {
+      clearTimeout(showOptionsTimerRef.current);
+      showOptionsTimerRef.current = null;
+    }
+    setShowTestSelection(false);
+    activeTestKindRef.current = testNumber;
+    setActiveTestKind(testNumber);
     setTestPhrases(shufflePhrases(chPhrases));
     setTestIndex(0);
-    setTestAnswers([]);
+    setWrongAnswers([]);
+    setCurrentOptions([]);
+    setSelectedOptionId(null);
+    setShowOptions(false);
+    setAnswerLocked(false);
+    setShowTestDone(false);
     setIsTestMode(true);
   };
 
   const exitTest = () => {
+    if (showOptionsTimerRef.current) {
+      clearTimeout(showOptionsTimerRef.current);
+      showOptionsTimerRef.current = null;
+    }
+    safePlayerPause(testPlaybackPlayer);
     setIsTestMode(false);
+    activeTestKindRef.current = null;
+    setActiveTestKind(null);
+    setTestIndex(0);
+    setWrongAnswers([]);
+    setCurrentOptions([]);
+    setSelectedOptionId(null);
+    setShowOptions(false);
+    setAnswerLocked(false);
+    setShowTestDone(false);
   };
 
   const onNext = () => {
@@ -200,6 +442,7 @@ export default function HomeScreen() {
   };
 
   const onBack = () => {
+    setShowTestSelection(false);
     if (isAllPhrasesComplete) {
       setCurrentIndex(chCount - 1);
       return;
@@ -221,40 +464,358 @@ export default function HomeScreen() {
     isChapterComplete ? chCount - 1 : currentIndex
   ] as Phrase | undefined;
 
+  if (!fontsLoaded) {
+    return (
+      <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
+        <ActivityIndicator size="large" color={BRAND} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
       <Header />
       <View style={styles.homeBody}>
-        <PhraseCard
-          chapterNumber={currentChapter}
-          categoryTitle={categoryTitle}
-          isChapterComplete={isChapterComplete}
-          isAllPhrasesComplete={isAllPhrasesComplete}
-          inChapterN={inChapterN}
-          ch1Count={chCount}
-          globalProgressText={globalProgressText}
-          globalBarPct={globalBarPct}
-          english={phrase?.english ?? ''}
-          german={phrase?.german ?? ''}
-          category={phrase?.category ?? ''}
-          currentIndex={currentIndex}
-          completedChapterName={categoryTitle}
-          phraseId={phrase?.id ?? 0}
-          isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
-          onTogglePin={(id) => {
-            const updated = pinnedIds.includes(id)
-              ? pinnedIds.filter((x) => x !== id)
-              : [...pinnedIds, id];
-            setPinnedIds(updated);
-            AsyncStorage.setItem('pinned_phrases', JSON.stringify(updated));
-          }}
-          onStartTest={startTest}
-          onRepeatChapter={onRepeatChapter}
-          onRestartChapter={() => setCurrentIndex(0)}
-          onNextChapter={onNextChapter}
-          onBack={onBack}
-          onNext={onNext}
-        />
+        {showTestSelection ? (
+          <View style={styles.testSelectionOuter}>
+            <View style={styles.testSelectionShadow}>
+              <View style={styles.testSelectionCard}>
+                <ScrollView
+                  style={styles.testSelectionScroll}
+                  contentContainerStyle={styles.testSelectionScrollContent}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <Text
+                    style={[
+                      styles.testSelectionTitle,
+                      { fontFamily: FONT_DM_SERIF },
+                    ]}
+                  >
+                    Wähle deinen Test
+                  </Text>
+                  <Text style={styles.testSelectionSubtitle}>
+                    Beide Tests nutzen die Stimmen von Chris und Ann
+                  </Text>
+
+                  <View style={styles.testBlock}>
+                    <Text style={styles.testBlockLabel}>Test 1</Text>
+                    <Text style={styles.testBlockBody}>
+                      Chris und Ann geben dir einen englischen Satz – du ordnest
+                      ihn der richtigen Phrase A, B oder C zu
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Test 1 starten"
+                      onPress={() => startTest(1)}
+                      style={({ pressed }) => [
+                        styles.testBlockBtn,
+                        styles.testBlockBtnPrimary,
+                        pressed && { opacity: 0.92 },
+                      ]}
+                    >
+                      <Text style={styles.testBlockBtnText}>
+                        Test 1 starten →
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  <View style={styles.testBlock}>
+                    <Text style={styles.testBlockLabel}>Test 2</Text>
+                    <Text style={styles.testBlockBody}>
+                      Chris und Ann geben dir wieder einen Satz – diesmal wählst
+                      du zwischen drei deutschen Bedeutungen A, B oder C
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Test 2 starten"
+                      onPress={() => startTest(2)}
+                      style={({ pressed }) => [
+                        styles.testBlockBtn,
+                        styles.testBlockBtnAccent,
+                        pressed && { opacity: 0.92 },
+                      ]}
+                    >
+                      <Text style={styles.testBlockBtnText}>
+                        Test 2 starten →
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Zurück"
+                    onPress={() => setShowTestSelection(false)}
+                    style={({ pressed }) => [
+                      styles.testSelectionBack,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                  >
+                    <Text style={styles.testSelectionBackText}>Zurück</Text>
+                  </Pressable>
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        ) : showTestDone ? (
+          <View style={styles.testSelectionOuter}>
+            <View style={styles.testSelectionShadow}>
+              <View
+                style={[
+                  styles.testSelectionCard,
+                  styles.testResultCardInner,
+                ]}
+              >
+                <ScrollView
+                  style={styles.testSelectionScroll}
+                  contentContainerStyle={styles.testResultScrollContent}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Text
+                    style={[
+                      styles.testResultScreenTitle,
+                      { fontFamily: FONT_DM_SERIF },
+                    ]}
+                  >
+                    Test abgeschlossen! 🎉
+                  </Text>
+                  <Text style={styles.testResultScoreBig}>
+                    {testPhrases.length - wrongAnswers.length} /{' '}
+                    {testPhrases.length}
+                  </Text>
+                  <Text style={styles.testResultScoreLabel}>
+                    Richtige Antworten
+                  </Text>
+                  {wrongAnswers.length > 0 ? (
+                    <Text style={styles.testResultRepeatNote}>
+                      {wrongAnswers.length} Karten wurden in deinen{'\n'}
+                      Repeat-Stapel gespeichert 📌
+                    </Text>
+                  ) : (
+                    <Text style={styles.testResultPerfectNote}>
+                      Perfekt! Alle Karten richtig! ⭐
+                    </Text>
+                  )}
+                  {currentChapter < 7 ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Nächstes Kapitel"
+                      onPress={() => {
+                        advanceToNextChapter();
+                        exitTest();
+                      }}
+                      style={({ pressed }) => [
+                        styles.testResultBtnPrimary,
+                        pressed && { opacity: 0.92 },
+                      ]}
+                    >
+                      <Text style={styles.testResultBtnPrimaryText}>
+                        Nächstes Kapitel →
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Zurück zur Übersicht"
+                    onPress={exitTest}
+                    style={({ pressed }) => [
+                      styles.testResultBtnSecondary,
+                      {
+                        marginTop: currentChapter < 7 ? 12 : 28,
+                      },
+                      pressed && { opacity: 0.85 },
+                    ]}
+                  >
+                    <Text style={styles.testResultBtnSecondaryText}>
+                      Zurück zur Übersicht
+                    </Text>
+                  </Pressable>
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        ) : isTestMode &&
+          testPhrases.length > 0 &&
+          activeTestKind != null &&
+          testIndex < testPhrases.length ? (
+          <View style={styles.testRunColumn}>
+            <Text style={styles.testRunHeaderOutside}>
+              Frage {testIndex + 1} / {testPhrases.length}
+            </Text>
+            <View style={styles.testRunProgressTrackOutside}>
+              <View
+                style={[
+                  styles.testRunProgressFillOutside,
+                  {
+                    width: `${Math.round(
+                      ((testIndex + 1) / testPhrases.length) * 100,
+                    )}%`,
+                  },
+                ]}
+              />
+            </View>
+            <View style={styles.testSelectionOuter}>
+              <View style={styles.testSelectionShadow}>
+                <View style={styles.testSelectionCard}>
+                  {currentOptions.length < 3 || !testPhrases[testIndex] ? (
+                    <View style={styles.testLoadingInner}>
+                      <ActivityIndicator size="large" color={ACTIVE} />
+                    </View>
+                  ) : (
+                    <ScrollView
+                      style={styles.testSelectionScroll}
+                      contentContainerStyle={styles.testRunScrollContent}
+                      showsVerticalScrollIndicator={false}
+                      keyboardShouldPersistTaps="handled"
+                    >
+                      {!showOptions ? (
+                        <View style={styles.testPhase1Wrap}>
+                          <TestChrisAnnButtons
+                            player={testPlaybackPlayer}
+                            phraseId={testPhrases[testIndex]!.id}
+                            showOptions={showOptions}
+                            onOpenOptionsAfterFirstVoice={
+                              onOpenOptionsAfterFirstVoice
+                            }
+                            compact={false}
+                          />
+                          <Text style={styles.testPlayHintPhase1}>
+                            Wähle Chris oder Ann, um den Satz zu hören
+                          </Text>
+                        </View>
+                      ) : (
+                        <>
+                          <View style={styles.testPhase2TopRow}>
+                            <TestChrisAnnButtons
+                              player={testPlaybackPlayer}
+                              phraseId={testPhrases[testIndex]!.id}
+                              showOptions={showOptions}
+                              onOpenOptionsAfterFirstVoice={
+                                onOpenOptionsAfterFirstVoice
+                              }
+                              compact
+                            />
+                            <Ionicons
+                              name="pin"
+                              size={20}
+                              color={
+                                answerLocked &&
+                                selectedOptionId !== null &&
+                                selectedOptionId !==
+                                  testPhrases[testIndex]!.id
+                                  ? '#CF142B'
+                                  : '#888888'
+                              }
+                            />
+                          </View>
+                          {currentOptions.map((opt, i) => {
+                            const letter = ['A', 'B', 'C'][i] ?? '?';
+                            const correctId = testPhrases[testIndex]!.id;
+                            const label =
+                              activeTestKind === 1
+                                ? opt.english
+                                : opt.german;
+                            let rowBg = SCREEN_BG;
+                            if (answerLocked) {
+                              if (opt.id === correctId) {
+                                rowBg = '#2E7D32';
+                              } else if (opt.id === selectedOptionId) {
+                                rowBg = '#CF142B';
+                              }
+                            }
+                            const onColored =
+                              answerLocked &&
+                              (opt.id === correctId ||
+                                opt.id === selectedOptionId);
+                            const textCol = onColored
+                              ? BUTTON_TEXT
+                              : '#1A1A1A';
+                            const letterCol = onColored
+                              ? BUTTON_TEXT
+                              : ACTIVE;
+                            const showCheckBefore =
+                              answerLocked && opt.id === correctId;
+                            return (
+                              <Pressable
+                                key={`${opt.id}-${i}`}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Antwort ${letter}`}
+                                disabled={answerLocked}
+                                onPress={() => onPickTestOption(opt.id)}
+                                style={({ pressed }) => [
+                                  styles.testOptionRow,
+                                  {
+                                    backgroundColor: rowBg,
+                                  },
+                                  !answerLocked &&
+                                    pressed && { opacity: 0.92 },
+                                ]}
+                              >
+                                <View style={styles.testOptionRowInner}>
+                                  <Text
+                                    style={[
+                                      styles.testOptionLetter,
+                                      {
+                                        color: letterCol,
+                                        minWidth: 28,
+                                      },
+                                    ]}
+                                  >
+                                    {letter}
+                                  </Text>
+                                  <Text
+                                    style={[
+                                      styles.testOptionText,
+                                      { color: textCol },
+                                    ]}
+                                  >
+                                    {showCheckBefore ? '✓ ' : ''}
+                                    {label}
+                                  </Text>
+                                </View>
+                              </Pressable>
+                            );
+                          })}
+                        </>
+                      )}
+                    </ScrollView>
+                  )}
+                </View>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <PhraseCard
+            chapterNumber={currentChapter}
+            categoryTitle={categoryTitle}
+            isChapterComplete={isChapterComplete}
+            isAllPhrasesComplete={isAllPhrasesComplete}
+            inChapterN={inChapterN}
+            ch1Count={chCount}
+            globalProgressText={globalProgressText}
+            globalBarPct={globalBarPct}
+            english={phrase?.english ?? ''}
+            german={phrase?.german ?? ''}
+            category={phrase?.category ?? ''}
+            currentIndex={currentIndex}
+            completedChapterName={categoryTitle}
+            phraseId={phrase?.id ?? 0}
+            isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
+            onTogglePin={(id) => {
+              const updated = pinnedIds.includes(id)
+                ? pinnedIds.filter((x) => x !== id)
+                : [...pinnedIds, id];
+              setPinnedIds(updated);
+              AsyncStorage.setItem('pinned_phrases', JSON.stringify(updated));
+            }}
+            onStartTest={() => setShowTestSelection(true)}
+            onRepeatChapter={onRepeatChapter}
+            onRestartChapter={() => setCurrentIndex(0)}
+            onNextChapter={onNextChapter}
+            onBack={onBack}
+            onNext={onNext}
+          />
+        )}
       </View>
     </View>
   );
@@ -277,5 +838,315 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: '3%',
     paddingBottom: 90, // schwebende Tab-Bar
+  },
+  testSelectionOuter: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+  },
+  testSelectionShadow: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: SCREEN_BG,
+    borderRadius: 28,
+    marginHorizontal: '3%',
+    marginVertical: 8,
+    ...Platform.select({
+      android: { elevation: 12 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+      },
+    }),
+  },
+  testSelectionCard: {
+    flex: 1,
+    minHeight: 0,
+    borderRadius: 28,
+    overflow: 'hidden',
+    backgroundColor: CARD_BG,
+  },
+  testSelectionScroll: {
+    flex: 1,
+  },
+  testSelectionScrollContent: {
+    padding: 20,
+    paddingBottom: 28,
+    flexGrow: 1,
+  },
+  testSelectionTitle: {
+    color: ACTIVE,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  testSelectionSubtitle: {
+    color: CARD_DE,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 24,
+  },
+  testBlock: {
+    backgroundColor: SCREEN_BG,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    ...Platform.select({
+      android: { elevation: 3 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+    }),
+  },
+  testBlockLabel: {
+    color: INACTIVE,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  testBlockBody: {
+    color: CARD_DE,
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  testBlockBtn: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  testBlockBtnPrimary: {
+    backgroundColor: ACTIVE,
+  },
+  testBlockBtnAccent: {
+    backgroundColor: '#CF142B',
+  },
+  testBlockBtnText: {
+    color: BUTTON_TEXT,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  testSelectionBack: {
+    alignSelf: 'center',
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  testSelectionBackText: {
+    color: INACTIVE,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  testLoadingInner: {
+    flex: 1,
+    minHeight: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testRunScrollContent: {
+    padding: 20,
+    paddingBottom: 28,
+  },
+  testRunColumn: {
+    flex: 1,
+    minHeight: 0,
+  },
+  testRunHeaderOutside: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  testRunProgressTrackOutside: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(0, 36, 125, 0.15)',
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  testRunProgressFillOutside: {
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: ACTIVE,
+  },
+  testPhase1Wrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    width: '100%',
+  },
+  testPlayHintPhase1: {
+    marginTop: 16,
+    fontSize: 14,
+    color: CARD_DE,
+    textAlign: 'center',
+    paddingHorizontal: 12,
+  },
+  testPhase2TopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+    gap: 10,
+  },
+  testVoiceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    width: '100%',
+    maxWidth: 340,
+  },
+  testVoiceRowCompact: {
+    flex: 1,
+    maxWidth: undefined,
+    minWidth: 0,
+  },
+  testVoiceBtn: {
+    flex: 1,
+    backgroundColor: ACTIVE,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testVoiceBtnCompact: {
+    flex: 1,
+    backgroundColor: ACTIVE,
+    borderRadius: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 0,
+  },
+  testVoiceBtnText: {
+    color: BUTTON_TEXT,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  testOptionRow: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    ...Platform.select({
+      android: { elevation: 3 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+    }),
+  },
+  testOptionRowInner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  testOptionLetterWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    minWidth: 36,
+  },
+  testOptionLetter: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  testOptionCheck: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  testOptionText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  testResultCardInner: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  testResultScrollContent: {
+    padding: 28,
+    alignItems: 'center',
+  },
+  testResultScreenTitle: {
+    fontSize: 30,
+    color: ACTIVE,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  testResultScoreBig: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: ACTIVE,
+    textAlign: 'center',
+  },
+  testResultScoreLabel: {
+    marginTop: 6,
+    fontSize: 14,
+    color: INACTIVE,
+    textAlign: 'center',
+  },
+  testResultRepeatNote: {
+    marginTop: 20,
+    fontSize: 14,
+    color: INACTIVE,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  testResultPerfectNote: {
+    marginTop: 20,
+    fontSize: 16,
+    color: ACTIVE,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  testResultBtnPrimary: {
+    marginTop: 28,
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: ACTIVE,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  testResultBtnPrimaryText: {
+    color: BUTTON_TEXT,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  testResultBtnSecondary: {
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: ACTIVE,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  testResultBtnSecondaryText: {
+    color: ACTIVE,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

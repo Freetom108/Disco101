@@ -21,8 +21,8 @@ import {
 import SpeakerButton from './SpeakerButton';
 
 const SLIDE_OFFSET = 400;
-const SLIDE_DURATION_MS = 280;
-const SLIDE_EASING = Easing.out(Easing.quad);
+const SLIDE_DURATION_MS = 380;
+const SLIDE_EASING = Easing.inOut(Easing.ease);
 
 export type PhraseCardProps = {
   chapterNumber: number;
@@ -207,7 +207,7 @@ export default function PhraseCard({
                 <View style={styles.chapterMenuButtons}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Test starten"
+                    accessibilityLabel="Tests starten"
                     style={({ pressed }) => [
                       styles.chapterMenuBtnPrimary,
                       pressed && { opacity: 0.92 },
@@ -215,7 +215,7 @@ export default function PhraseCard({
                     onPress={onStartTest}
                   >
                     <Text style={styles.chapterMenuBtnPrimaryText}>
-                      📝 Test starten
+                      📝 Tests starten
                     </Text>
                   </Pressable>
                   <Pressable

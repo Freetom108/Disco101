@@ -1,8 +1,29 @@
-import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  setAudioModeAsync,
+  useAudioPlayer,
+} from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { getPhraseAudioSource } from '../constants/phraseAudioModules';
+import {
+  AUDIO_REPEAT_KEY,
+  AUDIO_SPEED_KEY,
+  audioSpeedToRate,
+  parseAudioRepeat,
+  parseAudioSpeed,
+} from '../constants/audioSettingsStorage';
 import { ACTIVE, BUTTON_TEXT } from '../constants/theme';
+import { audioAssets } from '../utils/audioAssets';
+import {
+  safePlayerPause,
+  safePlayerPlay,
+  safePlayerReplace,
+  safePlayerSeekTo,
+  safePlayerSetPlaybackRate,
+} from '../utils/safeAudioPlayer';
+
+const REPEAT_GAP_MS = 800;
+const PLAYBACK_STATUS_UPDATE = 'playbackStatusUpdate' as const;
 
 type SpeakerButtonProps = {
   accessibilityLabel: string;
@@ -15,55 +36,122 @@ export default function SpeakerButton({
   letter,
   phraseId,
 }: SpeakerButtonProps) {
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const voice = letter.trim().toUpperCase() === 'M' ? 'm' : 'f';
+  const assetKey = `phrase_${String(phraseId).padStart(3, '0')}_${voice}`;
+  const source = audioAssets[assetKey] ?? null;
+
+  const player = useAudioPlayer(null, { updateInterval: 100 });
+
+  const repeatTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finishCountRef = useRef(0);
+  const statusSubRef = useRef<{ remove: () => void } | null>(null);
+
+  const clearStatusSubscription = useCallback(() => {
+    statusSubRef.current?.remove();
+    statusSubRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (!source) return;
+    if (repeatTimeoutRef.current) {
+      clearTimeout(repeatTimeoutRef.current);
+      repeatTimeoutRef.current = null;
+    }
+    clearStatusSubscription();
+    safePlayerPause(player);
+    safePlayerReplace(player, source);
+  }, [source, player, clearStatusSubscription]);
 
   useEffect(() => {
     return () => {
-      const s = soundRef.current;
-      soundRef.current = null;
-      if (s) {
-        void s.unloadAsync();
+      if (repeatTimeoutRef.current) {
+        clearTimeout(repeatTimeoutRef.current);
+        repeatTimeoutRef.current = null;
       }
+      clearStatusSubscription();
+      safePlayerPause(player);
     };
-  }, []);
+  }, [player, clearStatusSubscription]);
 
   const play = useCallback(async () => {
-    const voice = letter.trim().toUpperCase() === 'M' ? 'm' : 'f';
-    const source = getPhraseAudioSource(phraseId, voice);
     if (!source) return;
 
+    let speedRaw: string | null = null;
+    let repeatRaw: string | null = null;
     try {
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+      [speedRaw, repeatRaw] = await Promise.all([
+        AsyncStorage.getItem(AUDIO_SPEED_KEY),
+        AsyncStorage.getItem(AUDIO_REPEAT_KEY),
+      ]);
+    } catch {
+      /* defaults */
+    }
+    const speedStored = parseAudioSpeed(speedRaw);
+    const repeatStored = parseAudioRepeat(repeatRaw);
+    const rate = audioSpeedToRate(speedStored);
+    const maxPlays = repeatStored === '2' ? 2 : 1;
 
-      const prev = soundRef.current;
-      soundRef.current = null;
-      if (prev) {
-        prev.setOnPlaybackStatusUpdate(null);
-        await prev.unloadAsync();
-      }
+    if (repeatTimeoutRef.current) {
+      clearTimeout(repeatTimeoutRef.current);
+      repeatTimeoutRef.current = null;
+    }
+    clearStatusSubscription();
 
-      const { sound } = await Audio.Sound.createAsync(source);
-      soundRef.current = sound;
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) return;
-        if (status.didJustFinish) {
-          void sound.unloadAsync();
-          if (soundRef.current === sound) {
-            soundRef.current = null;
-          }
-        }
+    try {
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        allowsRecording: false,
+        interruptionMode: 'duckOthers',
+        shouldPlayInBackground: false,
+        shouldRouteThroughEarpiece: false,
       });
 
-      await sound.playAsync();
-    } catch {
-      const s = soundRef.current;
-      soundRef.current = null;
-      if (s) {
-        await s.unloadAsync().catch(() => {});
+      safePlayerPause(player);
+      await safePlayerSeekTo(player, 0);
+
+      safePlayerSetPlaybackRate(player, rate, 'medium');
+
+      finishCountRef.current = 0;
+
+      const sub = player.addListener(PLAYBACK_STATUS_UPDATE, (status) => {
+        if (!status.isLoaded || !status.didJustFinish) return;
+
+        finishCountRef.current += 1;
+
+        if (finishCountRef.current < maxPlays) {
+          repeatTimeoutRef.current = setTimeout(() => {
+            repeatTimeoutRef.current = null;
+            void (async () => {
+              try {
+                await safePlayerSeekTo(player, 0);
+                safePlayerPlay(player);
+              } catch (e) {
+                console.log('Player already released', e);
+                clearStatusSubscription();
+                safePlayerPause(player);
+              }
+            })();
+          }, REPEAT_GAP_MS);
+          return;
+        }
+
+        clearStatusSubscription();
+        void safePlayerSeekTo(player, 0);
+        safePlayerPause(player);
+      });
+      statusSubRef.current = sub;
+
+      safePlayerPlay(player);
+    } catch (e) {
+      console.log('Player already released', e);
+      if (repeatTimeoutRef.current) {
+        clearTimeout(repeatTimeoutRef.current);
+        repeatTimeoutRef.current = null;
       }
+      clearStatusSubscription();
+      safePlayerPause(player);
     }
-  }, [letter, phraseId]);
+  }, [clearStatusSubscription, phraseId, player, source]);
 
   return (
     <Pressable

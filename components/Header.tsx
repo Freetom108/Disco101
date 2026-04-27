@@ -8,7 +8,7 @@ export default function Header() {
         <View style={styles.headerTextCol}>
           <Text style={styles.headerLine1}>{"Hello, let's learn!"}</Text>
           <Text style={styles.headerLine2}>
-            Bereit für die nächste Phrase?
+            Englisch für den Urlaub
           </Text>
         </View>
         <View style={styles.headerLogoMask}>
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   headerLogoMask: {
-    width: 72,
-    height: 72,
+    width: 88,
+    height: 88,
     flexShrink: 0,
   },
   headerLogo: {

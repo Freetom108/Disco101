@@ -145,24 +145,24 @@ export default function OnboardingScreen() {
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
-                  · 🎯 Am Ende jeden Kapitels kannst du deinen Wissensstand auf
-                  zwei Arten überprüfen oder gleich zum nächsten Kapitel
-                  weitergehen
+                  · 🎯 Am Ende jeden Kapitels kannst du deinen Wissensstand
+                  überprüfen oder gleich zum nächsten Kapitel weitergehen
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🎧 Test 1: Drei englische Sätze erscheinen – Chris und Ann
-                  geben dir einen Satz und du ordnest ihn einem der drei Sätze
-                  oben zu
+                  · 🎧 Test 1: Chris oder Ann lesen dir einen Satz vor – erkenne
+                  ihn unter drei englischen Optionen
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🇩🇪 Test 2: Drei deutsche Sätze erscheinen – Chris und Ann
-                  geben dir einen englischen Satz und du ordnest ihn einem der
-                  drei Sätze oben zu
+                  · 🇩🇪 Test 2: Chris oder Ann lesen dir einen Satz vor – finde
+                  die richtige deutsche Bedeutung unter drei Optionen
+                </Text>
+                <Text style={styles.listItem}>
+                  · ⚡ Jeder Test stellt dir 8 zufällige Aufgaben aus dem
+                  Kapitel – bei Wiederholung bekommst du andere Fragen
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
-                  · 🔄 Karten die du nicht richtig zugeordnet hast landen
-                  automatisch im Repeat-Stapel – so kannst du jederzeit üben wann
-                  immer du möchtest
+                  · 🔄 Falsch beantwortete Karten landen automatisch im
+                  Repeat-Stapel damit du sie jederzeit üben kannst bis sie sitzen
                 </Text>
               </View>
             </View>

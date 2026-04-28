@@ -74,6 +74,9 @@ export default function SpeakerButton({
   }, [player, clearStatusSubscription]);
 
   const play = useCallback(async () => {
+    console.log('phraseId:', phraseId, 'letter:', letter);
+    console.log('assetKey:', assetKey);
+    console.log('source:', source);
     if (!source) return;
 
     let speedRaw: string | null = null;

@@ -241,6 +241,15 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setIsTestMode(false);
+      setShowTestDone(false);
+      setShowTestSelection(false);
+      setTestIndex(0);
+      setWrongAnswers([]);
+      setCurrentOptions([]);
+      setSelectedOptionId(null);
+      setShowOptions(false);
+      setAnswerLocked(false);
       AsyncStorage.getItem('pinned_phrases').then((val) => {
         if (val) setPinnedIds(JSON.parse(val));
       });
@@ -380,7 +389,9 @@ export default function HomeScreen() {
     setShowTestSelection(false);
     activeTestKindRef.current = testNumber;
     setActiveTestKind(testNumber);
-    setTestPhrases(shufflePhrases(chPhrases));
+    const shuffled = shufflePhrases(chPhrases);
+    const limited = shuffled.slice(0, 8);
+    setTestPhrases(limited);
     setTestIndex(0);
     setWrongAnswers([]);
     setCurrentOptions([]);
@@ -464,6 +475,22 @@ export default function HomeScreen() {
     isChapterComplete ? chCount - 1 : currentIndex
   ] as Phrase | undefined;
 
+  const phraseIdForCard = (() => {
+    const fromPhrase = phrase?.id;
+    if (typeof fromPhrase === 'number' && fromPhrase > 0) {
+      return fromPhrase;
+    }
+    const first = chPhrases[0]?.id;
+    if (typeof first === 'number' && first > 0) {
+      return first;
+    }
+    return 1;
+  })();
+
+  useEffect(() => {
+    console.log('phraseId:', phrase?.id);
+  }, [phrase?.id, currentIndex, currentChapter]);
+
   if (!fontsLoaded) {
     return (
       <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
@@ -494,15 +521,12 @@ export default function HomeScreen() {
                   >
                     Wähle deinen Test
                   </Text>
-                  <Text style={styles.testSelectionSubtitle}>
-                    Beide Tests nutzen die Stimmen von Chris und Ann
-                  </Text>
 
                   <View style={styles.testBlock}>
                     <Text style={styles.testBlockLabel}>Test 1</Text>
                     <Text style={styles.testBlockBody}>
-                      Chris und Ann geben dir einen englischen Satz – du ordnest
-                      ihn der richtigen Phrase A, B oder C zu
+                      Chris oder Ann lesen dir einen Satz vor. Deine Aufgabe:
+                      Erkenne den gehörten Satz unter drei englischen Optionen.
                     </Text>
                     <Pressable
                       accessibilityRole="button"
@@ -523,8 +547,8 @@ export default function HomeScreen() {
                   <View style={styles.testBlock}>
                     <Text style={styles.testBlockLabel}>Test 2</Text>
                     <Text style={styles.testBlockBody}>
-                      Chris und Ann geben dir wieder einen Satz – diesmal wählst
-                      du zwischen drei deutschen Bedeutungen A, B oder C
+                      Chris oder Ann lesen dir einen Satz vor. Deine Aufgabe:
+                      Finde die richtige deutsche Bedeutung unter drei Optionen.
                     </Text>
                     <Pressable
                       accessibilityRole="button"
@@ -596,6 +620,47 @@ export default function HomeScreen() {
                       Perfekt! Alle Karten richtig! ⭐
                     </Text>
                   )}
+                  {activeTestKind != null ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        activeTestKind === 1
+                          ? 'Test 2 starten'
+                          : 'Test 1 starten'
+                      }
+                      onPress={() =>
+                        startTest(activeTestKind === 1 ? 2 : 1)
+                      }
+                      style={({ pressed }) => [
+                        styles.testResultBtnOtherTest,
+                        {
+                          backgroundColor:
+                            activeTestKind === 1 ? '#CF142B' : ACTIVE,
+                        },
+                        pressed && { opacity: 0.92 },
+                      ]}
+                    >
+                      <Text style={styles.testResultBtnPrimaryText}>
+                        {activeTestKind === 1
+                          ? 'Test 2 starten →'
+                          : 'Test 1 starten →'}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Zurück zur Übersicht"
+                    onPress={exitTest}
+                    style={({ pressed }) => [
+                      styles.testResultBtnSecondary,
+                      styles.testResultBtnAfterSwitch,
+                      pressed && { opacity: 0.85 },
+                    ]}
+                  >
+                    <Text style={styles.testResultBtnSecondaryText}>
+                      Zurück zur Übersicht
+                    </Text>
+                  </Pressable>
                   {currentChapter < 7 ? (
                     <Pressable
                       accessibilityRole="button"
@@ -606,6 +671,7 @@ export default function HomeScreen() {
                       }}
                       style={({ pressed }) => [
                         styles.testResultBtnPrimary,
+                        styles.testResultBtnAfterBack,
                         pressed && { opacity: 0.92 },
                       ]}
                     >
@@ -614,22 +680,6 @@ export default function HomeScreen() {
                       </Text>
                     </Pressable>
                   ) : null}
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Zurück zur Übersicht"
-                    onPress={exitTest}
-                    style={({ pressed }) => [
-                      styles.testResultBtnSecondary,
-                      {
-                        marginTop: currentChapter < 7 ? 12 : 28,
-                      },
-                      pressed && { opacity: 0.85 },
-                    ]}
-                  >
-                    <Text style={styles.testResultBtnSecondaryText}>
-                      Zurück zur Übersicht
-                    </Text>
-                  </Pressable>
                 </ScrollView>
               </View>
             </View>
@@ -799,7 +849,7 @@ export default function HomeScreen() {
             category={phrase?.category ?? ''}
             currentIndex={currentIndex}
             completedChapterName={categoryTitle}
-            phraseId={phrase?.id ?? 0}
+            phraseId={phraseIdForCard}
             isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
             onTogglePin={(id) => {
               const updated = pinnedIds.includes(id)
@@ -938,7 +988,7 @@ const styles = StyleSheet.create({
   },
   testSelectionBack: {
     alignSelf: 'center',
-    marginTop: 8,
+    marginTop: 24,
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
@@ -1117,6 +1167,21 @@ const styles = StyleSheet.create({
     color: ACTIVE,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  testResultBtnOtherTest: {
+    marginTop: 24,
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  testResultBtnAfterSwitch: {
+    marginTop: 12,
+  },
+  testResultBtnAfterBack: {
+    marginTop: 12,
   },
   testResultBtnPrimary: {
     marginTop: 28,

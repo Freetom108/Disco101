@@ -19,6 +19,10 @@ import {
   SCREEN_BG,
 } from '../constants/theme';
 import SpeakerButton from './SpeakerButton';
+import { preloadPhraseAudio } from '../utils/audioPreloader';
+
+const CHRIS_AVATAR = require('../assets/images/chris-avatar.png');
+const ANN_AVATAR = require('../assets/images/ann-avatar.png');
 
 const SLIDE_OFFSET = 400;
 const SLIDE_DURATION_MS = 380;
@@ -39,6 +43,7 @@ export type PhraseCardProps = {
   currentIndex: number;
   completedChapterName: string;
   phraseId: number;
+  chapterPhraseIds: number[];
   isPinned: boolean;
   onTogglePin: (id: number) => void;
   onStartTest: () => void;
@@ -64,6 +69,7 @@ export default function PhraseCard({
   currentIndex,
   completedChapterName,
   phraseId,
+  chapterPhraseIds,
   isPinned,
   onTogglePin,
   onStartTest,
@@ -84,6 +90,10 @@ export default function PhraseCard({
       slideX.setValue(0);
     }
   }, [phraseId, slideX, isSlideAnimating]);
+
+  useEffect(() => {
+    preloadPhraseAudio(chapterPhraseIds);
+  }, [chapterPhraseIds]);
 
   const runAnimatedNext = useCallback(() => {
     if (isSlideAnimating || isAllPhrasesComplete) return;
@@ -163,7 +173,7 @@ export default function PhraseCard({
               <Ionicons
                 name="pin"
                 size={20}
-                color={isPinned ? '#CF142B' : '#00247D'}
+                color={isPinned ? '#C8102E' : '#00247D'}
               />
             </Pressable>
           ) : null}
@@ -296,11 +306,13 @@ export default function PhraseCard({
                     accessibilityLabel="Male speaker"
                     letter="M"
                     phraseId={phraseId}
+                    avatarSource={CHRIS_AVATAR}
                   />
                   <SpeakerButton
                     accessibilityLabel="Female speaker"
                     letter="F"
                     phraseId={phraseId}
+                    avatarSource={ANN_AVATAR}
                   />
                 </View>
                 <Pressable
@@ -558,7 +570,7 @@ const styles = StyleSheet.create({
   cardNext: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: '#CF142B',
+    backgroundColor: '#C8102E',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 12,

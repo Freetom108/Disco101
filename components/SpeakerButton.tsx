@@ -4,7 +4,7 @@ import {
   useAudioPlayer,
 } from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   AUDIO_REPEAT_KEY,
   AUDIO_SPEED_KEY,
@@ -12,8 +12,8 @@ import {
   parseAudioRepeat,
   parseAudioSpeed,
 } from '../constants/audioSettingsStorage';
-import { ACTIVE, BUTTON_TEXT } from '../constants/theme';
-import { audioAssets } from '../utils/audioAssets';
+import { ACTIVE, BUTTON_TEXT, INACTIVE } from '../constants/theme';
+import { getPreloadedSource } from '../utils/audioPreloader';
 import {
   safePlayerPause,
   safePlayerPlay,
@@ -29,27 +29,33 @@ type SpeakerButtonProps = {
   accessibilityLabel: string;
   letter: string;
   phraseId: number;
+  avatarSource?: any;
 };
 
 export default function SpeakerButton({
   accessibilityLabel,
   letter,
   phraseId,
+  avatarSource,
 }: SpeakerButtonProps) {
   const voice = letter.trim().toUpperCase() === 'M' ? 'm' : 'f';
-  const assetKey = `phrase_${String(phraseId).padStart(3, '0')}_${voice}`;
-  const source = audioAssets[assetKey] ?? null;
+  const source = getPreloadedSource(phraseId, voice);
 
   const player = useAudioPlayer(null, { updateInterval: 100 });
 
   const repeatTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finishCountRef = useRef(0);
   const statusSubRef = useRef<{ remove: () => void } | null>(null);
+  const isReleasedRef = useRef(false);
 
   const clearStatusSubscription = useCallback(() => {
     statusSubRef.current?.remove();
     statusSubRef.current = null;
   }, []);
+
+  useEffect(() => {
+    isReleasedRef.current = false;
+  }, [phraseId]);
 
   useEffect(() => {
     if (!source) return;
@@ -58,7 +64,9 @@ export default function SpeakerButton({
       repeatTimeoutRef.current = null;
     }
     clearStatusSubscription();
+    if (isReleasedRef.current) return;
     safePlayerPause(player);
+    if (isReleasedRef.current) return;
     safePlayerReplace(player, source);
   }, [source, player, clearStatusSubscription]);
 
@@ -69,14 +77,13 @@ export default function SpeakerButton({
         repeatTimeoutRef.current = null;
       }
       clearStatusSubscription();
+      if (isReleasedRef.current) return;
       safePlayerPause(player);
+      isReleasedRef.current = true;
     };
   }, [player, clearStatusSubscription]);
 
   const play = useCallback(async () => {
-    console.log('phraseId:', phraseId, 'letter:', letter);
-    console.log('assetKey:', assetKey);
-    console.log('source:', source);
     if (!source) return;
 
     let speedRaw: string | null = null;
@@ -109,9 +116,12 @@ export default function SpeakerButton({
         shouldRouteThroughEarpiece: false,
       });
 
+      if (isReleasedRef.current) return;
       safePlayerPause(player);
+      if (isReleasedRef.current) return;
       await safePlayerSeekTo(player, 0);
 
+      if (isReleasedRef.current) return;
       safePlayerSetPlaybackRate(player, rate, 'medium');
 
       finishCountRef.current = 0;
@@ -126,11 +136,14 @@ export default function SpeakerButton({
             repeatTimeoutRef.current = null;
             void (async () => {
               try {
+                if (isReleasedRef.current) return;
                 await safePlayerSeekTo(player, 0);
+                if (isReleasedRef.current) return;
                 safePlayerPlay(player);
               } catch (e) {
                 console.log('Player already released', e);
                 clearStatusSubscription();
+                if (isReleasedRef.current) return;
                 safePlayerPause(player);
               }
             })();
@@ -139,11 +152,14 @@ export default function SpeakerButton({
         }
 
         clearStatusSubscription();
+        if (isReleasedRef.current) return;
         void safePlayerSeekTo(player, 0);
+        if (isReleasedRef.current) return;
         safePlayerPause(player);
       });
       statusSubRef.current = sub;
 
+      if (isReleasedRef.current) return;
       safePlayerPlay(player);
     } catch (e) {
       console.log('Player already released', e);
@@ -152,9 +168,12 @@ export default function SpeakerButton({
         repeatTimeoutRef.current = null;
       }
       clearStatusSubscription();
+      if (isReleasedRef.current) return;
       safePlayerPause(player);
     }
   }, [clearStatusSubscription, phraseId, player, source]);
+
+  const speakerName = letter.trim().toUpperCase() === 'M' ? 'Chris' : 'Ann';
 
   return (
     <Pressable
@@ -163,9 +182,22 @@ export default function SpeakerButton({
       accessibilityLabel={accessibilityLabel}
       onPress={play}
     >
-      <View style={styles.speakerCircle}>
-        <Text style={styles.speakerLetter}>{letter}</Text>
-      </View>
+      {avatarSource ? (
+        <View style={styles.avatarColumn}>
+          <View style={styles.avatarRound}>
+            <Image
+              source={avatarSource}
+              style={styles.avatarImage}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.avatarName}>{speakerName}</Text>
+        </View>
+      ) : (
+        <View style={styles.speakerCircle}>
+          <Text style={styles.speakerLetter}>{letter}</Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -194,5 +226,24 @@ const styles = StyleSheet.create({
     color: BUTTON_TEXT,
     fontSize: 22,
     fontWeight: '700',
+  },
+  avatarColumn: {
+    alignItems: 'center',
+  },
+  avatarRound: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+  },
+  avatarName: {
+    fontSize: 13,
+    color: INACTIVE,
+    textAlign: 'center',
+    marginTop: 4,
   },
 });

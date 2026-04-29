@@ -201,4 +201,9 @@ export const audioAssets: Record<string, any> = {
   'phrase_100_f': require('../assets/audio/phrase_100_f.mp3'),
   'phrase_101_m': require('../assets/audio/phrase_101_m.mp3'),
   'phrase_101_f': require('../assets/audio/phrase_101_f.mp3'),
+  'correct1': require('../assets/audio/correct1.mp3'),
+  'correct2': require('../assets/audio/correct2.mp3'),
+  'chris-das-war-spitze': require('../assets/audio/chris-das-war-spitze.mp3'),
+  'ann-gut-gemacht': require('../assets/audio/ann-gut-gemacht.mp3'),
+  'complete': require('../assets/audio/complete.mp3'),
 };

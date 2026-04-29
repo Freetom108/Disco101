@@ -14,6 +14,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SpeakerButton from '../../../components/SpeakerButton';
 import {
+  preloadPhraseAudio,
+} from '../../../utils/audioPreloader';
+
+const CHRIS_AVATAR = require('../../../assets/images/chris-avatar.png');
+const ANN_AVATAR = require('../../../assets/images/ann-avatar.png');
+import {
   ACTIVE,
   BRAND,
   BUTTON_TEXT,
@@ -105,6 +111,12 @@ export default function RepeatSessionScreen() {
       setInitFailed(true);
     }
   }, [params.phraseIds, byId]);
+
+  useEffect(() => {
+    const phrases = repeatSession?.phrases;
+    if (!phrases?.length) return;
+    preloadPhraseAudio(phrases.map((p) => p.id));
+  }, [repeatSession?.phrases]);
 
   useEffect(() => {
     if (initFailed) {
@@ -272,7 +284,7 @@ export default function RepeatSessionScreen() {
                       size={20}
                       color={
                         pinnedIds.includes(currentPhrase.id)
-                          ? '#CF142B'
+                          ? '#C8102E'
                           : BRAND
                       }
                     />
@@ -318,11 +330,13 @@ export default function RepeatSessionScreen() {
                       accessibilityLabel="Male speaker"
                       letter="M"
                       phraseId={currentPhrase.id}
+                      avatarSource={CHRIS_AVATAR}
                     />
                     <SpeakerButton
                       accessibilityLabel="Female speaker"
                       letter="F"
                       phraseId={currentPhrase.id}
+                      avatarSource={ANN_AVATAR}
                     />
                   </View>
                   <View style={styles.sessionFooterRow}>
@@ -523,7 +537,7 @@ const styles = StyleSheet.create({
   },
   naechsteBtn: {
     flex: 1,
-    backgroundColor: '#CF142B',
+    backgroundColor: '#C8102E',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -554,7 +568,7 @@ const styles = StyleSheet.create({
   },
   sessionCompleteBtn: {
     marginTop: 28,
-    backgroundColor: '#CF142B',
+    backgroundColor: '#C8102E',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,

@@ -3,10 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import type { AudioPlayer } from 'expo-audio';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
+import * as Haptics from 'expo-haptics';
 import { useFonts } from 'expo-font';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -22,6 +26,9 @@ import {
 } from '../../constants/audioSettingsStorage';
 import Header from '../../components/Header';
 import PhraseCard from '../../components/PhraseCard';
+import {
+  preloadPhraseAudio,
+} from '../../utils/audioPreloader';
 import {
   ACTIVE,
   BRAND,
@@ -39,6 +46,9 @@ import {
   safePlayerReplace,
   safePlayerSetPlaybackRate,
 } from '../../utils/safeAudioPlayer';
+
+const CHRIS_AVATAR = require('../../assets/images/chris-avatar.png');
+const ANN_AVATAR = require('../../assets/images/ann-avatar.png');
 
 type Phrase = {
   id: number;
@@ -155,7 +165,16 @@ function TestChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <Text style={styles.testVoiceBtnText}>Chris</Text>
+        <View style={styles.testVoiceBtnInner}>
+          <View style={styles.testVoiceAvatarWrap}>
+            <Image
+              source={CHRIS_AVATAR}
+              style={styles.testVoiceAvatarImg}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.testVoiceBtnText}>Chris</Text>
+        </View>
       </Pressable>
       <Pressable
         accessibilityRole="button"
@@ -166,7 +185,16 @@ function TestChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <Text style={styles.testVoiceBtnText}>Ann</Text>
+        <View style={styles.testVoiceBtnInner}>
+          <View style={styles.testVoiceAvatarWrap}>
+            <Image
+              source={ANN_AVATAR}
+              style={styles.testVoiceAvatarImg}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.testVoiceBtnText}>Ann</Text>
+        </View>
       </Pressable>
     </View>
   );
@@ -234,6 +262,74 @@ export default function HomeScreen() {
   );
 
   const testPlaybackPlayer = useAudioPlayer(null, { updateInterval: 100 });
+  const feedbackPlayer = useAudioPlayer(null, { updateInterval: 100 });
+  const testDiscoSpin = useRef(new Animated.Value(0)).current;
+  const spin = useMemo(
+    () =>
+      testDiscoSpin.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+      }),
+    [testDiscoSpin],
+  );
+
+  useEffect(() => {
+    if (!showTestDone || wrongAnswers.length > 0) {
+      testDiscoSpin.setValue(0);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.timing(testDiscoSpin, {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+      testDiscoSpin.setValue(0);
+    };
+  }, [showTestDone, wrongAnswers.length, testDiscoSpin]);
+
+  const playFeedbackSound = useCallback(
+    async (key: string) => {
+      const src = audioAssets[key];
+      if (!src) return;
+      try {
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: false,
+          interruptionMode: 'duckOthers',
+          shouldPlayInBackground: false,
+          shouldRouteThroughEarpiece: false,
+        });
+        safePlayerReplace(feedbackPlayer, src);
+        safePlayerPlay(feedbackPlayer);
+      } catch (e) {
+        console.log('Player already released', e);
+        safePlayerPause(feedbackPlayer);
+      }
+    },
+    [feedbackPlayer],
+  );
+
+  useEffect(() => {
+    if (!showTestDone || testPhrases.length === 0) return;
+    const pct =
+      ((testPhrases.length - wrongAnswers.length) / testPhrases.length) * 100;
+    if (wrongAnswers.length === 0) {
+      void playFeedbackSound('chris-das-war-spitze');
+    } else if (pct > 80) {
+      void playFeedbackSound('ann-gut-gemacht');
+    }
+  }, [
+    showTestDone,
+    testPhrases.length,
+    wrongAnswers.length,
+    playFeedbackSound,
+  ]);
 
   useEffect(() => {
     setShowTestSelection(false);
@@ -281,6 +377,10 @@ export default function HomeScreen() {
         (a, b) => a.id - b.id,
       ) as Phrase[],
     [currentChapter],
+  );
+  const chapterPhraseIds = useMemo(
+    () => chPhrases.map((p) => p.id),
+    [chPhrases],
   );
   const chCount = chPhrases.length;
   const categoryTitle = chPhrases[0]?.category ?? `Kapitel ${currentChapter}`;
@@ -334,6 +434,14 @@ export default function HomeScreen() {
       setSelectedOptionId(optionPhraseId);
       const isCorrect = optionPhraseId === correct.id;
       const delay = isCorrect ? 1000 : 2000;
+      if (isCorrect) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        void playFeedbackSound('correct1');
+      } else {
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Error,
+        );
+      }
 
       setWrongAnswers((prev) => {
         const nextWrong = isCorrect ? prev : [...prev, correct.id];
@@ -351,7 +459,13 @@ export default function HomeScreen() {
         return nextWrong;
       });
     },
-    [answerLocked, mergeWrongIntoPinned, testIndex, testPhrases],
+    [
+      answerLocked,
+      mergeWrongIntoPinned,
+      playFeedbackSound,
+      testIndex,
+      testPhrases,
+    ],
   );
 
   const isChapterComplete = chCount > 0 && currentIndex >= chCount;
@@ -391,6 +505,7 @@ export default function HomeScreen() {
     setActiveTestKind(testNumber);
     const shuffled = shufflePhrases(chPhrases);
     const limited = shuffled.slice(0, 8);
+    preloadPhraseAudio(limited.map((p) => p.id));
     setTestPhrases(limited);
     setTestIndex(0);
     setWrongAnswers([]);
@@ -616,9 +731,19 @@ export default function HomeScreen() {
                       Repeat-Stapel gespeichert 📌
                     </Text>
                   ) : (
-                    <Text style={styles.testResultPerfectNote}>
-                      Perfekt! Alle Karten richtig! ⭐
-                    </Text>
+                    <View>
+                      <Animated.Image
+                        source={require('../../assets/images/logo.png')}
+                        style={[
+                          styles.testResultDiscoBall,
+                          { transform: [{ rotate: spin }] },
+                        ]}
+                        accessibilityLabel="Perfekt, alle Karten richtig"
+                      />
+                      <Text style={styles.testResultPerfectCaption}>
+                        Perfekt! Alle Karten richtig! 🎉
+                      </Text>
+                    </View>
                   )}
                   {activeTestKind != null ? (
                     <Pressable
@@ -635,7 +760,7 @@ export default function HomeScreen() {
                         styles.testResultBtnOtherTest,
                         {
                           backgroundColor:
-                            activeTestKind === 1 ? '#CF142B' : ACTIVE,
+                            activeTestKind === 1 ? '#C8102E' : ACTIVE,
                         },
                         pressed && { opacity: 0.92 },
                       ]}
@@ -753,7 +878,7 @@ export default function HomeScreen() {
                                 selectedOptionId !== null &&
                                 selectedOptionId !==
                                   testPhrases[testIndex]!.id
-                                  ? '#CF142B'
+                                  ? '#C8102E'
                                   : '#888888'
                               }
                             />
@@ -770,7 +895,7 @@ export default function HomeScreen() {
                               if (opt.id === correctId) {
                                 rowBg = '#2E7D32';
                               } else if (opt.id === selectedOptionId) {
-                                rowBg = '#CF142B';
+                                rowBg = '#C8102E';
                               }
                             }
                             const onColored =
@@ -850,6 +975,7 @@ export default function HomeScreen() {
             currentIndex={currentIndex}
             completedChapterName={categoryTitle}
             phraseId={phraseIdForCard}
+            chapterPhraseIds={chapterPhraseIds}
             isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
             onTogglePin={(id) => {
               const updated = pinnedIds.includes(id)
@@ -979,7 +1105,7 @@ const styles = StyleSheet.create({
     backgroundColor: ACTIVE,
   },
   testBlockBtnAccent: {
-    backgroundColor: '#CF142B',
+    backgroundColor: '#C8102E',
   },
   testBlockBtnText: {
     color: BUTTON_TEXT,
@@ -1066,27 +1192,37 @@ const styles = StyleSheet.create({
   },
   testVoiceBtn: {
     flex: 1,
-    backgroundColor: ACTIVE,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   testVoiceBtnCompact: {
     flex: 1,
-    backgroundColor: ACTIVE,
-    borderRadius: 10,
-    paddingVertical: 11,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 0,
   },
+  testVoiceBtnInner: {
+    alignItems: 'center',
+  },
+  testVoiceAvatarWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  testVoiceAvatarImg: {
+    width: 72,
+    height: 72,
+  },
   testVoiceBtnText: {
-    color: BUTTON_TEXT,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 13,
+    color: INACTIVE,
+    textAlign: 'center',
+    marginTop: 4,
   },
   testOptionRow: {
     borderRadius: 12,
@@ -1161,12 +1297,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  testResultPerfectNote: {
+  testResultDiscoBall: {
     marginTop: 20,
-    fontSize: 16,
+    width: 120,
+    height: 120,
+    alignSelf: 'center',
+  },
+  testResultPerfectCaption: {
+    marginTop: 12,
+    fontSize: 18,
     color: ACTIVE,
     textAlign: 'center',
-    lineHeight: 22,
   },
   testResultBtnOtherTest: {
     marginTop: 24,

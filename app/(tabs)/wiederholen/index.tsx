@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   shuffleBtn: {
-    backgroundColor: '#CF142B',
+    backgroundColor: '#C8102E',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

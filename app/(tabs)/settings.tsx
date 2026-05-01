@@ -34,7 +34,7 @@ import {
 
 const SECTION_LABEL = '#888';
 
-const SPEED_OPTIONS: AudioSpeedStored[] = ['0.75', '1.0', '1.25'];
+const SPEED_OPTIONS: AudioSpeedStored[] = ['0.9', '1.0', '1.1'];
 const REPEAT_OPTIONS: AudioRepeatStored[] = ['1', '2'];
 
 export default function SettingsScreen() {

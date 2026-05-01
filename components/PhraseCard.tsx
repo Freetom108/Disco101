@@ -79,7 +79,7 @@ export default function PhraseCard({
   onBack,
   onNext,
 }: PhraseCardProps) {
-  const showChapterMenu = isChapterComplete && !isAllPhrasesComplete;
+  const showChapterMenu = isChapterComplete;
   const isBackDisabled = false;
 
   const slideX = useRef(new Animated.Value(0)).current;
@@ -209,7 +209,9 @@ export default function PhraseCard({
                     { fontFamily: FONT_DM_SERIF },
                   ]}
                 >
-                  Kapitel abgeschlossen! 🎉
+                  {isAllPhrasesComplete
+                    ? 'Alle 101 Phrasen gelernt! 🎉'
+                    : 'Kapitel abgeschlossen! 🎉'}
                 </Text>
                 <Text style={styles.chapterMenuSubtitle}>
                   {completedChapterName}
@@ -256,12 +258,6 @@ export default function PhraseCard({
                   </Pressable>
                 </View>
               </View>
-            ) : isChapterComplete ? (
-              <Text
-                style={[styles.cardCompleteTitle, { fontFamily: FONT_DM_SERIF }]}
-              >
-                Alle 101 Phrasen gelernt!
-              </Text>
             ) : (
               <>
                 <View style={styles.cardNumberRow}>
@@ -477,13 +473,6 @@ const styles = StyleSheet.create({
     minHeight: 0,
     marginTop: 8,
     justifyContent: 'center',
-  },
-  cardCompleteTitle: {
-    color: ACTIVE,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: '600',
-    textAlign: 'center',
   },
   speakerAndFooter: {},
   speakerAndFooterComplete: {

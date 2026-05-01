@@ -1,9 +1,11 @@
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useFonts } from 'expo-font';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,8 +19,18 @@ import {
 } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { FONT_DM_SERIF } from '../constants/theme';
+import { FONT_DM_SERIF, CARD_BG, INACTIVE } from '../constants/theme';
+import { audioAssets } from '../utils/audioAssets';
+import {
+  safePlayerPause,
+  safePlayerPlay,
+  safePlayerReplace,
+  safePlayerSeekTo,
+  safePlayerSetPlaybackRate,
+} from '../utils/safeAudioPlayer';
 
+const CHRIS_AVATAR = require('../assets/images/chris-avatar.png');
+const ANN_AVATAR = require('../assets/images/ann-avatar.png');
 const ONBOARDING_BG = '#EDE9E3';
 const ONBOARDING_KEY = 'onboarding_done';
 const TITLE_DARK = '#1A1A1A';
@@ -39,9 +51,48 @@ export default function OnboardingScreen() {
   );
   const scrollRef = useRef<ScrollView>(null);
   const [slideIndex, setSlideIndex] = useState(0);
+  const welcomePlayer = useAudioPlayer(null, { updateInterval: 100 });
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
+
+  useEffect(() => {
+    return () => {
+      safePlayerPause(welcomePlayer);
+    };
+  }, [welcomePlayer]);
+
+  const playWelcomeVoice = useCallback(
+    async (gender: 'm' | 'f') => {
+      const key = gender === 'm' ? 'welcome_m' : 'welcome_f';
+      const src = audioAssets[key];
+      if (!src) return;
+      try {
+        safePlayerPause(welcomePlayer);
+        safePlayerReplace(welcomePlayer, src);
+        for (let i = 0; i < 60; i++) {
+          if (welcomePlayer.currentStatus.duration > 0) break;
+          await new Promise<void>((r) => setTimeout(r, 40));
+        }
+        if (welcomePlayer.currentStatus.duration <= 0) return;
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: false,
+          interruptionMode: 'duckOthers',
+          shouldPlayInBackground: false,
+          shouldRouteThroughEarpiece: false,
+        });
+        safePlayerPause(welcomePlayer);
+        await safePlayerSeekTo(welcomePlayer, 0);
+        safePlayerSetPlaybackRate(welcomePlayer, 1, 'medium');
+        safePlayerPlay(welcomePlayer);
+      } catch (e) {
+        console.log('Welcome audio', e);
+        safePlayerPause(welcomePlayer);
+      }
+    },
+    [welcomePlayer],
+  );
 
   const onScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -85,21 +136,66 @@ export default function OnboardingScreen() {
           scrollEventThrottle={16}
         >
           <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={styles.slideInnerFirst}>
+            <View style={styles.slide1Wrap}>
               <Image
                 source={require('../assets/images/logo.png')}
-                style={styles.logo}
+                style={styles.slide1Logo}
                 resizeMode="contain"
               />
-              <View style={styles.slide1TextBlock}>
+              <View style={styles.practiceCard}>
                 <Text
-                  style={[styles.titleWelcome, { fontFamily: FONT_DM_SERIF }]}
+                  style={[styles.slide1English, { fontFamily: FONT_DM_SERIF }]}
+                  adjustsFontSizeToFit
+                  numberOfLines={4}
+                  minimumFontScale={0.85}
                 >
-                  Disco 101
+                  Welcome to Disco 101! Let us show you how it works.
                 </Text>
-                <Text style={styles.subtitle}>
-                  Englisch für den Urlaub{'\n'}Effizient lernen, sicher sprechen.
+                <Text style={styles.slide1German}>
+                  Willkommen bei Disco 101! Lass dir zeigen wie es funktioniert.
                 </Text>
+                <View style={styles.slide1AvatarRow}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Chris (männliche Stimme)"
+                    onPress={() => void playWelcomeVoice('m')}
+                    style={({ pressed }) => [
+                      styles.slide1SpeakerBtn,
+                      pressed && { opacity: 0.9 },
+                    ]}
+                  >
+                    <View style={styles.slide1AvatarColumn}>
+                      <View style={styles.slide1AvatarCircle}>
+                        <Image
+                          source={CHRIS_AVATAR}
+                          style={styles.slide1AvatarImg}
+                          resizeMode="cover"
+                        />
+                      </View>
+                      <Text style={styles.slide1VoiceLabel}>Chris</Text>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Ann (weibliche Stimme)"
+                    onPress={() => void playWelcomeVoice('f')}
+                    style={({ pressed }) => [
+                      styles.slide1SpeakerBtn,
+                      pressed && { opacity: 0.9 },
+                    ]}
+                  >
+                    <View style={styles.slide1AvatarColumn}>
+                      <View style={styles.slide1AvatarCircle}>
+                        <Image
+                          source={ANN_AVATAR}
+                          style={styles.slide1AvatarImg}
+                          resizeMode="cover"
+                        />
+                      </View>
+                      <Text style={styles.slide1VoiceLabel}>Ann</Text>
+                    </View>
+                  </Pressable>
+                </View>
               </View>
             </View>
           </View>
@@ -257,41 +353,93 @@ const styles = StyleSheet.create({
   slide: {
     minHeight: 200,
   },
-  slideInnerFirst: {
+  slide1Wrap: {
     flex: 1,
-    paddingTop: 80,
-    paddingHorizontal: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: '3%',
+    paddingVertical: 12,
+  },
+  slide1Logo: {
+    width: 140,
+    height: 140,
+    marginBottom: 16,
+  },
+  practiceCard: {
+    alignSelf: 'stretch',
+    backgroundColor: CARD_BG,
+    borderRadius: 28,
+    padding: 20,
+    overflow: 'hidden',
+    ...Platform.select({
+      android: {
+        elevation: 12,
+      },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+      },
+    }),
+  },
+  slide1English: {
+    color: TITLE_DARK,
+    fontSize: 26,
+    lineHeight: 34,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  slide1German: {
+    color: BODY_GRAY,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  slide1AvatarRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+    alignItems: 'stretch',
+  },
+  slide1SpeakerBtn: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 80,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  slide1TextBlock: {
+  slide1AvatarColumn: {
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  slide1AvatarCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  slide1AvatarImg: {
+    width: 72,
+    height: 72,
+  },
+  slide1VoiceLabel: {
+    fontSize: 13,
+    color: INACTIVE,
+    textAlign: 'center',
+    marginTop: 4,
   },
   slideInnerCentered: {
     flex: 1,
     paddingHorizontal: 24,
     width: '100%',
     justifyContent: 'center',
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    marginBottom: 32,
-    backgroundColor: 'transparent',
-  },
-  titleWelcome: {
-    color: TITLE_DARK,
-    fontSize: 42,
-    lineHeight: 50,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  subtitle: {
-    color: BODY_GRAY,
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    marginTop: 0,
   },
   titleSection: {
     color: TITLE_DARK,

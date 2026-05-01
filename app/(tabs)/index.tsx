@@ -139,8 +139,7 @@ function TestChrisAnnButtons({
         await player.seekTo(0);
         safePlayerSetPlaybackRate(player, rate, 'medium');
         safePlayerPlay(player);
-      } catch (e) {
-        console.log('Player already released', e);
+      } catch {
         safePlayerPause(player);
       }
     },
@@ -307,8 +306,7 @@ export default function HomeScreen() {
         });
         safePlayerReplace(feedbackPlayer, src);
         safePlayerPlay(feedbackPlayer);
-      } catch (e) {
-        console.log('Player already released', e);
+      } catch {
         safePlayerPause(feedbackPlayer);
       }
     },
@@ -602,10 +600,6 @@ export default function HomeScreen() {
     return 1;
   })();
 
-  useEffect(() => {
-    console.log('phraseId:', phrase?.id);
-  }, [phrase?.id, currentIndex, currentChapter]);
-
   if (!fontsLoaded) {
     return (
       <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
@@ -727,8 +721,9 @@ export default function HomeScreen() {
                   </Text>
                   {wrongAnswers.length > 0 ? (
                     <Text style={styles.testResultRepeatNote}>
-                      {wrongAnswers.length} Karten wurden in deinen{'\n'}
-                      Repeat-Stapel gespeichert 📌
+                      {wrongAnswers.length === 1
+                        ? '1 Karte wurde in deinem Repeat-Stapel gespeichert 📌'
+                        : `${wrongAnswers.length} Karten wurden in deinem Repeat-Stapel gespeichert 📌`}
                     </Text>
                   ) : (
                     <View>

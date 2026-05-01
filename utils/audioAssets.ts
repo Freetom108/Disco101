@@ -206,4 +206,6 @@ export const audioAssets: Record<string, any> = {
   'chris-das-war-spitze': require('../assets/audio/chris-das-war-spitze.mp3'),
   'ann-gut-gemacht': require('../assets/audio/ann-gut-gemacht.mp3'),
   'complete': require('../assets/audio/complete.mp3'),
+  'welcome_m': require('../assets/audio/welcome_m.mp3'),
+  'welcome_f': require('../assets/audio/welcome_f.mp3'),
 };

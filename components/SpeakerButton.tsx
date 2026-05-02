@@ -140,8 +140,7 @@ export default function SpeakerButton({
                 await safePlayerSeekTo(player, 0);
                 if (isReleasedRef.current) return;
                 safePlayerPlay(player);
-              } catch (e) {
-                console.log('Player already released', e);
+              } catch {
                 clearStatusSubscription();
                 if (isReleasedRef.current) return;
                 safePlayerPause(player);
@@ -161,8 +160,7 @@ export default function SpeakerButton({
 
       if (isReleasedRef.current) return;
       safePlayerPlay(player);
-    } catch (e) {
-      console.log('Player already released', e);
+    } catch {
       if (repeatTimeoutRef.current) {
         clearTimeout(repeatTimeoutRef.current);
         repeatTimeoutRef.current = null;

@@ -6,9 +6,11 @@ import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { useFonts } from 'expo-font';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   Easing,
   Image,
   Platform,
@@ -262,6 +264,10 @@ export default function HomeScreen() {
 
   const testPlaybackPlayer = useAudioPlayer(null, { updateInterval: 100 });
   const feedbackPlayer = useAudioPlayer(null, { updateInterval: 100 });
+  const testConfettiRef = useRef<InstanceType<typeof ConfettiCannon> | null>(
+    null,
+  );
+  const testResultFxFiredRef = useRef(false);
   const testDiscoSpin = useRef(new Animated.Value(0)).current;
   const spin = useMemo(
     () =>
@@ -273,7 +279,13 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (!showTestDone || wrongAnswers.length > 0) {
+    if (!showTestDone || testPhrases.length === 0) {
+      testDiscoSpin.setValue(0);
+      return;
+    }
+    const pct =
+      ((testPhrases.length - wrongAnswers.length) / testPhrases.length) * 100;
+    if (pct < 80) {
       testDiscoSpin.setValue(0);
       return;
     }
@@ -290,7 +302,12 @@ export default function HomeScreen() {
       loop.stop();
       testDiscoSpin.setValue(0);
     };
-  }, [showTestDone, wrongAnswers.length, testDiscoSpin]);
+  }, [
+    showTestDone,
+    wrongAnswers.length,
+    testPhrases.length,
+    testDiscoSpin,
+  ]);
 
   const playFeedbackSound = useCallback(
     async (key: string) => {
@@ -314,13 +331,59 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (!showTestDone || testPhrases.length === 0) return;
+    if (!showTestDone) {
+      testResultFxFiredRef.current = false;
+      return;
+    }
+    if (testPhrases.length === 0) return;
+    if (testResultFxFiredRef.current) return;
     const pct =
       ((testPhrases.length - wrongAnswers.length) / testPhrases.length) * 100;
     if (wrongAnswers.length === 0) {
-      void playFeedbackSound('chris-das-war-spitze');
-    } else if (pct > 80) {
-      void playFeedbackSound('ann-gut-gemacht');
+      testResultFxFiredRef.current = true;
+      void (async () => {
+        try {
+          await Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          );
+        } catch {
+          /* ignore */
+        }
+      })();
+      void (async () => {
+        try {
+          await playFeedbackSound('chris-das-war-spitze');
+        } catch {
+          /* ignore */
+        }
+      })();
+      try {
+        requestAnimationFrame(() => {
+          try {
+            testConfettiRef.current?.start();
+          } catch {
+            /* ignore */
+          }
+        });
+      } catch {
+        /* ignore */
+      }
+    } else if (pct >= 80) {
+      testResultFxFiredRef.current = true;
+      void (async () => {
+        try {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        } catch {
+          /* ignore */
+        }
+      })();
+      void (async () => {
+        try {
+          await playFeedbackSound('ann-gut-gemacht');
+        } catch {
+          /* ignore */
+        }
+      })();
     }
   }, [
     showTestDone,
@@ -404,6 +467,7 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
+    safePlayerPause(testPlaybackPlayer);
     if (!isTestMode || showTestSelection) return;
     if (testPhrases.length === 0) return;
     if (testIndex >= testPhrases.length) return;
@@ -434,7 +498,13 @@ export default function HomeScreen() {
       const delay = isCorrect ? 1000 : 2000;
       if (isCorrect) {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        void playFeedbackSound('correct1');
+        void (async () => {
+          try {
+            await playFeedbackSound('correct1');
+          } catch {
+            /* ignore */
+          }
+        })();
       } else {
         void Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Error,
@@ -600,6 +670,14 @@ export default function HomeScreen() {
     return 1;
   })();
 
+  const testScorePct =
+    showTestDone && testPhrases.length > 0
+      ? ((testPhrases.length - wrongAnswers.length) / testPhrases.length) *
+        100
+      : 0;
+  const testShowDiscoBall = showTestDone && testScorePct >= 80;
+  const testIsPerfect = showTestDone && wrongAnswers.length === 0;
+
   if (!fontsLoaded) {
     return (
       <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
@@ -697,10 +775,28 @@ export default function HomeScreen() {
                 style={[
                   styles.testSelectionCard,
                   styles.testResultCardInner,
+                  testIsPerfect && styles.testResultCardConfetti,
                 ]}
               >
+                {testIsPerfect ? (
+                  <View
+                    pointerEvents="none"
+                    style={styles.testConfettiLayer}
+                  >
+                    <ConfettiCannon
+                      ref={testConfettiRef}
+                      count={200}
+                      origin={{
+                        x: Dimensions.get('window').width / 2,
+                        y: -10,
+                      }}
+                      autoStart={false}
+                      fadeOut
+                    />
+                  </View>
+                ) : null}
                 <ScrollView
-                  style={styles.testSelectionScroll}
+                  style={[styles.testSelectionScroll, styles.testResultScroll]}
                   contentContainerStyle={styles.testResultScrollContent}
                   showsVerticalScrollIndicator={false}
                 >
@@ -725,21 +821,33 @@ export default function HomeScreen() {
                         ? '1 Karte wurde in deinem Repeat-Stapel gespeichert 📌'
                         : `${wrongAnswers.length} Karten wurden in deinem Repeat-Stapel gespeichert 📌`}
                     </Text>
-                  ) : (
-                    <View>
+                  ) : null}
+                  {testShowDiscoBall ? (
+                    <View
+                      style={
+                        wrongAnswers.length > 0
+                          ? styles.testDiscoWrapAfterNote
+                          : undefined
+                      }
+                    >
                       <Animated.Image
                         source={require('../../assets/images/logo.png')}
                         style={[
                           styles.testResultDiscoBall,
+                          wrongAnswers.length > 0
+                            ? styles.testResultDiscoBallAfterNote
+                            : undefined,
                           { transform: [{ rotate: spin }] },
                         ]}
-                        accessibilityLabel="Perfekt, alle Karten richtig"
+                        accessibilityLabel="Test-Ergebnis"
                       />
-                      <Text style={styles.testResultPerfectCaption}>
-                        Perfekt! Alle Karten richtig! 🎉
-                      </Text>
+                      {testIsPerfect ? (
+                        <Text style={styles.testResultPerfectCaption}>
+                          Perfekt! Alle Karten richtig! 🎉
+                        </Text>
+                      ) : null}
                     </View>
-                  )}
+                  ) : null}
                   {activeTestKind != null ? (
                     <Pressable
                       accessibilityRole="button"
@@ -1042,6 +1150,9 @@ const styles = StyleSheet.create({
   testSelectionScroll: {
     flex: 1,
   },
+  testResultScroll: {
+    zIndex: 2,
+  },
   testSelectionScrollContent: {
     padding: 20,
     paddingBottom: 28,
@@ -1262,6 +1373,18 @@ const styles = StyleSheet.create({
     padding: 0,
     overflow: 'hidden',
   },
+  testResultCardConfetti: {
+    overflow: 'visible',
+  },
+  testConfettiLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
+    overflow: 'visible',
+  },
+  testDiscoWrapAfterNote: {
+    alignItems: 'center',
+    marginTop: 12,
+  },
   testResultScrollContent: {
     padding: 28,
     alignItems: 'center',
@@ -1297,6 +1420,9 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     alignSelf: 'center',
+  },
+  testResultDiscoBallAfterNote: {
+    marginTop: 0,
   },
   testResultPerfectCaption: {
     marginTop: 12,

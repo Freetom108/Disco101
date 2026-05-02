@@ -243,19 +243,21 @@ export default function PhraseCard({
                       🔁 Kapitel wiederholen
                     </Text>
                   </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Nächstes Kapitel"
-                    style={({ pressed }) => [
-                      styles.chapterMenuBtnGhost,
-                      pressed && { opacity: 0.85 },
-                    ]}
-                    onPress={onNextChapter}
-                  >
-                    <Text style={styles.chapterMenuBtnGhostText}>
-                      Nächstes Kapitel →
-                    </Text>
-                  </Pressable>
+                  {chapterNumber < 7 ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Nächstes Kapitel"
+                      style={({ pressed }) => [
+                        styles.chapterMenuBtnGhost,
+                        pressed && { opacity: 0.85 },
+                      ]}
+                      onPress={onNextChapter}
+                    >
+                      <Text style={styles.chapterMenuBtnGhostText}>
+                        Nächstes Kapitel →
+                      </Text>
+                    </Pressable>
+                  ) : null}
                 </View>
               </View>
             ) : (

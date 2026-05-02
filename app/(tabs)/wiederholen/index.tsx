@@ -155,9 +155,14 @@ export default function RepeatOverviewScreen() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.countLine}>
-            {totalCount} Karten gespeichert
-          </Text>
+          <View style={styles.stackHeaderBlock}>
+            <Text style={styles.stackHeaderTitle}>
+              Hier sind deine Übungsstapel
+            </Text>
+            <Text style={styles.stackHeaderSub}>
+              {totalCount} Karte{totalCount === 1 ? '' : 'n'} gespeichert
+            </Text>
+          </View>
 
           <Pressable
             onPress={startAllSession}
@@ -283,11 +288,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: '3%',
   },
-  countLine: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#1A1A1A',
+  stackHeaderBlock: {
     marginBottom: 16,
+  },
+  stackHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  stackHeaderSub: {
+    fontSize: 14,
+    color: INACTIVE,
   },
   shuffleBtn: {
     backgroundColor: '#C8102E',

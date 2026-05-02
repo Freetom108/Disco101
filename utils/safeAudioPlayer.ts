@@ -4,8 +4,8 @@ export function safePlayerPause(player: AudioPlayer | null | undefined): void {
   if (!player) return;
   try {
     player.pause();
-  } catch (e) {
-    console.log('Player already released', e);
+  } catch {
+    /* player may already be released */
   }
 }
 
@@ -16,8 +16,8 @@ export async function safePlayerSeekTo(
   if (!player) return;
   try {
     await player.seekTo(seconds);
-  } catch (e) {
-    console.log('Player already released', e);
+  } catch {
+    /* player may already be released */
   }
 }
 
@@ -25,8 +25,8 @@ export function safePlayerPlay(player: AudioPlayer | null | undefined): void {
   if (!player) return;
   try {
     player.play();
-  } catch (e) {
-    console.log('Player already released', e);
+  } catch {
+    /* player may already be released */
   }
 }
 
@@ -37,8 +37,8 @@ export function safePlayerReplace(
   if (!player) return;
   try {
     player.replace(source);
-  } catch (e) {
-    console.log('Player already released', e);
+  } catch {
+    /* player may already be released */
   }
 }
 
@@ -50,7 +50,7 @@ export function safePlayerSetPlaybackRate(
   if (!player) return;
   try {
     player.setPlaybackRate(rate, pitchCorrectionQuality);
-  } catch (e) {
-    console.log('Player already released', e);
+  } catch {
+    /* player may already be released */
   }
 }

@@ -1,21 +1,46 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { AudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SpeakerButton from '../../../components/SpeakerButton';
+import {
+  AUDIO_SPEED_KEY,
+  audioSpeedToRate,
+  parseAudioSpeed,
+} from '../../../constants/audioSettingsStorage';
 import {
   preloadPhraseAudio,
 } from '../../../utils/audioPreloader';
+import { audioAssets } from '../../../utils/audioAssets';
+import {
+  safePlayerPause,
+  safePlayerPlay,
+  safePlayerReplace,
+  safePlayerSeekTo,
+  safePlayerSetPlaybackRate,
+} from '../../../utils/safeAudioPlayer';
 
 const CHRIS_AVATAR = require('../../../assets/images/chris-avatar.png');
 const ANN_AVATAR = require('../../../assets/images/ann-avatar.png');
@@ -48,6 +73,156 @@ function shufflePhrases(phrases: Phrase[]): Phrase[] {
   return a;
 }
 
+function buildSessionQuizOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
+  const others = shufflePhrases(pool.filter((p) => p.id !== correct.id));
+  const w1 = others[0] ?? correct;
+  const w2 = others[1] ?? others[0] ?? correct;
+  return shufflePhrases([correct, w1, w2]);
+}
+
+function sessionPhraseAudioSource(phraseId: number, gender: 'm' | 'f') {
+  const key = `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
+  return audioAssets[key] ?? null;
+}
+
+function SessionChrisAnnButtons({
+  player,
+  phraseId,
+  showOptions,
+  onOpenOptionsAfterFirstVoice,
+  compact,
+  isReleasedRef,
+}: {
+  player: AudioPlayer;
+  phraseId: number;
+  showOptions: boolean;
+  onOpenOptionsAfterFirstVoice: () => void;
+  compact: boolean;
+  isReleasedRef: MutableRefObject<boolean>;
+}) {
+  const showOptionsRef = useRef(showOptions);
+  useEffect(() => {
+    showOptionsRef.current = showOptions;
+  }, [showOptions]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        if (isReleasedRef.current) return;
+        safePlayerPause(player);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [player, isReleasedRef]);
+
+  const playVoice = useCallback(
+    async (gender: 'm' | 'f') => {
+      if (isReleasedRef.current) return;
+      const src = sessionPhraseAudioSource(phraseId, gender);
+      if (!src) return;
+      if (!showOptionsRef.current) {
+        onOpenOptionsAfterFirstVoice();
+      }
+      let speedRaw: string | null = null;
+      try {
+        speedRaw = await AsyncStorage.getItem(AUDIO_SPEED_KEY);
+      } catch {
+        /* default rate */
+      }
+      const rate = audioSpeedToRate(parseAudioSpeed(speedRaw));
+      try {
+        if (isReleasedRef.current) return;
+        safePlayerPause(player);
+        if (isReleasedRef.current) return;
+        safePlayerReplace(player, src);
+        for (let i = 0; i < 60; i++) {
+          if (isReleasedRef.current) return;
+          if (player.currentStatus.duration > 0) break;
+          await new Promise<void>((r) => setTimeout(r, 40));
+        }
+        if (isReleasedRef.current) return;
+        if (player.currentStatus.duration <= 0) return;
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: false,
+          interruptionMode: 'duckOthers',
+          shouldPlayInBackground: false,
+          shouldRouteThroughEarpiece: false,
+        });
+        if (isReleasedRef.current) return;
+        safePlayerPause(player);
+        if (isReleasedRef.current) return;
+        await safePlayerSeekTo(player, 0);
+        if (isReleasedRef.current) return;
+        safePlayerSetPlaybackRate(player, rate, 'medium');
+        if (isReleasedRef.current) return;
+        safePlayerPlay(player);
+      } catch {
+        try {
+          if (isReleasedRef.current) return;
+          safePlayerPause(player);
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    [isReleasedRef, onOpenOptionsAfterFirstVoice, player, phraseId],
+  );
+
+  const btnStyle = compact ? styles.sessionTestVoiceBtnCompact : styles.sessionTestVoiceBtn;
+
+  return (
+    <View
+      style={[
+        styles.sessionTestVoiceRow,
+        compact && styles.sessionTestVoiceRowCompact,
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Chris (männliche Stimme)"
+        onPress={() => void playVoice('m')}
+        style={({ pressed }) => [
+          btnStyle,
+          pressed && { opacity: 0.9 },
+        ]}
+      >
+        <View style={styles.sessionTestVoiceBtnInner}>
+          <View style={styles.sessionTestVoiceAvatarWrap}>
+            <Image
+              source={CHRIS_AVATAR}
+              style={styles.sessionTestVoiceAvatarImg}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.sessionTestVoiceBtnText}>Chris</Text>
+        </View>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Ann (weibliche Stimme)"
+        onPress={() => void playVoice('f')}
+        style={({ pressed }) => [
+          btnStyle,
+          pressed && { opacity: 0.9 },
+        ]}
+      >
+        <View style={styles.sessionTestVoiceBtnInner}>
+          <View style={styles.sessionTestVoiceAvatarWrap}>
+            <Image
+              source={ANN_AVATAR}
+              style={styles.sessionTestVoiceAvatarImg}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.sessionTestVoiceBtnText}>Ann</Text>
+        </View>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function RepeatSessionScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -61,7 +236,50 @@ export default function RepeatSessionScreen() {
   const [sitztConfirmedPhraseIds, setSitztConfirmedPhraseIds] = useState<
     number[]
   >([]);
+  const [showStackCompleteNote, setShowStackCompleteNote] = useState(false);
   const [initFailed, setInitFailed] = useState(false);
+  const [showQuizOptions, setShowQuizOptions] = useState(false);
+  const [quizOptions, setQuizOptions] = useState<Phrase[]>([]);
+  const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [answerLocked, setAnswerLocked] = useState(false);
+
+  const sessionConfettiRef = useRef<InstanceType<typeof ConfettiCannon> | null>(
+    null,
+  );
+  const isReleasedRef = useRef(false);
+  const sitztFxPlayer = useAudioPlayer(null, { updateInterval: 100 });
+  const celebrationPlayer = useAudioPlayer(null, { updateInterval: 100 });
+  const sessionTestPlaybackPlayer = useAudioPlayer(null, {
+    updateInterval: 100,
+  });
+
+  useEffect(() => {
+    return () => {
+      isReleasedRef.current = true;
+      try {
+        safePlayerPause(sitztFxPlayer);
+      } catch {
+        /* ignore */
+      }
+      try {
+        safePlayerPause(celebrationPlayer);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [sitztFxPlayer, celebrationPlayer]);
+
+  useEffect(() => {
+    if (!showStackCompleteNote) return;
+    const frame = requestAnimationFrame(() => {
+      try {
+        sessionConfettiRef.current?.start();
+      } catch {
+        /* ignore */
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [showStackCompleteNote]);
 
   const byId = useMemo(
     () => new Map((SENTENCES as Phrase[]).map((s) => [s.id, s])),
@@ -107,6 +325,11 @@ export default function RepeatSessionScreen() {
       }
       setRepeatSession({ phrases: shufflePhrases(phrases), index: 0 });
       setSitztConfirmedPhraseIds([]);
+      setShowStackCompleteNote(false);
+      setShowQuizOptions(false);
+      setQuizOptions([]);
+      setSelectedOptionId(null);
+      setAnswerLocked(false);
     } catch {
       setInitFailed(true);
     }
@@ -139,13 +362,108 @@ export default function RepeatSessionScreen() {
       ? sessionPhrases[sessionIndex]
       : undefined;
 
+  useEffect(() => {
+    isReleasedRef.current = false;
+  }, [sessionIndex]);
+
   const sitztDoneForCurrent =
     currentPhrase != null &&
     sitztConfirmedPhraseIds.includes(currentPhrase.id);
 
+  const chapterPhrasesPool = useMemo(() => {
+    if (!currentPhrase) return [];
+    return (SENTENCES as Phrase[]).filter(
+      (p) => p.chapterId === currentPhrase.chapterId,
+    );
+  }, [currentPhrase]);
+
+  useEffect(() => {
+    try {
+      if (isReleasedRef.current) return;
+      safePlayerPause(sessionTestPlaybackPlayer);
+    } catch {
+      /* ignore */
+    }
+    setShowQuizOptions(false);
+    setQuizOptions([]);
+    setSelectedOptionId(null);
+    setAnswerLocked(false);
+  }, [currentPhrase?.id, sessionTestPlaybackPlayer]);
+
+  const onOpenQuizOptions = useCallback(() => {
+    if (!currentPhrase) return;
+    setShowQuizOptions(true);
+    setQuizOptions(buildSessionQuizOptions(currentPhrase, chapterPhrasesPool));
+  }, [currentPhrase, chapterPhrasesPool]);
+
+  const onPickQuizOption = useCallback(
+    (optionPhraseId: number) => {
+      if (answerLocked || !currentPhrase) return;
+      setAnswerLocked(true);
+      setSelectedOptionId(optionPhraseId);
+      const isCorrect = optionPhraseId === currentPhrase.id;
+      if (isCorrect) {
+        void (async () => {
+          try {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          } catch {
+            /* ignore */
+          }
+        })();
+        void (async () => {
+          try {
+            if (isReleasedRef.current) return;
+            const src = audioAssets['correct1'];
+            if (!src) throw new Error('missing asset');
+            await setAudioModeAsync({
+              playsInSilentMode: true,
+              allowsRecording: false,
+              interruptionMode: 'duckOthers',
+              shouldPlayInBackground: false,
+              shouldRouteThroughEarpiece: false,
+            });
+            if (isReleasedRef.current) return;
+            safePlayerReplace(sitztFxPlayer, src);
+            if (isReleasedRef.current) return;
+            safePlayerPlay(sitztFxPlayer);
+          } catch {
+            try {
+              if (isReleasedRef.current) return;
+              safePlayerPause(sitztFxPlayer);
+            } catch {
+              /* ignore */
+            }
+          }
+        })();
+      } else {
+        void (async () => {
+          try {
+            await Haptics.notificationAsync(
+              Haptics.NotificationFeedbackType.Error,
+            );
+          } catch {
+            /* ignore */
+          }
+        })();
+      }
+    },
+    [answerLocked, currentPhrase, sitztFxPlayer],
+  );
+
   const goBack = () => router.back();
 
   const onSessionPinTap = async () => {
+    setShowStackCompleteNote(false);
+    setShowQuizOptions(false);
+    setQuizOptions([]);
+    setSelectedOptionId(null);
+    setAnswerLocked(false);
+    try {
+      if (isReleasedRef.current) return;
+      safePlayerPause(sessionTestPlaybackPlayer);
+    } catch {
+      /* ignore */
+    }
     if (!repeatSession || !currentPhrase) return;
     const id = currentPhrase.id;
     const newPinned = pinnedIds.filter((x) => x !== id);
@@ -167,13 +485,67 @@ export default function RepeatSessionScreen() {
 
   const onSitzt = async () => {
     if (!repeatSession || !currentPhrase) return;
+    if (
+      !answerLocked ||
+      selectedOptionId !== currentPhrase.id ||
+      sitztDoneForCurrent
+    ) {
+      return;
+    }
     const id = currentPhrase.id;
+    const isLastCard = sessionPhrases.length === 1;
+
     const newPinned = pinnedIds.filter((x) => x !== id);
     await persistPinned(newPinned);
     setSitztConfirmedPhraseIds((prev) => [...prev, id]);
+
+    if (!isLastCard) return;
+
+    setShowStackCompleteNote(true);
+    try {
+      await Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success,
+      );
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (isReleasedRef.current) return;
+      const tadaSrc = audioAssets['tada'];
+      if (!tadaSrc) throw new Error('missing asset');
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        allowsRecording: false,
+        interruptionMode: 'duckOthers',
+        shouldPlayInBackground: false,
+        shouldRouteThroughEarpiece: false,
+      });
+      if (isReleasedRef.current) return;
+      safePlayerReplace(celebrationPlayer, tadaSrc);
+      if (isReleasedRef.current) return;
+      safePlayerPlay(celebrationPlayer);
+    } catch {
+      try {
+        if (isReleasedRef.current) return;
+        safePlayerPause(celebrationPlayer);
+      } catch {
+        /* ignore */
+      }
+    }
   };
 
   const onNaechste = () => {
+    setShowStackCompleteNote(false);
+    setShowQuizOptions(false);
+    setQuizOptions([]);
+    setSelectedOptionId(null);
+    setAnswerLocked(false);
+    try {
+      if (isReleasedRef.current) return;
+      safePlayerPause(sessionTestPlaybackPlayer);
+    } catch {
+      /* ignore */
+    }
     if (!repeatSession || !currentPhrase) return;
     const { phrases, index } = repeatSession;
     const id = currentPhrase.id;
@@ -291,86 +663,203 @@ export default function RepeatSessionScreen() {
                   </Pressable>
                 </View>
 
-                <View style={styles.sessionCardMid}>
-                  <View style={styles.sessionNumRow}>
-                    <Text style={styles.sessionBigNum}>{sessionIndex + 1}</Text>
-                    <Text style={styles.sessionNumHint}>
-                      / {sessionPhrases.length} Karten
+                {!showQuizOptions ? (
+                  <View style={styles.sessionCardMid}>
+                    <View style={styles.sessionNumRow}>
+                      <Text style={styles.sessionBigNum}>
+                        {sessionIndex + 1}
+                      </Text>
+                      <Text style={styles.sessionNumHint}>
+                        / {sessionPhrases.length} Karten
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.sessionEnglish,
+                        { fontFamily: FONT_DM_SERIF },
+                      ]}
+                      adjustsFontSizeToFit
+                      numberOfLines={4}
+                      minimumFontScale={0.7}
+                    >
+                      {currentPhrase.english}
                     </Text>
+                    {showStackCompleteNote ? (
+                      <Text style={styles.stackCompleteBanner}>
+                        Geschafft! Dein Stapel ist leer.
+                      </Text>
+                    ) : null}
+                    <View style={styles.categoryPill}>
+                      <Text style={styles.categoryPillText}>
+                        {currentPhrase.category}
+                      </Text>
+                    </View>
                   </View>
-                  <Text
-                    style={[
-                      styles.sessionEnglish,
-                      { fontFamily: FONT_DM_SERIF },
-                    ]}
-                    adjustsFontSizeToFit
-                    numberOfLines={4}
-                    minimumFontScale={0.7}
-                  >
-                    {currentPhrase.english}
-                  </Text>
-                  <Text
-                    style={styles.sessionGerman}
-                    numberOfLines={3}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    {currentPhrase.german}
-                  </Text>
-                  <View style={styles.categoryPill}>
-                    <Text style={styles.categoryPillText}>
-                      {currentPhrase.category}
-                    </Text>
-                  </View>
-                </View>
+                ) : null}
 
                 <View style={styles.sessionBottom}>
-                  <View style={styles.cardMFRow}>
-                    <SpeakerButton
-                      accessibilityLabel="Male speaker"
-                      letter="M"
-                      phraseId={currentPhrase.id}
-                      avatarSource={CHRIS_AVATAR}
-                    />
-                    <SpeakerButton
-                      accessibilityLabel="Female speaker"
-                      letter="F"
-                      phraseId={currentPhrase.id}
-                      avatarSource={ANN_AVATAR}
-                    />
-                  </View>
-                  <View style={styles.sessionFooterRow}>
-                    <Pressable
-                      onPress={onSitzt}
-                      style={({ pressed }) => [
-                        styles.sitztBtn,
-                        sitztDoneForCurrent && styles.sitztBtnDone,
-                        pressed && { opacity: 0.85 },
-                      ]}
-                      accessibilityRole="button"
-                      accessibilityLabel="Sitzt"
-                    >
-                      <Text
-                        style={[
-                          styles.sitztBtnText,
-                          sitztDoneForCurrent && styles.sitztBtnTextDone,
-                        ]}
-                      >
-                        {sitztDoneForCurrent ? '✓ Sitzt! ✓' : '✓ Sitzt!'}
+                  {!showQuizOptions ? (
+                    <View style={styles.sessionPhase1Wrap}>
+                      <SessionChrisAnnButtons
+                        player={sessionTestPlaybackPlayer}
+                        phraseId={currentPhrase.id}
+                        showOptions={showQuizOptions}
+                        onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
+                        compact={false}
+                        isReleasedRef={isReleasedRef}
+                      />
+                      <Text style={styles.sessionPhase1Hint}>
+                        Hör den Satz an – welche deutsche Bedeutung passt?
                       </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={onNaechste}
-                      style={({ pressed }) => [
-                        styles.naechsteBtn,
-                        pressed && { opacity: 0.92 },
-                      ]}
-                      accessibilityRole="button"
-                      accessibilityLabel="Nächste Karte"
-                    >
-                      <Text style={styles.naechsteBtnText}>Nächste →</Text>
-                    </Pressable>
-                  </View>
+                    </View>
+                  ) : (
+                    <View style={styles.sessionQuizColumn}>
+                      <View style={styles.sessionPhase2TopRow}>
+                        <SessionChrisAnnButtons
+                          player={sessionTestPlaybackPlayer}
+                          phraseId={currentPhrase.id}
+                          showOptions={showQuizOptions}
+                          onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
+                          compact
+                          isReleasedRef={isReleasedRef}
+                        />
+                      </View>
+                      <View style={styles.sessionQuizOptionsBlock}>
+                        {quizOptions.map((opt, i) => {
+                          const letter = ['A', 'B', 'C'][i] ?? '?';
+                          const correctId = currentPhrase.id;
+                          const label = opt.german;
+                          let rowBg = SCREEN_BG;
+                          if (answerLocked) {
+                            if (opt.id === correctId) {
+                              rowBg = '#2E7D32';
+                            } else if (opt.id === selectedOptionId) {
+                              rowBg = '#C8102E';
+                            }
+                          }
+                          const onColored =
+                            answerLocked &&
+                            (opt.id === correctId ||
+                              opt.id === selectedOptionId);
+                          const textCol = onColored
+                            ? BUTTON_TEXT
+                            : '#1A1A1A';
+                          const letterCol = onColored
+                            ? BUTTON_TEXT
+                            : ACTIVE;
+                          const showCheckBefore =
+                            answerLocked && opt.id === correctId;
+                          return (
+                            <Pressable
+                              key={`${opt.id}-${i}`}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Antwort ${letter}`}
+                              disabled={answerLocked}
+                              onPress={() => onPickQuizOption(opt.id)}
+                              style={({ pressed }) => [
+                                styles.sessionQuizOptionRow,
+                                {
+                                  backgroundColor: rowBg,
+                                },
+                                !answerLocked &&
+                                  pressed && { opacity: 0.92 },
+                              ]}
+                            >
+                              <View style={styles.sessionQuizOptionRowInner}>
+                                <Text
+                                  style={[
+                                    styles.sessionQuizOptionLetter,
+                                    {
+                                      color: letterCol,
+                                      minWidth: 28,
+                                    },
+                                  ]}
+                                >
+                                  {letter}
+                                </Text>
+                                <Text
+                                  style={[
+                                    styles.sessionQuizOptionText,
+                                    { color: textCol },
+                                  ]}
+                                >
+                                  {showCheckBefore ? '✓ ' : ''}
+                                  {label}
+                                </Text>
+                              </View>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                      {answerLocked ? (
+                        <View
+                          style={[
+                            styles.sessionFooterRow,
+                            styles.sessionQuizFooterPinned,
+                          ]}
+                        >
+                          {selectedOptionId === currentPhrase.id ? (
+                            <>
+                              <Pressable
+                                onPress={() => void onSitzt()}
+                                disabled={sitztDoneForCurrent}
+                                style={({ pressed }) => [
+                                  styles.sitztBtn,
+                                  sitztDoneForCurrent && styles.sitztBtnDone,
+                                  pressed &&
+                                    !sitztDoneForCurrent && {
+                                      opacity: 0.85,
+                                    },
+                                ]}
+                                accessibilityRole="button"
+                                accessibilityLabel="Sitzt"
+                              >
+                                <Text
+                                  style={[
+                                    styles.sitztBtnText,
+                                    sitztDoneForCurrent &&
+                                      styles.sitztBtnTextDone,
+                                  ]}
+                                >
+                                  {sitztDoneForCurrent
+                                    ? '✓ Sitzt! ✓'
+                                    : '✓ Sitzt!'}
+                                </Text>
+                              </Pressable>
+                              <Pressable
+                                onPress={onNaechste}
+                                style={({ pressed }) => [
+                                  styles.naechsteBtn,
+                                  pressed && { opacity: 0.92 },
+                                ]}
+                                accessibilityRole="button"
+                                accessibilityLabel="Nächste Karte"
+                              >
+                                <Text style={styles.naechsteBtnText}>
+                                  Nächste →
+                                </Text>
+                              </Pressable>
+                            </>
+                          ) : (
+                            <Pressable
+                              onPress={onNaechste}
+                              style={({ pressed }) => [
+                                styles.naechsteBtn,
+                                styles.naechsteBtnFullWidth,
+                                pressed && { opacity: 0.92 },
+                              ]}
+                              accessibilityRole="button"
+                              accessibilityLabel="Nächste Karte"
+                            >
+                              <Text style={styles.naechsteBtnText}>
+                                Nächste →
+                              </Text>
+                            </Pressable>
+                          )}
+                        </View>
+                      ) : null}
+                    </View>
+                  )}
                 </View>
               </>
             ) : (
@@ -381,6 +870,20 @@ export default function RepeatSessionScreen() {
           </View>
         </View>
       </View>
+      {showStackCompleteNote ? (
+        <View pointerEvents="none" style={styles.sessionConfettiLayer}>
+          <ConfettiCannon
+            ref={sessionConfettiRef}
+            count={200}
+            origin={{
+              x: Dimensions.get('window').width / 2,
+              y: -10,
+            }}
+            autoStart={false}
+            fadeOut
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -388,6 +891,11 @@ export default function RepeatSessionScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    position: 'relative',
+  },
+  sessionConfettiLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
   },
   sessionHeaderBar: {
     flexDirection: 'row',
@@ -482,11 +990,12 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     marginTop: 12,
   },
-  sessionGerman: {
-    color: '#999999',
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 8,
+  stackCompleteBanner: {
+    marginTop: 14,
+    fontSize: 17,
+    fontWeight: '700',
+    color: ACTIVE,
+    textAlign: 'center',
   },
   categoryPill: {
     alignSelf: 'flex-start',
@@ -502,17 +1011,127 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sessionBottom: {
+    flex: 1,
+    minHeight: 0,
     marginTop: 8,
   },
-  cardMFRow: {
+  sessionPhase1Wrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    width: '100%',
+    flex: 1,
+  },
+  sessionPhase1Hint: {
+    marginTop: 16,
+    fontSize: 14,
+    color: CARD_DE,
+    textAlign: 'center',
+    paddingHorizontal: 12,
+  },
+  sessionPhase2TopRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '100%',
+    marginBottom: 20,
+    gap: 10,
+  },
+  sessionQuizColumn: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+    paddingBottom: 28,
+  },
+  sessionQuizOptionsBlock: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+  },
+  sessionQuizOptionRow: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    ...Platform.select({
+      android: { elevation: 3 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+    }),
+  },
+  sessionQuizOptionRowInner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 12,
+  },
+  sessionQuizOptionLetter: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  sessionQuizOptionText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  sessionTestVoiceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    width: '100%',
+    maxWidth: 340,
+  },
+  sessionTestVoiceRowCompact: {
+    flex: 1,
+    maxWidth: undefined,
+    minWidth: 0,
+  },
+  sessionTestVoiceBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sessionTestVoiceBtnCompact: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 0,
+  },
+  sessionTestVoiceBtnInner: {
+    alignItems: 'center',
+  },
+  sessionTestVoiceAvatarWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  sessionTestVoiceAvatarImg: {
+    width: 72,
+    height: 72,
+  },
+  sessionTestVoiceBtnText: {
+    fontSize: 13,
+    color: INACTIVE,
+    textAlign: 'center',
+    marginTop: 4,
   },
   sessionFooterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 16,
     gap: 12,
+  },
+  sessionQuizFooterPinned: {
+    marginTop: 'auto',
   },
   sitztBtn: {
     borderWidth: 2,
@@ -541,6 +1160,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
+    minWidth: 0,
+  },
+  naechsteBtnFullWidth: {
+    flexGrow: 1,
+    width: '100%',
   },
   naechsteBtnText: {
     color: BUTTON_TEXT,

@@ -42,8 +42,8 @@ import {
   safePlayerSetPlaybackRate,
 } from '../../../utils/safeAudioPlayer';
 
-const CHRIS_AVATAR = require('../../../assets/images/chris-avatar.png');
-const ANN_AVATAR = require('../../../assets/images/ann-avatar.png');
+const CHRIS_AVATAR = require('../../../assets/images/chris.png');
+const ANN_AVATAR = require('../../../assets/images/ann.png');
 import {
   ACTIVE,
   BRAND,

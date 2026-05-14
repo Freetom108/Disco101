@@ -21,8 +21,8 @@ import {
 import SpeakerButton from './SpeakerButton';
 import { preloadPhraseAudio } from '../utils/audioPreloader';
 
-const CHRIS_AVATAR = require('../assets/images/chris-avatar.png');
-const ANN_AVATAR = require('../assets/images/ann-avatar.png');
+const CHRIS_AVATAR = require('../assets/images/chris.png');
+const ANN_AVATAR = require('../assets/images/ann.png');
 
 const SLIDE_OFFSET = 400;
 const SLIDE_DURATION_MS = 380;

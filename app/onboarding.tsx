@@ -200,7 +200,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
           <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={styles.slideInnerCentered}>
+            <View style={[styles.slideInnerCentered, styles.slideInnerLearn]}>
               <Text
                 style={[
                   styles.titleSection,
@@ -240,10 +240,6 @@ export default function OnboardingScreen() {
                 Testen & Wiederholen
               </Text>
               <View style={styles.list}>
-                <Text style={styles.listItem}>
-                  · 🎯 Am Ende jeden Kapitels kannst du deinen Wissensstand
-                  überprüfen oder gleich zum nächsten Kapitel weitergehen
-                </Text>
                 <Text style={styles.listItem}>
                   · 🎧 Test 1: Chris oder Ann lesen dir einen Satz vor – erkenne
                   ihn unter drei englischen Optionen
@@ -440,6 +436,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     width: '100%',
     justifyContent: 'center',
+  },
+  /** Slide 2: avoid vertically-centered clipping — pin content below safe/header zone */
+  slideInnerLearn: {
+    justifyContent: 'flex-start',
+    paddingTop: 32,
+    paddingBottom: 24,
   },
   titleSection: {
     color: TITLE_DARK,

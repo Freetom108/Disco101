@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -20,6 +21,10 @@ import {
   INACTIVE,
   SCREEN_BG,
 } from '../../constants/theme';
+import {
+  hasDisc101FullAccess,
+  isChapterLockedWithoutPurchase,
+} from '../../constants/chapterUnlock';
 import SENTENCES from '../../data/sentences.json';
 
 const LAST_POSITION_KEY = 'last_position';
@@ -71,18 +76,21 @@ export default function LernenScreen() {
   const [chapterProgress, setChapterProgress] = useState<Record<string, number>>(
     {},
   );
+  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
       (async () => {
-        const [lp, cp] = await Promise.all([
+        const [lp, cp, full101] = await Promise.all([
           AsyncStorage.getItem(LAST_POSITION_KEY),
           AsyncStorage.getItem(CHAPTER_PROGRESS_KEY),
+          hasDisc101FullAccess(),
         ]);
         if (cancelled) return;
         setLastPosition(parseLastPosition(lp));
         setChapterProgress(parseChapterProgress(cp));
+        setDisc101FullUnlocked(full101);
       })();
       return () => {
         cancelled = true;
@@ -134,10 +142,30 @@ export default function LernenScreen() {
   }, [lastPosition]);
 
   const goHome = () => {
+    if (
+      lastPosition &&
+      isChapterLockedWithoutPurchase(lastPosition.chapterId) &&
+      !disc101FullUnlocked
+    ) {
+      router.push({
+        pathname: '/paywall',
+        params: { focusModule: '101' },
+      });
+      return;
+    }
     router.replace('/(tabs)');
   };
 
   const selectChapter = async (chapterId: number) => {
+    const locked =
+      isChapterLockedWithoutPurchase(chapterId) && !disc101FullUnlocked;
+    if (locked) {
+      router.push({
+        pathname: '/paywall',
+        params: { focusModule: '101' },
+      });
+      return;
+    }
     await AsyncStorage.setItem(
       LAST_POSITION_KEY,
       JSON.stringify({ chapterId, phraseIndex: 0 }),
@@ -198,26 +226,38 @@ export default function LernenScreen() {
 
         <Text style={styles.listHeading}>Kapitel</Text>
 
-        {chapterRows.map((row) => (
+        {chapterRows.map((row) => {
+          const locked =
+            isChapterLockedWithoutPurchase(row.chapterId) && !disc101FullUnlocked;
+          return (
           <Pressable
             key={row.chapterId}
-            onPress={() => selectChapter(row.chapterId)}
+            onPress={() => void selectChapter(row.chapterId)}
             style={({ pressed }) => [
               styles.chapterCard,
-              pressed && { opacity: 0.88 },
+              locked && styles.chapterCardLocked,
+              pressed && { opacity: locked ? 0.92 : 0.88 },
             ]}
             accessibilityRole="button"
-            accessibilityLabel={`${row.title} öffnen`}
+            accessibilityLabel={
+              locked ? `${row.title} gesperrt` : `${row.title} öffnen`
+            }
           >
             <View style={styles.chapterCardTop}>
               <Text style={styles.chapterName} numberOfLines={2}>
                 {row.title}
               </Text>
-              <Text style={styles.chapterFrac}>
-                {row.displayX} / {row.y}
-              </Text>
+              {locked ? (
+                <Ionicons name="lock-closed" size={18} color="#8E8E93" />
+              ) : (
+                <Text style={styles.chapterFrac}>
+                  {row.displayX} / {row.y}
+                </Text>
+              )}
             </View>
-            {row.completed ? (
+            {locked ? (
+              <Text style={styles.chapterLockedHint}>Tippe zum Freischalten</Text>
+            ) : row.completed ? (
               <Text style={styles.chapterCheck}>✓</Text>
             ) : (
               <View style={styles.progressTrack}>
@@ -227,7 +267,8 @@ export default function LernenScreen() {
               </View>
             )}
           </Pressable>
-        ))}
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -334,6 +375,10 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  chapterCardLocked: {
+    opacity: 0.92,
+    backgroundColor: '#FAFAFA',
+  },
   chapterCardTop: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -349,6 +394,12 @@ const styles = StyleSheet.create({
   chapterFrac: {
     fontSize: 14,
     color: '#8E8E93',
+  },
+  chapterLockedHint: {
+    marginTop: 10,
+    fontSize: 13,
+    color: '#8E8E93',
+    fontWeight: '500',
   },
   progressTrack: {
     height: 3,

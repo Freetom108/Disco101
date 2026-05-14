@@ -37,6 +37,53 @@ const SECTION_LABEL = '#888';
 const SPEED_OPTIONS: AudioSpeedStored[] = ['0.9', '1.0', '1.1'];
 const REPEAT_OPTIONS: AudioRepeatStored[] = ['1', '2'];
 
+type FaqAccordionItem = {
+  id: string;
+  question: string;
+  answer: string;
+  upgradeCta?: boolean;
+};
+
+const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
+  {
+    id: 'offline',
+    question: 'Funktioniert die App offline?',
+    answer:
+      'Ja, die App ist extra so konzipiert dass sie vollständig offline funktioniert – damit du zum Beispiel auch im Auto, in der U-Bahn oder im Flugzeug üben kannst. Keine Internetverbindung notwendig.',
+  },
+  {
+    id: 'disco102',
+    question: 'Disco 102 – Urlaub',
+    answer:
+      'Disco 102 erweitert deinen Urlaubs-Wortschatz mit 101 weiteren Phrasen rund um Themen wie Strand, Hotel, Restaurant und Ausflüge – damit du auch abseits des Alltags sicher auf Englisch kommunizieren kannst.',
+  },
+  {
+    id: 'disco103',
+    question: 'Disco 103 – Business',
+    answer:
+      'Disco 103 enthält die 101 wichtigsten Redewendungen für den Business-Alltag – von Meetings und Präsentationen bis hin zu Geschäftsreisen und professionellen Gesprächen.',
+  },
+  {
+    id: 'disco104',
+    question: 'Disco 104 – Expats',
+    answer:
+      'Disco 104 ist speziell für alle die im englischsprachigen Ausland leben oder leben möchten: 101 Phrasen für Behörden, Arztbesuche, Versicherungen, Polizei und alles was das Leben als Expat mit sich bringt.',
+  },
+  {
+    id: 'restore',
+    question: 'Was ist Restore Purchase?',
+    answer:
+      'Falls du die App neu installiert hast und deine bereits gekauften Inhalte nicht mehr verfügbar sind, kannst du sie mit Restore Purchase kostenlos wiederherstellen. Tippe einfach auf den Restore Purchase Button weiter unten in den Settings.',
+  },
+  {
+    id: 'upgrade_options',
+    question: 'Wo finde ich die Upgrade Optionen?',
+    answer:
+      'Die Upgrade-Ansicht mit allen Modulen und Bundle-Preisen erreichst du über die Schaltfläche unten oder indem du im Learn-Tab ein gesperrtes Kapitel auswählst.',
+    upgradeCta: true,
+  },
+];
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -46,6 +93,11 @@ export default function SettingsScreen() {
   const [audioRepeat, setAudioRepeat] = useState<AudioRepeatStored>(
     DEFAULT_AUDIO_REPEAT,
   );
+  const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
+
+  const toggleFaq = useCallback((id: string) => {
+    setFaqOpenId((prev) => (prev === id ? null : id));
+  }, []);
 
   const loadAudioSettings = useCallback(async () => {
     try {
@@ -114,8 +166,7 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabelFirst}>App Info</Text>
         <View style={styles.group}>
           <Row label="Version" value="1.0.0" />
-          <Row label="Phrasen" value="101" />
-          <Row label="Kapitel" value="7" last />
+          <Row label="Sprache" value="Englisch 🇬🇧" last />
         </View>
 
         <Text style={styles.sectionLabel}>Wiedergabe</Text>
@@ -193,7 +244,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>Lernen</Text>
+        <Text style={styles.sectionLabel}>FAQ</Text>
         <View style={styles.group}>
           <Pressable
             onPress={() =>
@@ -203,24 +254,75 @@ export default function SettingsScreen() {
               })
             }
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="App Intro wiederholen"
           >
             <View style={[styles.row, styles.rowBorder]}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                Einführung wiederholen
+                App Intro wiederholen
               </Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color="#8E8E93"
-              />
+              <Ionicons name="arrow-forward" size={20} color="#8E8E93" />
             </View>
           </Pressable>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel} numberOfLines={1}>
-              Sprache
-            </Text>
-            <Text style={styles.rowValue}>Englisch 🇬🇧</Text>
-          </View>
+          {FAQ_ACCORDION_ITEMS.map((item, index) => {
+            const open = faqOpenId === item.id;
+            const isLast = index === FAQ_ACCORDION_ITEMS.length - 1;
+            return (
+              <View key={item.id}>
+                <Pressable
+                  onPress={() => toggleFaq(item.id)}
+                  style={({ pressed }) => [pressed && { opacity: 0.85 }]}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: open }}
+                  accessibilityLabel={item.question}
+                >
+                  <View
+                    style={[
+                      styles.row,
+                      !open && !isLast && styles.rowBorder,
+                    ]}
+                  >
+                    <Text style={styles.rowLabel} numberOfLines={3}>
+                      {item.question}
+                    </Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={22}
+                      color="#8E8E93"
+                      style={{
+                        transform: [{ rotate: open ? '90deg' : '0deg' }],
+                      }}
+                    />
+                  </View>
+                </Pressable>
+                {open ? (
+                  <View
+                    style={[
+                      styles.faqAnswer,
+                      !isLast && styles.faqAnswerBorder,
+                    ]}
+                  >
+                    <Text style={styles.aboutText}>{item.answer}</Text>
+                    {item.upgradeCta ? (
+                      <Pressable
+                        onPress={() => router.push('/paywall')}
+                        style={({ pressed }) => [
+                          styles.faqUpgradeBtn,
+                          pressed && { opacity: 0.92 },
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityLabel="Upgrade ansehen"
+                      >
+                        <Text style={styles.faqUpgradeBtnText}>
+                          Upgrade ansehen →
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
 
         <Text style={styles.sectionLabel}>Über die App</Text>
@@ -230,6 +332,10 @@ export default function SettingsScreen() {
               Disco 101 ist dein Reisebegleiter: 101 englische Redewendungen, die
               du wirklich brauchst—von Ankunft bis Small Talk, übersichtlich in
               sieben Kapiteln. Lernen, testen, wiederholen.
+            </Text>
+            <Text style={[styles.aboutText, styles.aboutParagraphGap]}>
+              Disco 102, 103 und 104 sind bereits integriert und können jederzeit
+              freigeschaltet werden.
             </Text>
           </View>
         </View>
@@ -415,6 +521,32 @@ const styles = StyleSheet.create({
   aboutText: {
     fontSize: 15,
     lineHeight: 22,
+    color: BUTTON_TEXT,
+  },
+  aboutParagraphGap: {
+    marginTop: 14,
+  },
+  faqAnswer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 0,
+  },
+  faqAnswerBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#C6C6C8',
+  },
+  faqUpgradeBtn: {
+    marginTop: 14,
+    alignSelf: 'stretch',
+    backgroundColor: ACTIVE,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  faqUpgradeBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
     color: BUTTON_TEXT,
   },
 });

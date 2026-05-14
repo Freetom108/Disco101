@@ -3,7 +3,6 @@ import { useFonts } from 'expo-font';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Alert,
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -105,28 +104,29 @@ export default function PaywallScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
             <Text style={[styles.title, { fontFamily: FONT_DM_SERIF }]}>
               Schalte alles frei 🔓
             </Text>
             <Text style={styles.subtitle}>Einmalige Zahlung – kein Abo</Text>
           </View>
 
+          <Text style={styles.paywallIntro}>
+            Disco 101 ist dein Reisebegleiter: 101 englische Redewendungen die
+            du wirklich brauchst – von Ankunft bis Small Talk, übersichtlich in
+            sieben Kapiteln.
+          </Text>
+
           <View style={styles.gratisCard}>
             <Text style={styles.gratisTitle}>Immer gratis</Text>
-            <Text style={styles.gratisLine}>✅ Kapitel 1</Text>
             <Text style={[styles.gratisLine, styles.gratisLineLast]}>
-              ✅ Tests zu Kapitel 1
+              ✅ Disco 101 – Kapitel 1 + Tests
             </Text>
           </View>
 
           <View style={[styles.moduleGrid, { width: gridInnerWidth }]}>
             {MODULE_PRODUCTS.map((m, index) => {
               const highlighted = focusModule === m.code;
+              const phraseLine = `${m.code} Redewendungen`;
               return (
                 <Pressable
                   key={m.code}
@@ -145,10 +145,19 @@ export default function PaywallScreen() {
                   accessibilityLabel={`${m.title} ${m.subtitle} kaufen`}
                 >
                   <View>
-                    <Text style={styles.moduleTileTitle} numberOfLines={3}>
-                      {`${m.title}\n${m.subtitle} · ${m.priceLabel}`}
+                    <Text style={styles.moduleTileTitle}>{m.title}</Text>
+                    <Text style={styles.moduleTilePaymentHint}>{phraseLine}</Text>
+                    <Text style={[styles.moduleTileTitle, styles.moduleTilePriceRow]}>
+                      {`${m.subtitle} · ${m.priceLabel}`}
                     </Text>
-                    <Text style={styles.moduleTilePaymentHint}>Einmalzahlung</Text>
+                    <Text
+                      style={[
+                        styles.moduleTilePaymentHint,
+                        styles.moduleTileEinmalSpacing,
+                      ]}
+                    >
+                      Einmalzahlung
+                    </Text>
                   </View>
                 </Pressable>
               );
@@ -234,11 +243,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  logo: {
-    width: 96,
-    height: 96,
+    marginTop: -4,
     marginBottom: 16,
   },
   title: {
@@ -249,10 +254,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    marginTop: 10,
+    marginTop: 8,
     fontSize: 15,
     lineHeight: 22,
     color: HEADER_TEXT_SUB,
+    textAlign: 'center',
+  },
+  paywallIntro: {
+    marginBottom: 18,
+    paddingHorizontal: 2,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '400',
+    color: '#888888',
     textAlign: 'center',
   },
   gratisCard: {
@@ -292,7 +306,7 @@ const styles = StyleSheet.create({
     backgroundColor: CARD_BG,
     borderRadius: 12,
     padding: 14,
-    minHeight: 128,
+    minHeight: 152,
     justifyContent: 'flex-start',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -316,12 +330,18 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     lineHeight: 19,
   },
+  moduleTilePriceRow: {
+    marginTop: 4,
+  },
   moduleTilePaymentHint: {
-    marginTop: 6,
+    marginTop: 4,
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '500',
     color: '#A0A0A0',
+  },
+  moduleTileEinmalSpacing: {
+    marginTop: 6,
   },
   ctaSection: {
     alignSelf: 'stretch',

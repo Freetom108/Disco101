@@ -1,6 +1,9 @@
-import { Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { ModuleCode } from '../../constants/products';
 import {
+  BUTTON_TEXT,
   CARD_BG,
   CARD_DE,
   HEADER_DARK,
@@ -9,8 +12,38 @@ import {
   SCREEN_BG,
 } from '../../constants/theme';
 
+const UNLOCK_RED = '#CF142B';
+
+type ModuleTileConfig = {
+  code: ModuleCode;
+  title: string;
+  body: string;
+};
+
+const MODULE_TILES: ModuleTileConfig[] = [
+  {
+    code: '102',
+    title: '🔒 Disco 102',
+    body:
+      '102 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
+  },
+  {
+    code: '103',
+    title: '🔒 Disco 103 – Job',
+    body:
+      '103 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
+  },
+  {
+    code: '104',
+    title: '🔒 Disco 104 – Expats',
+    body:
+      '104 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
+  },
+];
+
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
@@ -38,29 +71,28 @@ export default function MoreScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.tile}>
-          <Text style={styles.tileTitle}>🔒 Disco 102</Text>
-          <Text style={styles.tileBody}>
-            Erweiterter Wortschatz für deinen Urlaub – 101 weitere Phrasen in 7
-            Kapiteln
-          </Text>
-        </View>
-
-        <View style={styles.tile}>
-          <Text style={styles.tileTitle}>🔒 Disco 103 – Business</Text>
-          <Text style={styles.tileBody}>
-            101 Phrasen für Geschäftsreisen und berufliche Situationen
-          </Text>
-        </View>
-
-        <View style={styles.tile}>
-          <Text style={styles.tileTitle}>🔒 Disco 104 – Expats</Text>
-          <Text style={styles.tileBody}>
-            101 Phrasen für Behörden, Arzt und das Leben im Ausland
-          </Text>
-        </View>
-
-        <Text style={styles.footerHint}>Weitere Inhalte folgen in Kürze</Text>
+        {MODULE_TILES.map((m) => (
+          <View key={m.code} style={styles.tile}>
+            <Text style={styles.tileTitle}>{m.title}</Text>
+            <Text style={styles.tileBody}>{m.body}</Text>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: '/paywall',
+                  params: { focusModule: m.code },
+                })
+              }
+              style={({ pressed }) => [
+                styles.unlockBtn,
+                pressed && { opacity: 0.92 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`Freischalten ${m.title}`}
+            >
+              <Text style={styles.unlockBtnText}>🔓 Freischalten – 9,99 €</Text>
+            </Pressable>
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
@@ -147,11 +179,20 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: CARD_DE,
   },
-  footerHint: {
-    marginTop: 8,
-    fontSize: 13,
-    lineHeight: 18,
-    color: '#A0A0A0',
-    textAlign: 'center',
+  unlockBtn: {
+    marginTop: 14,
+    alignSelf: 'stretch',
+    backgroundColor: UNLOCK_RED,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  unlockBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: BUTTON_TEXT,
   },
 });

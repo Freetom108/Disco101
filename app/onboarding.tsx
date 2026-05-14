@@ -29,8 +29,8 @@ import {
   safePlayerSetPlaybackRate,
 } from '../utils/safeAudioPlayer';
 
-const CHRIS_AVATAR = require('../assets/images/chris.png');
-const ANN_AVATAR = require('../assets/images/ann.png');
+const CHRIS_AVATAR = require('../assets/chris.png');
+const ANN_AVATAR = require('../assets/ann.png');
 const ONBOARDING_BG = '#EDE9E3';
 const ONBOARDING_KEY = 'onboarding_done';
 const TITLE_DARK = '#1A1A1A';

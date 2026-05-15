@@ -18,26 +18,37 @@ type ModuleTileConfig = {
   code: ModuleCode;
   title: string;
   body: string;
+  buttonLabel: string;
 };
 
 const MODULE_TILES: ModuleTileConfig[] = [
   {
-    code: '102',
-    title: '🔒 Disco 102',
+    code: '101',
+    title: '🔓 Unit 1 Basics',
     body:
-      '102 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
+      '101 Redewendungen in 7 Kapiteln – die wichtigsten englischen Phrasen für deinen Alltag. Von der Begrüßung bis zum Small Talk.',
+    buttonLabel: 'Freischalten – 5,99 €',
+  },
+  {
+    code: '102',
+    title: '🔒 Unit 2 Urlaub',
+    body:
+      '101 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
+    buttonLabel: '🔓 Freischalten – 5,99 €',
   },
   {
     code: '103',
-    title: '🔒 Disco 103 – Job',
+    title: '🔒 Unit 3 Job',
     body:
-      '103 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
+      '101 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
+    buttonLabel: '🔓 Freischalten – 5,99 €',
   },
   {
     code: '104',
-    title: '🔒 Disco 104 – Expats',
+    title: '🔒 Unit 4 Expat',
     body:
-      '104 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
+      '101 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
+    buttonLabel: '🔓 Freischalten – 5,99 €',
   },
 ];
 
@@ -51,7 +62,7 @@ export default function MoreScreen() {
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
             <Text style={styles.headerLine1}>More</Text>
-            <Text style={styles.headerLine2}>Erweitere dein Englisch</Text>
+            <Text style={styles.headerLine2}>Erweitere deinen Wortschatz</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -89,7 +100,7 @@ export default function MoreScreen() {
               accessibilityRole="button"
               accessibilityLabel={`Freischalten ${m.title}`}
             >
-              <Text style={styles.unlockBtnText}>🔓 Freischalten – 9,99 €</Text>
+              <Text style={styles.unlockBtnText}>{m.buttonLabel}</Text>
             </Pressable>
           </View>
         ))}

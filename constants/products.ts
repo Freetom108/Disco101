@@ -2,36 +2,30 @@ export type ModuleCode = '101' | '102' | '103' | '104';
 
 export type ModuleProduct = {
   code: ModuleCode;
-  /** Zeile 1, z. B. "Disco 101" */
+  /** Zeile 1, z. B. "Unit 1 Basics" */
   title: string;
-  /** Zeile 2 vor Preis, z. B. "Basis" → angezeigt als `{subtitle} · {priceLabel}` */
-  subtitle: string;
   priceLabel: string;
 };
 
 export const MODULE_PRODUCTS: ModuleProduct[] = [
   {
     code: '101',
-    title: 'Disco 101',
-    subtitle: 'Basis',
-    priceLabel: '9,99 €',
+    title: 'Unit 1 Basics',
+    priceLabel: '5,99 €',
   },
   {
     code: '102',
-    title: 'Disco 102',
-    subtitle: 'Urlaub',
-    priceLabel: '9,99 €',
+    title: 'Unit 2 Urlaub',
+    priceLabel: '5,99 €',
   },
   {
     code: '103',
-    title: 'Disco 103',
-    subtitle: 'Job',
-    priceLabel: '9,99 €',
+    title: 'Unit 3 Job',
+    priceLabel: '5,99 €',
   },
   {
     code: '104',
-    title: 'Disco 104',
-    subtitle: 'Expats',
-    priceLabel: '9,99 €',
+    title: 'Unit 4 Expat',
+    priceLabel: '5,99 €',
   },
 ];

@@ -33,6 +33,10 @@ import {
 import {
   preloadPhraseAudio,
 } from '../../../utils/audioPreloader';
+import {
+  filterPhraseIdsForRepeatAccess,
+  hasDisc101FullAccess,
+} from '../../../constants/chapterUnlock';
 import { audioAssets } from '../../../utils/audioAssets';
 import {
   safePlayerPause,
@@ -233,6 +237,8 @@ export default function RepeatSessionScreen() {
 
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [repeatSession, setRepeatSession] = useState<RepeatSession | null>(null);
+  const [purchaseResolved, setPurchaseResolved] = useState(false);
+  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
   const [sitztConfirmedPhraseIds, setSitztConfirmedPhraseIds] = useState<
     number[]
   >([]);
@@ -300,10 +306,23 @@ export default function RepeatSessionScreen() {
   }, []);
 
   useEffect(() => {
+    void (async () => {
+      try {
+        setDisc101FullUnlocked(await hasDisc101FullAccess());
+      } catch {
+        setDisc101FullUnlocked(false);
+      } finally {
+        setPurchaseResolved(true);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     loadPinned();
   }, [loadPinned]);
 
   useEffect(() => {
+    if (!purchaseResolved) return;
     const raw = params.phraseIds;
     const phraseIdsParam = Array.isArray(raw) ? raw[0] : raw;
     if (!phraseIdsParam || typeof phraseIdsParam !== 'string') {
@@ -311,11 +330,16 @@ export default function RepeatSessionScreen() {
       return;
     }
     try {
-      const ids = JSON.parse(phraseIdsParam) as unknown;
-      if (!Array.isArray(ids) || ids.some((x) => typeof x !== 'number')) {
+      const idsRaw = JSON.parse(phraseIdsParam) as unknown;
+      if (!Array.isArray(idsRaw) || idsRaw.some((x) => typeof x !== 'number')) {
         setInitFailed(true);
         return;
       }
+      const ids = filterPhraseIdsForRepeatAccess(
+        idsRaw,
+        disc101FullUnlocked,
+        SENTENCES as Phrase[],
+      );
       const phrases = ids
         .map((id) => byId.get(id))
         .filter((p): p is Phrase => p != null);
@@ -333,7 +357,7 @@ export default function RepeatSessionScreen() {
     } catch {
       setInitFailed(true);
     }
-  }, [params.phraseIds, byId]);
+  }, [purchaseResolved, disc101FullUnlocked, params.phraseIds, byId]);
 
   useEffect(() => {
     const phrases = repeatSession?.phrases;

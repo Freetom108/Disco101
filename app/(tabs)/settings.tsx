@@ -52,22 +52,28 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
       'Ja, die App ist extra so konzipiert dass sie vollständig offline funktioniert – damit du zum Beispiel auch im Auto, in der U-Bahn oder im Flugzeug üben kannst. Keine Internetverbindung notwendig.',
   },
   {
-    id: 'disco102',
-    question: 'Disco 102 – Urlaub',
+    id: 'unit101',
+    question: 'Unit 1 Basics',
     answer:
-      'Disco 102 erweitert deinen Urlaubs-Wortschatz mit 101 weiteren Phrasen rund um Themen wie Strand, Hotel, Restaurant und Ausflüge – damit du auch abseits des Alltags sicher auf Englisch kommunizieren kannst.',
+      '101 Redewendungen in 7 Kapiteln – die wichtigsten englischen Phrasen für deinen Alltag. Von der Begrüßung bis zum Small Talk.',
   },
   {
-    id: 'disco103',
-    question: 'Disco 103 – Business',
+    id: 'unit102',
+    question: 'Unit 2 Urlaub',
     answer:
-      'Disco 103 enthält die 101 wichtigsten Redewendungen für den Business-Alltag – von Meetings und Präsentationen bis hin zu Geschäftsreisen und professionellen Gesprächen.',
+      '101 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
   },
   {
-    id: 'disco104',
-    question: 'Disco 104 – Expats',
+    id: 'unit103',
+    question: 'Unit 3 Job',
     answer:
-      'Disco 104 ist speziell für alle die im englischsprachigen Ausland leben oder leben möchten: 101 Phrasen für Behörden, Arztbesuche, Versicherungen, Polizei und alles was das Leben als Expat mit sich bringt.',
+      '101 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
+  },
+  {
+    id: 'unit104',
+    question: 'Unit 4 Expat',
+    answer:
+      '101 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
   },
   {
     id: 'restore',
@@ -166,7 +172,7 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabelFirst}>App Info</Text>
         <View style={styles.group}>
           <Row label="Version" value="1.0.0" />
-          <Row label="Sprache" value="Englisch 🇬🇧" last />
+          <Row label="Sprache" value="Deutsch 🇩🇪 – Englisch 🇬🇧" last />
         </View>
 
         <Text style={styles.sectionLabel}>Wiedergabe</Text>
@@ -329,13 +335,9 @@ export default function SettingsScreen() {
         <View style={styles.group}>
           <View style={styles.aboutRow}>
             <Text style={styles.aboutText}>
-              Disco 101 ist dein Reisebegleiter: 101 englische Redewendungen, die
-              du wirklich brauchst—von Ankunft bis Small Talk, übersichtlich in
-              sieben Kapiteln. Lernen, testen, wiederholen.
-            </Text>
-            <Text style={[styles.aboutText, styles.aboutParagraphGap]}>
-              Disco 102, 103 und 104 sind bereits integriert und können jederzeit
-              freigeschaltet werden.
+              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
+              englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben
+              im Ausland.
             </Text>
           </View>
         </View>
@@ -522,9 +524,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: BUTTON_TEXT,
-  },
-  aboutParagraphGap: {
-    marginTop: 14,
   },
   faqAnswer: {
     paddingHorizontal: 16,

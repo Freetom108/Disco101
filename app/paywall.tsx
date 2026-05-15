@@ -22,7 +22,6 @@ import {
   BUTTON_TEXT,
   CARD_BG,
   FONT_DM_SERIF,
-  HEADER_TEXT_SUB,
   SCREEN_BG,
 } from '../constants/theme';
 
@@ -105,28 +104,21 @@ export default function PaywallScreen() {
         >
           <View style={styles.hero}>
             <Text style={[styles.title, { fontFamily: FONT_DM_SERIF }]}>
-              Schalte alles frei 🔓
+              Alles auf einen Blick
             </Text>
-            <Text style={styles.subtitle}>Einmalige Zahlung – kein Abo</Text>
           </View>
 
-          <Text style={styles.paywallIntro}>
-            Disco 101 ist dein Reisebegleiter: 101 englische Redewendungen die
-            du wirklich brauchst – von Ankunft bis Small Talk, übersichtlich in
-            sieben Kapiteln.
-          </Text>
-
-          <View style={styles.gratisCard}>
-            <Text style={styles.gratisTitle}>Immer gratis</Text>
-            <Text style={[styles.gratisLine, styles.gratisLineLast]}>
-              ✅ Disco 101 – Kapitel 1 + Tests
+          <View style={styles.infoBox}>
+            <Text style={styles.infoBoxParagraph}>
+              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
+              englischen Redewendungen – egal ob Alltag, Urlaub, Beruf oder Leben
+              im Ausland.
             </Text>
           </View>
 
           <View style={[styles.moduleGrid, { width: gridInnerWidth }]}>
             {MODULE_PRODUCTS.map((m, index) => {
               const highlighted = focusModule === m.code;
-              const phraseLine = `${m.code} Redewendungen`;
               return (
                 <Pressable
                   key={m.code}
@@ -142,20 +134,25 @@ export default function PaywallScreen() {
                     pressed && { opacity: 0.92 },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`${m.title} ${m.subtitle} kaufen`}
+                  accessibilityLabel={`${m.title} kaufen`}
                 >
                   <View>
-                    <Text style={styles.moduleTileTitle}>{m.title}</Text>
-                    <Text style={styles.moduleTilePaymentHint}>{phraseLine}</Text>
-                    <Text style={[styles.moduleTileTitle, styles.moduleTilePriceRow]}>
-                      {`${m.subtitle} · ${m.priceLabel}`}
+                    <Text style={styles.moduleTileBold} numberOfLines={1}>
+                      {m.title}
                     </Text>
-                    <Text
-                      style={[
-                        styles.moduleTilePaymentHint,
-                        styles.moduleTileEinmalSpacing,
-                      ]}
-                    >
+                    <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGap]}>
+                      101 Phrasen
+                    </Text>
+                    <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGapTight]}>
+                      7 Kapitel
+                    </Text>
+                    <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGapTight]}>
+                      Kapitel 1 gratis
+                    </Text>
+                    <Text style={[styles.moduleTileBold, styles.moduleTilePriceGap]}>
+                      {m.priceLabel}
+                    </Text>
+                    <Text style={[styles.moduleTileMuted, styles.moduleTileEinmalGap]}>
                       Einmalzahlung
                     </Text>
                   </View>
@@ -172,11 +169,13 @@ export default function PaywallScreen() {
                 pressed && { opacity: 0.9 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Nur dieses Modul kaufen"
+              accessibilityLabel="Nur diese Unit kaufen"
             >
-              <Text style={styles.singleBtnText}>Nur dieses Modul – 9,99 €</Text>
+              <Text style={styles.singleBtnText}>Nur diese Unit – 5,99 €</Text>
             </Pressable>
-            <Text style={styles.ctaSubcaption}>Einmalzahlung</Text>
+            <Text style={styles.ctaSubcaption}>
+              Einmalige Zahlung – kein Abo
+            </Text>
           </View>
 
           <View style={[styles.ctaSection, styles.ctaSectionBelow]}>
@@ -187,12 +186,12 @@ export default function PaywallScreen() {
                 pressed && { opacity: 0.92 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Alle vier Module kaufen"
+              accessibilityLabel="Alle vier Units kaufen"
             >
-              <Text style={styles.bundleBtnText}>Alle vier Module – 34,99 €</Text>
+              <Text style={styles.bundleBtnText}>Alle vier Units – 19,99 €</Text>
             </Pressable>
             <Text style={styles.ctaSubcaption}>
-              Einmalzahlung · Du sparst 5,- €
+              Einmalzahlung · Spare über 15%
             </Text>
           </View>
 
@@ -208,9 +207,7 @@ export default function PaywallScreen() {
             <Text style={styles.restoreLinkText}>Käufe wiederherstellen</Text>
           </Pressable>
 
-          <Text style={styles.footerLegal}>
-            Einmalige Zahlung – kein Abo · Datenschutz · AGB
-          </Text>
+          <Text style={styles.footerLegal}>Datenschutz · AGB</Text>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -244,7 +241,7 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     marginTop: -4,
-    marginBottom: 16,
+    marginBottom: 0,
   },
   title: {
     fontSize: 28,
@@ -253,48 +250,22 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     textAlign: 'center',
   },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 15,
-    lineHeight: 22,
-    color: HEADER_TEXT_SUB,
-    textAlign: 'center',
-  },
-  paywallIntro: {
-    marginBottom: 18,
-    paddingHorizontal: 2,
-    fontSize: 13,
-    lineHeight: 19,
-    fontWeight: '400',
-    color: '#888888',
-    textAlign: 'center',
-  },
-  gratisCard: {
+  infoBox: {
     alignSelf: 'stretch',
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
-    borderRadius: 12,
+    marginTop: 14,
+    marginBottom: 20,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    marginBottom: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.055)',
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
   },
-  gratisTitle: {
-    fontSize: 13,
-    fontWeight: '700',
+  infoBoxParagraph: {
+    fontSize: 14,
+    lineHeight: 21,
     color: '#555555',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 10,
-  },
-  gratisLine: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#1A1A1A',
-    marginBottom: 6,
-  },
-  gratisLineLast: {
-    marginBottom: 0,
+    textAlign: 'left',
   },
   moduleGrid: {
     flexDirection: 'row',
@@ -306,7 +277,7 @@ const styles = StyleSheet.create({
     backgroundColor: CARD_BG,
     borderRadius: 12,
     padding: 14,
-    minHeight: 152,
+    minHeight: 188,
     justifyContent: 'flex-start',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -324,23 +295,28 @@ const styles = StyleSheet.create({
     borderColor: ACTIVE,
     borderWidth: 2,
   },
-  moduleTileTitle: {
+  moduleTileBold: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1A1A1A',
     lineHeight: 19,
   },
-  moduleTilePriceRow: {
-    marginTop: 4,
-  },
-  moduleTilePaymentHint: {
-    marginTop: 4,
+  moduleTileMuted: {
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '500',
     color: '#A0A0A0',
   },
-  moduleTileEinmalSpacing: {
+  moduleTileMutedGap: {
+    marginTop: 5,
+  },
+  moduleTileMutedGapTight: {
+    marginTop: 3,
+  },
+  moduleTilePriceGap: {
+    marginTop: 8,
+  },
+  moduleTileEinmalGap: {
     marginTop: 6,
   },
   ctaSection: {
@@ -391,7 +367,7 @@ const styles = StyleSheet.create({
   },
   restoreLink: {
     alignSelf: 'center',
-    marginTop: 28,
+    marginTop: 16,
     paddingVertical: 8,
   },
   restoreLinkText: {

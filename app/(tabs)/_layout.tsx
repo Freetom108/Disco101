@@ -1,18 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
-import { ACTIVE, HEADER_DARK } from '../../constants/theme';
-
-const styles = StyleSheet.create({
-  wiederholenIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  wiederholenLock: {
-    marginLeft: 3,
-    opacity: 0.9,
-  },
-});
+import { HEADER_DARK } from '../../constants/theme';
 
 export default function TabLayout() {
   return (
@@ -68,15 +56,7 @@ export default function TabLayout() {
           title: 'Repeat',
           tabBarLabel: 'Repeat',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.wiederholenIconRow}>
-              <Ionicons name="repeat" size={size} color={color} />
-              <Ionicons
-                name="lock-closed"
-                size={11}
-                color={ACTIVE}
-                style={styles.wiederholenLock}
-              />
-            </View>
+            <Ionicons name="repeat" size={size} color={color} />
           ),
         }}
       />

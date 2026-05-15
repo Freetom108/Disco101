@@ -48,6 +48,10 @@ import {
   safePlayerReplace,
   safePlayerSetPlaybackRate,
 } from '../../utils/safeAudioPlayer';
+import {
+  hasDisc101FullAccess,
+  isChapterLockedWithoutPurchase,
+} from '../../constants/chapterUnlock';
 
 const CHRIS_AVATAR = require('../../assets/chris.png');
 const ANN_AVATAR = require('../../assets/ann.png');
@@ -256,6 +260,7 @@ export default function HomeScreen() {
   const [activeTestKind, setActiveTestKind] = useState<1 | 2 | null>(null);
   const [showTestDone, setShowTestDone] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
   const [showTestSelection, setShowTestSelection] = useState(false);
   const activeTestKindRef = useRef<1 | 2 | null>(null);
   const showOptionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -410,6 +415,7 @@ export default function HomeScreen() {
       AsyncStorage.getItem('pinned_phrases').then((val) => {
         if (val) setPinnedIds(JSON.parse(val));
       });
+      void hasDisc101FullAccess().then((full) => setDisc101FullUnlocked(full));
       AsyncStorage.getItem(LAST_POSITION_KEY).then((val) => {
         if (!val) return;
         try {
@@ -453,18 +459,26 @@ export default function HomeScreen() {
 
   const mergeWrongIntoPinned = useCallback(async (wrongIds: number[]) => {
     try {
+      const toAdd = disc101FullUnlocked
+        ? wrongIds
+        : wrongIds.filter((wid) => {
+            const m = SENTENCES.find((p) => p.id === wid);
+            return (
+              m != null && !isChapterLockedWithoutPurchase(m.chapterId)
+            );
+          });
       const raw = await AsyncStorage.getItem('pinned_phrases');
       const parsed = raw ? JSON.parse(raw) : [];
       const existing = Array.isArray(parsed)
         ? parsed.filter((x: unknown) => typeof x === 'number')
         : [];
-      const merged = Array.from(new Set([...existing, ...wrongIds]));
+      const merged = Array.from(new Set([...existing, ...toAdd]));
       setPinnedIds(merged);
       await AsyncStorage.setItem('pinned_phrases', JSON.stringify(merged));
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [disc101FullUnlocked]);
 
   useEffect(() => {
     safePlayerPause(testPlaybackPlayer);
@@ -1081,6 +1095,14 @@ export default function HomeScreen() {
             chapterPhraseIds={chapterPhraseIds}
             isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
             onTogglePin={(id) => {
+              const meta = SENTENCES.find((p) => p.id === id);
+              if (
+                meta &&
+                isChapterLockedWithoutPurchase(meta.chapterId) &&
+                !disc101FullUnlocked
+              ) {
+                return;
+              }
               const updated = pinnedIds.includes(id)
                 ? pinnedIds.filter((x) => x !== id)
                 : [...pinnedIds, id];

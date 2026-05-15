@@ -14,3 +14,19 @@ export async function hasDisc101FullAccess(): Promise<boolean> {
 export function isChapterLockedWithoutPurchase(chapterId: number): boolean {
   return chapterId > 1;
 }
+
+/**
+ * Repeat ist ohne Kauf nur für freie Inhalte (Kapitel 1 je Unit / aktuell ein Datenbestand).
+ */
+export function filterPhraseIdsForRepeatAccess(
+  ids: number[],
+  hasDisc101FullAccess: boolean,
+  sentences: ReadonlyArray<{ id: number; chapterId: number }>,
+): number[] {
+  if (hasDisc101FullAccess) return ids;
+  const byChapter = new Map(sentences.map((s) => [s.id, s.chapterId]));
+  return ids.filter((id) => {
+    const ch = byChapter.get(id);
+    return ch !== undefined && !isChapterLockedWithoutPurchase(ch);
+  });
+}

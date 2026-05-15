@@ -20,6 +20,10 @@ import {
   INACTIVE,
   SCREEN_BG,
 } from '../../../constants/theme';
+import {
+  filterPhraseIdsForRepeatAccess,
+  hasDisc101FullAccess,
+} from '../../../constants/chapterUnlock';
 import SENTENCES from '../../../data/sentences.json';
 
 const PINNED_KEY = 'pinned_phrases';
@@ -64,20 +68,30 @@ export default function RepeatOverviewScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
       (async () => {
         try {
-          const raw = await AsyncStorage.getItem(PINNED_KEY);
+          const [raw, full101] = await Promise.all([
+            AsyncStorage.getItem(PINNED_KEY),
+            hasDisc101FullAccess(),
+          ]);
           const parsed = raw ? JSON.parse(raw) : [];
           const ids = Array.isArray(parsed)
             ? parsed.filter((x: unknown) => typeof x === 'number')
             : [];
-          if (!cancelled) setPinnedIds(ids);
+          if (!cancelled) {
+            setPinnedIds(ids);
+            setDisc101FullUnlocked(full101);
+          }
         } catch {
-          if (!cancelled) setPinnedIds([]);
+          if (!cancelled) {
+            setPinnedIds([]);
+            setDisc101FullUnlocked(false);
+          }
         } finally {
           if (!cancelled) setLoading(false);
         }
@@ -88,23 +102,47 @@ export default function RepeatOverviewScreen() {
     }, []),
   );
 
+  const chapter1PhraseIds = useMemo(
+    () =>
+      (SENTENCES as Phrase[])
+        .filter((p) => p.chapterId === 1)
+        .sort((a, b) => a.id - b.id)
+        .map((p) => p.id),
+    [],
+  );
+
+  const allowedPinnedIds = useMemo(
+    () =>
+      filterPhraseIdsForRepeatAccess(
+        pinnedIds,
+        disc101FullUnlocked,
+        SENTENCES as Phrase[],
+      ),
+    [pinnedIds, disc101FullUnlocked],
+  );
+
   const groups = useMemo(
-    () => buildChapterGroups(pinnedIds, SENTENCES as Phrase[]),
-    [pinnedIds],
+    () => buildChapterGroups(allowedPinnedIds, SENTENCES as Phrase[]),
+    [allowedPinnedIds],
   );
 
-  const totalCount = useMemo(
-    () => groups.reduce((n, g) => n + g.count, 0),
-    [groups],
-  );
+  const totalPinnedAllowed = allowedPinnedIds.length;
 
-  const showEmpty = !loading && totalCount === 0;
+  const showEmpty = !loading && totalPinnedAllowed === 0;
 
   const startAllSession = () => {
-    if (pinnedIds.length === 0) return;
+    if (allowedPinnedIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
-      params: { phraseIds: JSON.stringify(pinnedIds) },
+      params: { phraseIds: JSON.stringify(allowedPinnedIds) },
+    });
+  };
+
+  const startChapter1Session = () => {
+    if (chapter1PhraseIds.length === 0) return;
+    router.push({
+      pathname: '/(tabs)/wiederholen/session',
+      params: { phraseIds: JSON.stringify(chapter1PhraseIds) },
     });
   };
 
@@ -136,16 +174,6 @@ export default function RepeatOverviewScreen() {
 
       {loading ? (
         <View style={styles.loadingBody} />
-      ) : showEmpty ? (
-        <View style={styles.emptyWrap}>
-          <Ionicons name="pin" size={48} color="#AAAAAA" />
-          <Text style={styles.emptyTitle}>Noch keine Karten gespeichert.</Text>
-          <Text style={styles.emptySubtext}>
-            Tippe den PIN auf einer Karte – sie landet automatisch auf dem Stapel
-            ihres Kapitels und wartet hier auf dich, damit du sie so oft wiederholen
-            kannst bis sie sitzt.
-          </Text>
-        </View>
       ) : (
         <ScrollView
           style={styles.scroll}
@@ -155,57 +183,98 @@ export default function RepeatOverviewScreen() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.stackHeaderBlock}>
-            <Text style={styles.stackHeaderTitle}>
-              Hier sind deine Übungsstapel
+          <View style={styles.chapter1Block}>
+            <Text style={styles.chapter1Title}>Kapitel 1 · Alle Phrasen</Text>
+            <Text style={styles.chapter1Sub}>
+              {chapter1PhraseIds.length} Karten · für alle Nutzer (Unit 1 Basics)
             </Text>
-            <Text style={styles.stackHeaderSub}>
-              {totalCount} Karte{totalCount === 1 ? '' : 'n'} gespeichert
-            </Text>
+            <Pressable
+              onPress={startChapter1Session}
+              style={({ pressed }) => [
+                styles.chapter1Btn,
+                pressed && { opacity: 0.92 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Alle Phrasen aus Kapitel 1 wiederholen"
+            >
+              <Text style={styles.chapter1BtnText}>
+                🔁 Alle Phrasen aus Kapitel 1 üben
+              </Text>
+            </Pressable>
           </View>
-
-          <Pressable
-            onPress={startAllSession}
-            style={({ pressed }) => [
-              styles.shuffleBtn,
-              pressed && { opacity: 0.92 },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Alle Karten wiederholen"
-          >
-            <Text style={styles.shuffleBtnText}>🔀 Alle Karten wiederholen</Text>
-          </Pressable>
 
           <View style={styles.divider} />
 
-          {groups.map((g) => (
-            <Pressable
-              key={g.chapterId}
-              onPress={() => startChapterSession(g)}
-              style={({ pressed }) => [
-                styles.chapterCard,
-                pressed && { opacity: 0.85 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`${g.title}, ${g.count} Karten wiederholen`}
-            >
-              <View style={styles.chapterRowInner}>
-                <Text style={styles.chapterTitle} numberOfLines={2}>
-                  {g.title}
+          {showEmpty ? (
+            <View style={styles.pinnedEmptyWrap}>
+              <Ionicons name="pin" size={40} color="#AAAAAA" />
+              <Text style={styles.pinnedEmptyTitle}>
+                Noch keine Karten aus dem Stapel
+              </Text>
+              <Text style={styles.pinnedEmptySubtext}>
+                Tippe die Stecknadel auf einer Karte im Home-Tab – gespeicherte
+                Phrasen aus Kapitel 1 erscheinen hier zum Üben. (Weitere Kapitel:
+                nach Freischaltung.)
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.stackHeaderBlock}>
+                <Text style={styles.stackHeaderTitle}>
+                  Dein Stapel (Stecknadel)
                 </Text>
-                <View style={styles.chapterMeta}>
-                  <Text style={styles.chapterCount}>
-                    {g.count} {g.count === 1 ? 'Karte' : 'Karten'}
-                  </Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color="#8E8E93"
-                  />
-                </View>
+                <Text style={styles.stackHeaderSub}>
+                  {totalPinnedAllowed} Karte{totalPinnedAllowed === 1 ? '' : 'n'}{' '}
+                  gespeichert
+                </Text>
               </View>
-            </Pressable>
-          ))}
+
+              <Pressable
+                onPress={startAllSession}
+                style={({ pressed }) => [
+                  styles.shuffleBtn,
+                  pressed && { opacity: 0.92 },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Alle gespeicherten Karten wiederholen"
+              >
+                <Text style={styles.shuffleBtnText}>
+                  🔀 Alle gespeicherten Karten wiederholen
+                </Text>
+              </Pressable>
+
+              <View style={styles.divider} />
+
+              {groups.map((g) => (
+                <Pressable
+                  key={g.chapterId}
+                  onPress={() => startChapterSession(g)}
+                  style={({ pressed }) => [
+                    styles.chapterCard,
+                    pressed && { opacity: 0.85 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${g.title}, ${g.count} Karten wiederholen`}
+                >
+                  <View style={styles.chapterRowInner}>
+                    <Text style={styles.chapterTitle} numberOfLines={2}>
+                      {g.title}
+                    </Text>
+                    <View style={styles.chapterMeta}>
+                      <Text style={styles.chapterCount}>
+                        {g.count} {g.count === 1 ? 'Karte' : 'Karten'}
+                      </Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color="#8E8E93"
+                      />
+                    </View>
+                  </View>
+                </Pressable>
+              ))}
+            </>
+          )}
         </ScrollView>
       )}
     </View>
@@ -261,21 +330,45 @@ const styles = StyleSheet.create({
   loadingBody: {
     flex: 1,
   },
-  emptyWrap: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
+  chapter1Block: {
+    marginBottom: 8,
   },
-  emptyTitle: {
-    marginTop: 20,
-    fontSize: 18,
+  chapter1Title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  chapter1Sub: {
+    fontSize: 14,
+    color: INACTIVE,
+    marginTop: 4,
+    marginBottom: 14,
+  },
+  chapter1Btn: {
+    backgroundColor: '#C8102E',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  chapter1BtnText: {
+    color: BUTTON_TEXT,
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  pinnedEmptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 28,
+    paddingHorizontal: 12,
+  },
+  pinnedEmptyTitle: {
+    marginTop: 14,
+    fontSize: 17,
     fontWeight: '600',
     textAlign: 'center',
     color: '#444444',
   },
-  emptySubtext: {
-    marginTop: 12,
+  pinnedEmptySubtext: {
+    marginTop: 10,
     color: '#AAAAAA',
     fontSize: 15,
     textAlign: 'center',

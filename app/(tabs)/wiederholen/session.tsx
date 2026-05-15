@@ -48,6 +48,7 @@ import {
   type SentenceRecord,
 } from '../../../constants/sentencePacks';
 import { audioAssets } from '../../../utils/audioAssets';
+import { phraseAudioAssetKey } from '../../../utils/phraseAudioKey';
 import {
   safePlayerPause,
   safePlayerPlay,
@@ -90,14 +91,19 @@ function buildSessionQuizOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
   return shufflePhrases([correct, w1, w2]);
 }
 
-function sessionPhraseAudioSource(phraseId: number, gender: 'm' | 'f') {
-  const key = `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
+function sessionPhraseAudioSource(
+  phraseId: number,
+  gender: 'm' | 'f',
+  moduleCode: ModuleCode,
+) {
+  const key = phraseAudioAssetKey(moduleCode, phraseId, gender);
   return audioAssets[key] ?? null;
 }
 
 function SessionChrisAnnButtons({
   player,
   phraseId,
+  moduleCode,
   showOptions,
   onOpenOptionsAfterFirstVoice,
   compact,
@@ -105,6 +111,7 @@ function SessionChrisAnnButtons({
 }: {
   player: AudioPlayer;
   phraseId: number;
+  moduleCode: ModuleCode;
   showOptions: boolean;
   onOpenOptionsAfterFirstVoice: () => void;
   compact: boolean;
@@ -129,7 +136,7 @@ function SessionChrisAnnButtons({
   const playVoice = useCallback(
     async (gender: 'm' | 'f') => {
       if (isReleasedRef.current) return;
-      const src = sessionPhraseAudioSource(phraseId, gender);
+      const src = sessionPhraseAudioSource(phraseId, gender, moduleCode);
       if (!src) return;
       if (!showOptionsRef.current) {
         onOpenOptionsAfterFirstVoice();
@@ -177,7 +184,7 @@ function SessionChrisAnnButtons({
         }
       }
     },
-    [isReleasedRef, onOpenOptionsAfterFirstVoice, player, phraseId],
+    [isReleasedRef, moduleCode, onOpenOptionsAfterFirstVoice, player, phraseId],
   );
 
   const btnStyle = compact ? styles.sessionTestVoiceBtnCompact : styles.sessionTestVoiceBtn;
@@ -386,8 +393,8 @@ export default function RepeatSessionScreen() {
   useEffect(() => {
     const phrases = repeatSession?.phrases;
     if (!phrases?.length) return;
-    preloadPhraseAudio(phrases.map((p) => p.id));
-  }, [repeatSession?.phrases]);
+    preloadPhraseAudio(phrases.map((p) => p.id), sessionModule);
+  }, [repeatSession?.phrases, sessionModule]);
 
   useEffect(() => {
     if (initFailed) {
@@ -751,6 +758,7 @@ export default function RepeatSessionScreen() {
                       <SessionChrisAnnButtons
                         player={sessionTestPlaybackPlayer}
                         phraseId={currentPhrase.id}
+                        moduleCode={sessionModule}
                         showOptions={showQuizOptions}
                         onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
                         compact={false}
@@ -766,6 +774,7 @@ export default function RepeatSessionScreen() {
                         <SessionChrisAnnButtons
                           player={sessionTestPlaybackPlayer}
                           phraseId={currentPhrase.id}
+                          moduleCode={sessionModule}
                           showOptions={showQuizOptions}
                           onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
                           compact

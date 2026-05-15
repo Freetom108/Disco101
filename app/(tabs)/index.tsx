@@ -42,6 +42,7 @@ import {
   SCREEN_BG,
 } from '../../constants/theme';
 import { audioAssets } from '../../utils/audioAssets';
+import { phraseAudioAssetKey } from '../../utils/phraseAudioKey';
 import {
   safePlayerPause,
   safePlayerPlay,
@@ -90,20 +91,26 @@ function buildTestOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
   return shufflePhrases([correct, w1, w2]);
 }
 
-function testPhraseAudioSource(phraseId: number, gender: 'm' | 'f') {
-  const key = `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
+function testPhraseAudioSource(
+  phraseId: number,
+  gender: 'm' | 'f',
+  moduleCode: ModuleCode,
+) {
+  const key = phraseAudioAssetKey(moduleCode, phraseId, gender);
   return audioAssets[key] ?? null;
 }
 
 function TestChrisAnnButtons({
   player,
   phraseId,
+  moduleCode,
   showOptions,
   onOpenOptionsAfterFirstVoice,
   compact,
 }: {
   player: AudioPlayer;
   phraseId: number;
+  moduleCode: ModuleCode;
   showOptions: boolean;
   onOpenOptionsAfterFirstVoice: () => void;
   compact: boolean;
@@ -121,7 +128,7 @@ function TestChrisAnnButtons({
 
   const playVoice = useCallback(
     async (gender: 'm' | 'f') => {
-      const src = testPhraseAudioSource(phraseId, gender);
+      const src = testPhraseAudioSource(phraseId, gender, moduleCode);
       if (!src) return;
       if (!showOptionsRef.current) {
         onOpenOptionsAfterFirstVoice();
@@ -156,7 +163,7 @@ function TestChrisAnnButtons({
         safePlayerPause(player);
       }
     },
-    [onOpenOptionsAfterFirstVoice, player, phraseId],
+    [moduleCode, onOpenOptionsAfterFirstVoice, player, phraseId],
   );
 
   const btnStyle = compact ? styles.testVoiceBtnCompact : styles.testVoiceBtn;
@@ -593,7 +600,7 @@ export default function HomeScreen() {
     setActiveTestKind(testNumber);
     const shuffled = shufflePhrases(chPhrases);
     const limited = shuffled.slice(0, 8);
-    preloadPhraseAudio(limited.map((p) => p.id));
+    preloadPhraseAudio(limited.map((p) => p.id), learningModule);
     setTestPhrases(limited);
     setTestIndex(0);
     setWrongAnswers([]);
@@ -984,6 +991,7 @@ export default function HomeScreen() {
                           <TestChrisAnnButtons
                             player={testPlaybackPlayer}
                             phraseId={testPhrases[testIndex]!.id}
+                            moduleCode={learningModule}
                             showOptions={showOptions}
                             onOpenOptionsAfterFirstVoice={
                               onOpenOptionsAfterFirstVoice
@@ -1000,6 +1008,7 @@ export default function HomeScreen() {
                             <TestChrisAnnButtons
                               player={testPlaybackPlayer}
                               phraseId={testPhrases[testIndex]!.id}
+                              moduleCode={learningModule}
                               showOptions={showOptions}
                               onOpenOptionsAfterFirstVoice={
                                 onOpenOptionsAfterFirstVoice
@@ -1112,6 +1121,7 @@ export default function HomeScreen() {
             completedChapterName={categoryTitle}
             phraseId={phraseIdForCard}
             chapterPhraseIds={chapterPhraseIds}
+            moduleCode={learningModule}
             isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
             onTogglePin={(id) => {
               const meta = sentences.find((p) => p.id === id);

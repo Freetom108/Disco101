@@ -13,6 +13,7 @@ import {
   parseAudioSpeed,
 } from '../constants/audioSettingsStorage';
 import { ACTIVE, BUTTON_TEXT, INACTIVE } from '../constants/theme';
+import type { ModuleCode } from '../constants/products';
 import { getPreloadedSource } from '../utils/audioPreloader';
 import {
   safePlayerPause,
@@ -29,6 +30,8 @@ type SpeakerButtonProps = {
   accessibilityLabel: string;
   letter: string;
   phraseId: number;
+  /** Defaults to Unit 1 — pass active learning module for bundled phrase assets. */
+  moduleCode?: ModuleCode;
   avatarSource?: any;
 };
 
@@ -36,10 +39,11 @@ export default function SpeakerButton({
   accessibilityLabel,
   letter,
   phraseId,
+  moduleCode = '101',
   avatarSource,
 }: SpeakerButtonProps) {
   const voice = letter.trim().toUpperCase() === 'M' ? 'm' : 'f';
-  const source = getPreloadedSource(phraseId, voice);
+  const source = getPreloadedSource(phraseId, voice, moduleCode);
 
   const player = useAudioPlayer(null, { updateInterval: 100 });
 
@@ -55,7 +59,7 @@ export default function SpeakerButton({
 
   useEffect(() => {
     isReleasedRef.current = false;
-  }, [phraseId]);
+  }, [phraseId, moduleCode]);
 
   useEffect(() => {
     if (!source) return;

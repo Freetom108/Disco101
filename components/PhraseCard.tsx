@@ -18,6 +18,7 @@ import {
   INACTIVE,
   SCREEN_BG,
 } from '../constants/theme';
+import type { ModuleCode } from '../constants/products';
 import SpeakerButton from './SpeakerButton';
 import { preloadPhraseAudio } from '../utils/audioPreloader';
 
@@ -44,6 +45,8 @@ export type PhraseCardProps = {
   completedChapterName: string;
   phraseId: number;
   chapterPhraseIds: number[];
+  /** Active learning module — selects bundled phrase MP3s (e.g. Unit 2). */
+  moduleCode: ModuleCode;
   isPinned: boolean;
   onTogglePin: (id: number) => void;
   onStartTest: () => void;
@@ -70,6 +73,7 @@ export default function PhraseCard({
   completedChapterName,
   phraseId,
   chapterPhraseIds,
+  moduleCode,
   isPinned,
   onTogglePin,
   onStartTest,
@@ -92,8 +96,8 @@ export default function PhraseCard({
   }, [phraseId, slideX, isSlideAnimating]);
 
   useEffect(() => {
-    preloadPhraseAudio(chapterPhraseIds);
-  }, [chapterPhraseIds]);
+    preloadPhraseAudio(chapterPhraseIds, moduleCode);
+  }, [chapterPhraseIds, moduleCode]);
 
   const runAnimatedNext = useCallback(() => {
     if (isSlideAnimating || isAllPhrasesComplete) return;
@@ -304,12 +308,14 @@ export default function PhraseCard({
                     accessibilityLabel="Male speaker"
                     letter="M"
                     phraseId={phraseId}
+                    moduleCode={moduleCode}
                     avatarSource={CHRIS_AVATAR}
                   />
                   <SpeakerButton
                     accessibilityLabel="Female speaker"
                     letter="F"
                     phraseId={phraseId}
+                    moduleCode={moduleCode}
                     avatarSource={ANN_AVATAR}
                   />
                 </View>

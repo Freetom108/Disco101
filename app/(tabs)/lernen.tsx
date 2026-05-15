@@ -22,27 +22,39 @@ import {
   SCREEN_BG,
 } from '../../constants/theme';
 import {
+  coerceModuleCode,
+  getActiveLearningModule,
+} from '../../constants/activeLearningModule';
+import {
   hasDisc101FullAccess,
   isChapterLockedWithoutPurchase,
 } from '../../constants/chapterUnlock';
-import SENTENCES from '../../data/sentences.json';
-
-const LAST_POSITION_KEY = 'last_position';
-const CHAPTER_PROGRESS_KEY = 'chapter_progress';
-
-type Phrase = (typeof SENTENCES)[number];
+import {
+  LAST_POSITION_KEY,
+  parseChapterProgressRecord,
+  readChapterProgressRaw,
+} from '../../constants/learningResume';
+import type { ModuleCode } from '../../constants/products';
+import { getSentencesForModule } from '../../constants/sentencePacks';
 
 type LastPosition = { chapterId: number; phraseIndex: number };
 
-function parseLastPosition(val: string | null): LastPosition | null {
+function parseLastPositionForModule(
+  val: string | null,
+  activeModule: ModuleCode,
+): LastPosition | null {
   if (!val) return null;
   try {
-    const { chapterId, phraseIndex } = JSON.parse(val) as {
+    const p = JSON.parse(val) as {
       chapterId?: unknown;
       phraseIndex?: unknown;
+      moduleCode?: unknown;
     };
-    const ch = Number(chapterId);
-    const idx = Number(phraseIndex);
+    const mc =
+      p.moduleCode != null ? coerceModuleCode(p.moduleCode) : ('101' as ModuleCode);
+    if (mc !== activeModule) return null;
+    const ch = Number(p.chapterId);
+    const idx = Number(p.phraseIndex);
     if (!Number.isFinite(ch) || !Number.isFinite(idx)) return null;
     if (ch < 1 || ch > 7) return null;
     return { chapterId: ch, phraseIndex: idx };
@@ -51,27 +63,10 @@ function parseLastPosition(val: string | null): LastPosition | null {
   }
 }
 
-function parseChapterProgress(val: string | null): Record<string, number> {
-  if (!val) return {};
-  try {
-    const o = JSON.parse(val) as Record<string, unknown>;
-    if (!o || typeof o !== 'object') return {};
-    const out: Record<string, number> = {};
-    for (let i = 1; i <= 7; i++) {
-      const k = String(i);
-      const v = o[k] ?? o[i as unknown as string];
-      const n = Number(v);
-      if (Number.isFinite(n) && n >= 0) out[k] = n;
-    }
-    return out;
-  } catch {
-    return {};
-  }
-}
-
 export default function LernenScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [activeModule, setActiveModule] = useState<ModuleCode>('101');
   const [lastPosition, setLastPosition] = useState<LastPosition | null>(null);
   const [chapterProgress, setChapterProgress] = useState<Record<string, number>>(
     {},
@@ -82,15 +77,14 @@ export default function LernenScreen() {
     useCallback(() => {
       let cancelled = false;
       (async () => {
-        const [lp, cp, full101] = await Promise.all([
-          AsyncStorage.getItem(LAST_POSITION_KEY),
-          AsyncStorage.getItem(CHAPTER_PROGRESS_KEY),
-          hasDisc101FullAccess(),
-        ]);
+        const mod = await getActiveLearningModule();
         if (cancelled) return;
-        setLastPosition(parseLastPosition(lp));
-        setChapterProgress(parseChapterProgress(cp));
-        setDisc101FullUnlocked(full101);
+        setActiveModule(mod);
+        const cpRaw = await readChapterProgressRaw(mod);
+        setChapterProgress(parseChapterProgressRecord(cpRaw));
+        const lp = await AsyncStorage.getItem(LAST_POSITION_KEY);
+        setLastPosition(parseLastPositionForModule(lp, mod));
+        setDisc101FullUnlocked(await hasDisc101FullAccess());
       })();
       return () => {
         cancelled = true;
@@ -98,9 +92,14 @@ export default function LernenScreen() {
     }, []),
   );
 
+  const sentences = useMemo(
+    () => getSentencesForModule(activeModule),
+    [activeModule],
+  );
+
   const chapterRows = useMemo(() => {
     return [1, 2, 3, 4, 5, 6, 7].map((chapterId) => {
-      const phrases = (SENTENCES as Phrase[])
+      const phrases = sentences
         .filter((p) => p.chapterId === chapterId)
         .sort((a, b) => a.id - b.id);
       const y = phrases.length;
@@ -125,12 +124,12 @@ export default function LernenScreen() {
         displayX,
       };
     });
-  }, [chapterProgress]);
+  }, [chapterProgress, sentences]);
 
   const weitermachenMeta = useMemo(() => {
     if (!lastPosition) return null;
     const { chapterId, phraseIndex } = lastPosition;
-    const phrases = (SENTENCES as Phrase[])
+    const phrases = sentences
       .filter((p) => p.chapterId === chapterId)
       .sort((a, b) => a.id - b.id);
     const y = phrases.length;
@@ -139,7 +138,7 @@ export default function LernenScreen() {
     const idx = Math.min(Math.max(0, phraseIndex), y);
     const displayPhrase = idx >= y ? y : idx + 1;
     return { name, displayPhrase, y };
-  }, [lastPosition]);
+  }, [lastPosition, sentences]);
 
   const goHome = () => {
     if (
@@ -149,7 +148,7 @@ export default function LernenScreen() {
     ) {
       router.push({
         pathname: '/paywall',
-        params: { focusModule: '101' },
+        params: { focusModule: activeModule },
       });
       return;
     }
@@ -159,16 +158,21 @@ export default function LernenScreen() {
   const selectChapter = async (chapterId: number) => {
     const locked =
       isChapterLockedWithoutPurchase(chapterId) && !disc101FullUnlocked;
+    const mod = await getActiveLearningModule();
     if (locked) {
       router.push({
         pathname: '/paywall',
-        params: { focusModule: '101' },
+        params: { focusModule: mod },
       });
       return;
     }
     await AsyncStorage.setItem(
       LAST_POSITION_KEY,
-      JSON.stringify({ chapterId, phraseIndex: 0 }),
+      JSON.stringify({
+        chapterId,
+        phraseIndex: 0,
+        moduleCode: mod,
+      }),
     );
     router.replace('/(tabs)');
   };

@@ -37,6 +37,16 @@ import {
   filterPhraseIdsForRepeatAccess,
   hasDisc101FullAccess,
 } from '../../../constants/chapterUnlock';
+import { coerceModuleCode } from '../../../constants/activeLearningModule';
+import {
+  loadPinnedIdsForModule,
+  persistPinnedIdsForModule,
+} from '../../../constants/learningResume';
+import type { ModuleCode } from '../../../constants/products';
+import {
+  getSentencesForModule,
+  type SentenceRecord,
+} from '../../../constants/sentencePacks';
 import { audioAssets } from '../../../utils/audioAssets';
 import {
   safePlayerPause,
@@ -58,11 +68,7 @@ import {
   INACTIVE,
   SCREEN_BG,
 } from '../../../constants/theme';
-import SENTENCES from '../../../data/sentences.json';
-
-const PINNED_KEY = 'pinned_phrases';
-
-type Phrase = (typeof SENTENCES)[number];
+type Phrase = SentenceRecord;
 
 type RepeatSession = { phrases: Phrase[]; index: number };
 
@@ -230,7 +236,23 @@ function SessionChrisAnnButtons({
 export default function RepeatSessionScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{ phraseIds?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    phraseIds?: string | string[];
+    moduleCode?: string | string[];
+  }>();
+
+  const rawModuleParam = params.moduleCode;
+  const sessionModule = useMemo<ModuleCode>(() => {
+    const v = Array.isArray(rawModuleParam)
+      ? rawModuleParam[0]
+      : rawModuleParam;
+    return coerceModuleCode(typeof v === 'string' ? v : undefined);
+  }, [rawModuleParam]);
+
+  const sentencesPack = useMemo(
+    () => getSentencesForModule(sessionModule),
+    [sessionModule],
+  );
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../../../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
@@ -288,22 +310,17 @@ export default function RepeatSessionScreen() {
   }, [showStackCompleteNote]);
 
   const byId = useMemo(
-    () => new Map((SENTENCES as Phrase[]).map((s) => [s.id, s])),
-    [],
+    () => new Map(sentencesPack.map((s) => [s.id, s])),
+    [sentencesPack],
   );
 
   const loadPinned = useCallback(async () => {
     try {
-      const raw = await AsyncStorage.getItem(PINNED_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      const ids = Array.isArray(parsed)
-        ? parsed.filter((x: unknown) => typeof x === 'number')
-        : [];
-      setPinnedIds(ids);
+      setPinnedIds(await loadPinnedIdsForModule(sessionModule));
     } catch {
       setPinnedIds([]);
     }
-  }, []);
+  }, [sessionModule]);
 
   useEffect(() => {
     void (async () => {
@@ -318,7 +335,7 @@ export default function RepeatSessionScreen() {
   }, []);
 
   useEffect(() => {
-    loadPinned();
+    void loadPinned();
   }, [loadPinned]);
 
   useEffect(() => {
@@ -338,7 +355,7 @@ export default function RepeatSessionScreen() {
       const ids = filterPhraseIdsForRepeatAccess(
         idsRaw,
         disc101FullUnlocked,
-        SENTENCES as Phrase[],
+        sentencesPack,
       );
       const phrases = ids
         .map((id) => byId.get(id))
@@ -357,7 +374,14 @@ export default function RepeatSessionScreen() {
     } catch {
       setInitFailed(true);
     }
-  }, [purchaseResolved, disc101FullUnlocked, params.phraseIds, byId]);
+  }, [
+    purchaseResolved,
+    disc101FullUnlocked,
+    params.phraseIds,
+    params.moduleCode,
+    byId,
+    sentencesPack,
+  ]);
 
   useEffect(() => {
     const phrases = repeatSession?.phrases;
@@ -373,7 +397,7 @@ export default function RepeatSessionScreen() {
 
   const persistPinned = async (ids: number[]) => {
     setPinnedIds(ids);
-    await AsyncStorage.setItem(PINNED_KEY, JSON.stringify(ids));
+    await persistPinnedIdsForModule(sessionModule, ids);
   };
 
   const sessionPhrases = repeatSession?.phrases ?? [];
@@ -396,10 +420,10 @@ export default function RepeatSessionScreen() {
 
   const chapterPhrasesPool = useMemo(() => {
     if (!currentPhrase) return [];
-    return (SENTENCES as Phrase[]).filter(
+    return sentencesPack.filter(
       (p) => p.chapterId === currentPhrase.chapterId,
     );
-  }, [currentPhrase]);
+  }, [currentPhrase, sentencesPack]);
 
   useEffect(() => {
     try {

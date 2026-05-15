@@ -1,15 +1,18 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { HEADER_DARK, HEADER_TEXT_SUB, INACTIVE } from '../constants/theme';
 
-export default function Header() {
+type HeaderProps = {
+  /** z. B. „Unit 1 Basics“ – aus aktiver Lern-Unit */
+  subtitle: string;
+};
+
+export default function Header({ subtitle }: HeaderProps) {
   return (
     <View style={styles.header}>
       <View style={styles.headerRow}>
         <View style={styles.headerTextCol}>
           <Text style={styles.headerLine1}>{"Hello, let's learn!"}</Text>
-          <Text style={styles.headerLine2}>
-            Englisch für den Urlaub
-          </Text>
+          <Text style={styles.headerLine2}>{subtitle}</Text>
         </View>
         <View style={styles.headerLogoMask}>
           <Image

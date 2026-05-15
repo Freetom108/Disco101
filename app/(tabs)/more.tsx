@@ -3,6 +3,9 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ModuleCode } from '../../constants/products';
 import {
+  setActiveLearningModule,
+} from '../../constants/activeLearningModule';
+import {
   BUTTON_TEXT,
   CARD_BG,
   CARD_DE,
@@ -87,12 +90,13 @@ export default function MoreScreen() {
             <Text style={styles.tileTitle}>{m.title}</Text>
             <Text style={styles.tileBody}>{m.body}</Text>
             <Pressable
-              onPress={() =>
+              onPress={() => {
+                void setActiveLearningModule(m.code);
                 router.push({
                   pathname: '/paywall',
                   params: { focusModule: m.code },
-                })
-              }
+                });
+              }}
               style={({ pressed }) => [
                 styles.unlockBtn,
                 pressed && { opacity: 0.92 },

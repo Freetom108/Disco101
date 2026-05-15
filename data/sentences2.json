@@ -1,0 +1,709 @@
+[
+  {
+    "id": 1,
+    "chapterId": 1,
+    "english": "Could I rent a sun lounger for the whole day?",
+    "german": "Kann ich eine Sonnenliege für den ganzen Tag mieten?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 2,
+    "chapterId": 1,
+    "english": "Is the water quality safe for swimming today?",
+    "german": "Ist die Wasserqualität heute zum Schwimmen geeignet?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 3,
+    "chapterId": 1,
+    "english": "What time is high tide today?",
+    "german": "Wann ist heute Flut?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 4,
+    "chapterId": 1,
+    "english": "Is there a lifeguard on duty at this beach?",
+    "german": "Gibt es hier einen Rettungsschwimmer im Dienst?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 5,
+    "chapterId": 1,
+    "english": "The waves are quite strong today, aren't they?",
+    "german": "Die Wellen sind heute ziemlich stark, oder?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 6,
+    "chapterId": 1,
+    "english": "Where can I find the beach showers?",
+    "german": "Wo finde ich die Strandduschen?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 7,
+    "chapterId": 1,
+    "english": "Could we rent an umbrella and two chairs, please?",
+    "german": "Könnten wir einen Sonnenschirm und zwei Stühle mieten?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 8,
+    "chapterId": 1,
+    "english": "Are there any jellyfish in the water at the moment?",
+    "german": "Gibt es gerade Quallen im Wasser?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 9,
+    "chapterId": 1,
+    "english": "Is it allowed to have a barbecue on this beach?",
+    "german": "Ist es erlaubt, an diesem Strand zu grillen?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 10,
+    "chapterId": 1,
+    "english": "I think I may have lost my towel near the rocks.",
+    "german": "Ich glaube, ich habe mein Handtuch bei den Felsen verloren.",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 11,
+    "chapterId": 1,
+    "english": "Could you tell me where the nearest beach bar is?",
+    "german": "Könnten Sie mir sagen, wo die nächste Strandbar ist?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 12,
+    "chapterId": 1,
+    "english": "We would like to rent a boat for two hours, please.",
+    "german": "Wir möchten bitte ein Boot für zwei Stunden mieten.",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 13,
+    "chapterId": 1,
+    "english": "Are there any dangerous rocks under the water here?",
+    "german": "Gibt es hier gefährliche Steine unter dem Wasser?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 14,
+    "chapterId": 1,
+    "english": "What are the beach rules regarding music and noise?",
+    "german": "Was sind die Strandregeln bezüglich Musik und Lärm?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 15,
+    "chapterId": 1,
+    "english": "Could you watch our things while we go for a swim?",
+    "german": "Könnten Sie auf unsere Sachen aufpassen, während wir schwimmen?",
+    "category": "Strand & Meer"
+  },
+  {
+    "id": 16,
+    "chapterId": 2,
+    "english": "The air conditioning in my room is not working properly.",
+    "german": "Die Klimaanlage in meinem Zimmer funktioniert nicht richtig.",
+    "category": "Hotel"
+  },
+  {
+    "id": 17,
+    "chapterId": 2,
+    "english": "Our neighbours are being very loud and we cannot sleep.",
+    "german": "Unsere Nachbarn sind sehr laut und wir können nicht schlafen.",
+    "category": "Hotel"
+  },
+  {
+    "id": 18,
+    "chapterId": 2,
+    "english": "Could we possibly change to a quieter room, please?",
+    "german": "Könnten wir bitte in ein ruhigeres Zimmer wechseln?",
+    "category": "Hotel"
+  },
+  {
+    "id": 19,
+    "chapterId": 2,
+    "english": "I would like to order room service for breakfast, please.",
+    "german": "Ich möchte bitte Zimmerservice für das Frühstück bestellen.",
+    "category": "Hotel"
+  },
+  {
+    "id": 20,
+    "chapterId": 2,
+    "english": "Is it possible to check in a few hours earlier than usual?",
+    "german": "Ist es möglich, einige Stunden früher einzuchecken als üblich?",
+    "category": "Hotel"
+  },
+  {
+    "id": 21,
+    "chapterId": 2,
+    "english": "Could you store our luggage until our flight this evening?",
+    "german": "Könnten Sie unser Gepäck bis zu unserem Flug heute Abend aufbewahren?",
+    "category": "Hotel"
+  },
+  {
+    "id": 22,
+    "chapterId": 2,
+    "english": "The minibar in our room has not been restocked yet.",
+    "german": "Die Minibar in unserem Zimmer wurde noch nicht aufgefüllt.",
+    "category": "Hotel"
+  },
+  {
+    "id": 23,
+    "chapterId": 2,
+    "english": "Could you arrange a wake-up call for seven in the morning?",
+    "german": "Könnten Sie einen Weckruf für sieben Uhr morgens arrangieren?",
+    "category": "Hotel"
+  },
+  {
+    "id": 24,
+    "chapterId": 2,
+    "english": "We would like to extend our stay by two more nights.",
+    "german": "Wir möchten unseren Aufenthalt um zwei weitere Nächte verlängern.",
+    "category": "Hotel"
+  },
+  {
+    "id": 25,
+    "chapterId": 2,
+    "english": "The towels in our bathroom have not been replaced today.",
+    "german": "Die Handtücher in unserem Bad wurden heute nicht ausgetauscht.",
+    "category": "Hotel"
+  },
+  {
+    "id": 26,
+    "chapterId": 2,
+    "english": "I would like to report some damage that I found in the room.",
+    "german": "Ich möchte einen Schaden melden, den ich im Zimmer gefunden habe.",
+    "category": "Hotel"
+  },
+  {
+    "id": 27,
+    "chapterId": 2,
+    "english": "Is there any chance of getting an upgrade to a sea view room?",
+    "german": "Besteht die Möglichkeit, ein Upgrade auf ein Zimmer mit Meerblick zu bekommen?",
+    "category": "Hotel"
+  },
+  {
+    "id": 28,
+    "chapterId": 2,
+    "english": "Could you arrange a laundry service for these clothes, please?",
+    "german": "Könnten Sie bitte einen Wäscheservice für diese Kleidung arrangieren?",
+    "category": "Hotel"
+  },
+  {
+    "id": 29,
+    "chapterId": 3,
+    "english": "I am allergic to peanuts, so please check the ingredients carefully.",
+    "german": "Ich bin allergisch gegen Erdnüsse, bitte überprüfen Sie die Zutaten sorgfältig.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 30,
+    "chapterId": 3,
+    "english": "Could you prepare this dish without gluten, please?",
+    "german": "Könnten Sie dieses Gericht bitte ohne Gluten zubereiten?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 31,
+    "chapterId": 3,
+    "english": "I am afraid this is not what I ordered – I asked for the fish.",
+    "german": "Leider ist das nicht das, was ich bestellt habe – ich hatte den Fisch bestellt.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 32,
+    "chapterId": 3,
+    "english": "This soup is far too salty for me, could you replace it?",
+    "german": "Diese Suppe ist viel zu salzig für mich, könnten Sie sie austauschen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 33,
+    "chapterId": 3,
+    "english": "My meal has arrived completely cold, could you warm it up?",
+    "german": "Mein Essen ist völlig kalt angekommen, könnten Sie es aufwärmen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 34,
+    "chapterId": 3,
+    "english": "Could we have some extra bread and butter on the side, please?",
+    "german": "Könnten wir bitte noch etwas Brot und Butter als Beilage haben?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 35,
+    "chapterId": 3,
+    "english": "How much tip is it customary to leave in this restaurant?",
+    "german": "Wie viel Trinkgeld ist es üblich, in diesem Restaurant zu hinterlassen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 36,
+    "chapterId": 3,
+    "english": "Could we possibly split the bill into two separate payments?",
+    "german": "Könnten wir die Rechnung bitte in zwei separate Zahlungen aufteilen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 37,
+    "chapterId": 3,
+    "english": "The food was absolutely wonderful – please compliment the chef.",
+    "german": "Das Essen war absolut wunderbar – bitte richten Sie dem Koch ein Kompliment aus.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 38,
+    "chapterId": 3,
+    "english": "I would like to order a starter and a main course, please.",
+    "german": "Ich möchte bitte eine Vorspeise und ein Hauptgericht bestellen.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 39,
+    "chapterId": 3,
+    "english": "Could I have a glass of still water and a sparkling one?",
+    "german": "Könnte ich bitte ein Glas stilles Wasser und ein Glas Sprudelwasser haben?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 40,
+    "chapterId": 3,
+    "english": "I am lactose intolerant, so I cannot eat anything with dairy.",
+    "german": "Ich bin laktoseintolerant, daher kann ich nichts mit Milchprodukten essen.",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 41,
+    "chapterId": 3,
+    "english": "Could you recommend a good dessert from today's menu?",
+    "german": "Könnten Sie einen guten Nachtisch von der heutigen Karte empfehlen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 42,
+    "chapterId": 3,
+    "english": "I think there may be a mistake on our bill, could you check?",
+    "german": "Ich glaube, es gibt einen Fehler auf unserer Rechnung, könnten Sie nachsehen?",
+    "category": "Essen & Trinken"
+  },
+  {
+    "id": 43,
+    "chapterId": 4,
+    "english": "What do you enjoy doing in your free time?",
+    "german": "Was machen Sie gerne in Ihrer Freizeit?",
+    "category": "Small Talk"
+  },
+  {
+    "id": 44,
+    "chapterId": 4,
+    "english": "I have been playing tennis for about ten years now.",
+    "german": "Ich spiele jetzt seit ungefähr zehn Jahren Tennis.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 45,
+    "chapterId": 4,
+    "english": "In my opinion, travelling is the best way to learn about the world.",
+    "german": "Meiner Meinung nach ist Reisen der beste Weg, die Welt kennenzulernen.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 46,
+    "chapterId": 4,
+    "english": "I think that learning a new language is a wonderful achievement.",
+    "german": "Ich finde, dass das Erlernen einer neuen Sprache eine wunderbare Leistung ist.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 47,
+    "chapterId": 4,
+    "english": "Do you have any children, or do you prefer travelling alone?",
+    "german": "Haben Sie Kinder, oder reisen Sie lieber alleine?",
+    "category": "Small Talk"
+  },
+  {
+    "id": 48,
+    "chapterId": 4,
+    "english": "I completely agree with you – the weather here is simply perfect.",
+    "german": "Ich stimme Ihnen völlig zu – das Wetter hier ist einfach perfekt.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 49,
+    "chapterId": 4,
+    "english": "That is a very interesting point – I had never thought of it that way.",
+    "german": "Das ist ein sehr interessanter Punkt – ich hatte das noch nie so gesehen.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 50,
+    "chapterId": 4,
+    "english": "What a lovely dress – where did you buy it, if you don't mind me asking?",
+    "german": "Was für ein schönes Kleid – wo haben Sie es gekauft, wenn ich fragen darf?",
+    "category": "Small Talk"
+  },
+  {
+    "id": 51,
+    "chapterId": 4,
+    "english": "I spent last weekend hiking in the mountains with some friends.",
+    "german": "Ich verbrachte letztes Wochenende mit einigen Freunden beim Wandern in den Bergen.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 52,
+    "chapterId": 4,
+    "english": "Have you ever visited Austria? It is a truly beautiful country.",
+    "german": "Haben Sie Österreich schon einmal besucht? Es ist ein wirklich wunderschönes Land.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 53,
+    "chapterId": 4,
+    "english": "I am really into cooking – I try a new recipe every weekend.",
+    "german": "Ich bin total begeistert vom Kochen – ich probiere jedes Wochenende ein neues Rezept.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 54,
+    "chapterId": 4,
+    "english": "What kind of music do you enjoy listening to in your spare time?",
+    "german": "Welche Art von Musik hören Sie gerne in Ihrer Freizeit?",
+    "category": "Small Talk"
+  },
+  {
+    "id": 55,
+    "chapterId": 4,
+    "english": "I respectfully disagree – I think there are better options available.",
+    "german": "Ich widerspreche höflich – ich denke, es gibt bessere Möglichkeiten.",
+    "category": "Small Talk"
+  },
+  {
+    "id": 56,
+    "chapterId": 4,
+    "english": "That sounds fascinating – could you tell me a little more about it?",
+    "german": "Das klingt faszinierend – könnten Sie mir ein bisschen mehr darüber erzählen?",
+    "category": "Small Talk"
+  },
+  {
+    "id": 57,
+    "chapterId": 5,
+    "english": "I would like to rent a car for three days, please.",
+    "german": "Ich möchte bitte ein Auto für drei Tage mieten.",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 58,
+    "chapterId": 5,
+    "english": "Could you tell me where the nearest petrol station is, please?",
+    "german": "Könnten Sie mir bitte sagen, wo die nächste Tankstelle ist?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 59,
+    "chapterId": 5,
+    "english": "I need to fill up with diesel, not petrol – is that available here?",
+    "german": "Ich muss mit Diesel tanken, nicht Benzin – ist das hier erhältlich?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 60,
+    "chapterId": 5,
+    "english": "I think one of my tyres may be flat – could you help me?",
+    "german": "Ich glaube, einer meiner Reifen könnte platt sein – könnten Sie mir helfen?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 61,
+    "chapterId": 5,
+    "english": "My car has broken down on the motorway – I need a tow truck.",
+    "german": "Mein Auto ist auf der Autobahn liegen geblieben – ich brauche einen Abschleppdienst.",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 62,
+    "chapterId": 5,
+    "english": "Could I have a group ticket for four adults and two children?",
+    "german": "Könnte ich bitte eine Gruppenfahrkarte für vier Erwachsene und zwei Kinder bekommen?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 63,
+    "chapterId": 5,
+    "english": "I have lost my train ticket – what should I do now?",
+    "german": "Ich habe meine Fahrkarte verloren – was soll ich jetzt tun?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 64,
+    "chapterId": 5,
+    "english": "My flight has been cancelled – can you rebook me on the next one?",
+    "german": "Mein Flug wurde gestrichen – können Sie mich auf den nächsten umbuchen?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 65,
+    "chapterId": 5,
+    "english": "How much excess luggage do I have, and what is the charge?",
+    "german": "Wie viel Übergepäck habe ich, und was kostet das?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 66,
+    "chapterId": 5,
+    "english": "Is there a delay on this train, and if so, how long will it be?",
+    "german": "Gibt es eine Verspätung bei diesem Zug, und wenn ja, wie lange wird sie dauern?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 67,
+    "chapterId": 5,
+    "english": "I would like to return this rental car a day earlier than planned.",
+    "german": "Ich möchte diesen Mietwagen einen Tag früher als geplant zurückgeben.",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 68,
+    "chapterId": 5,
+    "english": "Could you check the oil and tyre pressure for me, please?",
+    "german": "Könnten Sie bitte den Ölstand und den Reifendruck für mich überprüfen?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 69,
+    "chapterId": 5,
+    "english": "Where do I need to go to check in for my flight to London?",
+    "german": "Wohin muss ich gehen, um für meinen Flug nach London einzuchecken?",
+    "category": "Mobil unterwegs"
+  },
+  {
+    "id": 70,
+    "chapterId": 6,
+    "english": "I would like to exchange some euros for British pounds, please.",
+    "german": "Ich möchte bitte einige Euro in britische Pfund umtauschen.",
+    "category": "Shopping"
+  },
+  {
+    "id": 71,
+    "chapterId": 6,
+    "english": "I bought this jacket yesterday, but I would like to return it.",
+    "german": "Ich habe diese Jacke gestern gekauft, aber ich möchte sie zurückgeben.",
+    "category": "Shopping"
+  },
+  {
+    "id": 72,
+    "chapterId": 6,
+    "english": "This item is still under guarantee – could you repair it for free?",
+    "german": "Dieser Artikel ist noch unter Garantie – könnten Sie ihn kostenlos reparieren?",
+    "category": "Shopping"
+  },
+  {
+    "id": 73,
+    "chapterId": 6,
+    "english": "Could I exchange this for a different size, please?",
+    "german": "Könnte ich das bitte gegen eine andere Größe eintauschen?",
+    "category": "Shopping"
+  },
+  {
+    "id": 74,
+    "chapterId": 6,
+    "english": "Do you have any special offers or discounts available at the moment?",
+    "german": "Haben Sie gerade besondere Angebote oder Rabatte?",
+    "category": "Shopping"
+  },
+  {
+    "id": 75,
+    "chapterId": 6,
+    "english": "I am looking for a specific brand – do you stock it here?",
+    "german": "Ich suche eine bestimmte Marke – führen Sie diese hier?",
+    "category": "Shopping"
+  },
+  {
+    "id": 76,
+    "chapterId": 6,
+    "english": "Could I have a receipt, please, in case I need to return it later?",
+    "german": "Könnte ich bitte einen Kassenbon haben, falls ich es später zurückgeben muss?",
+    "category": "Shopping"
+  },
+  {
+    "id": 77,
+    "chapterId": 6,
+    "english": "I need something for a headache – what would you recommend?",
+    "german": "Ich brauche etwas gegen Kopfschmerzen – was würden Sie empfehlen?",
+    "category": "Shopping"
+  },
+  {
+    "id": 78,
+    "chapterId": 6,
+    "english": "What is the European size equivalent of a US size ten?",
+    "german": "Was ist die europäische Größenangabe für US-Größe zehn?",
+    "category": "Shopping"
+  },
+  {
+    "id": 79,
+    "chapterId": 6,
+    "english": "My phone has stopped working – is there a repair shop nearby?",
+    "german": "Mein Handy funktioniert nicht mehr – gibt es in der Nähe eine Reparaturwerkstatt?",
+    "category": "Shopping"
+  },
+  {
+    "id": 80,
+    "chapterId": 6,
+    "english": "I would like to complain about this product – it broke after one use.",
+    "german": "Ich möchte mich über dieses Produkt beschweren – es ist nach einmaligem Gebrauch kaputtgegangen.",
+    "category": "Shopping"
+  },
+  {
+    "id": 81,
+    "chapterId": 6,
+    "english": "Could you tell me where the nearest currency exchange office is?",
+    "german": "Könnten Sie mir sagen, wo das nächste Wechselbüro ist?",
+    "category": "Shopping"
+  },
+  {
+    "id": 82,
+    "chapterId": 6,
+    "english": "Is it better to pay by card or cash in most shops here?",
+    "german": "Ist es besser, in den meisten Geschäften hier mit Karte oder bar zu bezahlen?",
+    "category": "Shopping"
+  },
+  {
+    "id": 83,
+    "chapterId": 7,
+    "english": "I think you have given me the wrong change – could you check?",
+    "german": "Ich glaube, Sie haben mir das falsche Wechselgeld gegeben – könnten Sie nachsehen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 84,
+    "chapterId": 7,
+    "english": "How much tip should I leave for good service in this country?",
+    "german": "Wie viel Trinkgeld sollte ich für guten Service in diesem Land hinterlassen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 85,
+    "chapterId": 7,
+    "english": "I would like to withdraw some cash from the ATM – where is the nearest one?",
+    "german": "Ich möchte etwas Bargeld am Geldautomaten abheben – wo ist der nächste?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 86,
+    "chapterId": 7,
+    "english": "My credit card has been lost – I need to cancel it immediately.",
+    "german": "Meine Kreditkarte ist verloren gegangen – ich muss sie sofort sperren lassen.",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 87,
+    "chapterId": 7,
+    "english": "Could you tell me what the current exchange rate for euros is?",
+    "german": "Könnten Sie mir sagen, wie der aktuelle Wechselkurs für Euro ist?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 88,
+    "chapterId": 7,
+    "english": "I would like to check my account balance before I make this payment.",
+    "german": "Ich möchte meinen Kontostand prüfen, bevor ich diese Zahlung tätige.",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 89,
+    "chapterId": 7,
+    "english": "Are there any bank charges for using my card abroad?",
+    "german": "Gibt es Bankgebühren für die Nutzung meiner Karte im Ausland?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 90,
+    "chapterId": 7,
+    "english": "Could I pay in euros, or do I need the local currency?",
+    "german": "Kann ich in Euro bezahlen, oder benötige ich die lokale Währung?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 91,
+    "chapterId": 7,
+    "english": "I need to make an urgent bank transfer – can you help me?",
+    "german": "Ich muss eine dringende Banküberweisung tätigen – können Sie mir helfen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 92,
+    "chapterId": 7,
+    "english": "Could you break this large note into smaller ones, please?",
+    "german": "Könnten Sie diesen großen Schein bitte in kleinere wechseln?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 93,
+    "chapterId": 7,
+    "english": "I am not sure if this coin is still valid – could you check?",
+    "german": "Ich bin nicht sicher, ob diese Münze noch gültig ist – könnten Sie nachsehen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 94,
+    "chapterId": 7,
+    "english": "The ATM has swallowed my card and will not return it.",
+    "german": "Der Geldautomat hat meine Karte eingezogen und gibt sie nicht zurück.",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 95,
+    "chapterId": 7,
+    "english": "Could you give me a breakdown of all the charges on this bill?",
+    "german": "Könnten Sie mir eine Aufschlüsselung aller Gebühren auf dieser Rechnung geben?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 96,
+    "chapterId": 7,
+    "english": "I would prefer to pay in instalments if that is possible.",
+    "german": "Ich würde es vorziehen, in Raten zu bezahlen, wenn das möglich ist.",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 97,
+    "chapterId": 7,
+    "english": "Is there a fee for converting currencies at this exchange office?",
+    "german": "Gibt es eine Gebühr für den Währungsumtausch in diesem Wechselbüro?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 98,
+    "chapterId": 7,
+    "english": "I have been overcharged on my bill – could you correct this, please?",
+    "german": "Ich wurde auf meiner Rechnung zu viel berechnet – könnten Sie das bitte korrigieren?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 99,
+    "chapterId": 7,
+    "english": "Could I get a tax refund on these purchases before I leave?",
+    "german": "Könnte ich vor meiner Abreise eine Steuerrückerstattung für diese Einkäufe bekommen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 100,
+    "chapterId": 7,
+    "english": "What is the safest way to carry money when travelling abroad?",
+    "german": "Was ist die sicherste Art, Geld auf Auslandsreisen bei sich zu tragen?",
+    "category": "Zahlen & Geld"
+  },
+  {
+    "id": 101,
+    "chapterId": 7,
+    "english": "I would like to report a suspicious transaction on my account.",
+    "german": "Ich möchte eine verdächtige Transaktion auf meinem Konto melden.",
+    "category": "Zahlen & Geld"
+  }
+]

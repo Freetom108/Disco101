@@ -48,21 +48,28 @@ import {
   safePlayerReplace,
   safePlayerSetPlaybackRate,
 } from '../../utils/safeAudioPlayer';
+import { titleForModule } from '../../constants/activeLearningModule';
+import {
+  applyChapterProgressUpdatesAsync,
+  LAST_POSITION_KEY,
+  loadPinnedIdsForModule,
+  persistPinnedIdsForModule,
+  resolveHomeResume,
+} from '../../constants/learningResume';
+import {
+  getSentencesForModule,
+  type SentenceRecord,
+} from '../../constants/sentencePacks';
 import {
   hasDisc101FullAccess,
   isChapterLockedWithoutPurchase,
 } from '../../constants/chapterUnlock';
+import type { ModuleCode } from '../../constants/products';
 
 const CHRIS_AVATAR = require('../../assets/chris.png');
 const ANN_AVATAR = require('../../assets/ann.png');
 
-type Phrase = {
-  id: number;
-  chapterId: number;
-  english: string;
-  german: string;
-  category: string;
-};
+type Phrase = SentenceRecord;
 
 function shufflePhrases(phrases: Phrase[]): Phrase[] {
   const a = [...phrases];
@@ -205,41 +212,6 @@ function TestChrisAnnButtons({
   );
 }
 
-const SENTENCES: Phrase[] = require('../../data/sentences.json');
-const TOTAL_PHRASES = SENTENCES.length;
-
-const LAST_POSITION_KEY = 'last_position';
-const CHAPTER_PROGRESS_KEY = 'chapter_progress';
-
-function saveLastPosition(chapterId: number, phraseIndex: number) {
-  AsyncStorage.setItem(
-    LAST_POSITION_KEY,
-    JSON.stringify({ chapterId, phraseIndex }),
-  );
-}
-
-function applyChapterProgress(
-  updates: Array<{ chapterId: number; phraseIndex: number }>,
-) {
-  AsyncStorage.getItem(CHAPTER_PROGRESS_KEY).then((val) => {
-    try {
-      const progress: Record<string, number> = val ? JSON.parse(val) : {};
-      for (const { chapterId, phraseIndex } of updates) {
-        const key = String(chapterId);
-        progress[key] = Math.max(progress[key] ?? 0, phraseIndex);
-      }
-      AsyncStorage.setItem(CHAPTER_PROGRESS_KEY, JSON.stringify(progress));
-    } catch {
-      /* ignore */
-    }
-  });
-}
-
-function persistOnNext(chapterId: number, phraseIndex: number) {
-  saveLastPosition(chapterId, phraseIndex);
-  applyChapterProgress([{ chapterId, phraseIndex }]);
-}
-
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [fontsLoaded] = useFonts({
@@ -261,8 +233,43 @@ export default function HomeScreen() {
   const [showTestDone, setShowTestDone] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
+  const [learningModule, setLearningModule] = useState<ModuleCode>('101');
+  const [bootReady, setBootReady] = useState(false);
+  const [homeHeaderSubtitle, setHomeHeaderSubtitle] = useState(() =>
+    titleForModule('101'),
+  );
   const [showTestSelection, setShowTestSelection] = useState(false);
   const activeTestKindRef = useRef<1 | 2 | null>(null);
+
+  const sentences = useMemo(
+    () => getSentencesForModule(learningModule),
+    [learningModule],
+  );
+  const totalPhrases = sentences.length;
+
+  const persistPosition = useCallback(
+    (chapterId: number, phraseIndex: number) => {
+      void AsyncStorage.setItem(
+        LAST_POSITION_KEY,
+        JSON.stringify({
+          chapterId,
+          phraseIndex,
+          moduleCode: learningModule,
+        }),
+      );
+    },
+    [learningModule],
+  );
+
+  const persistOnNext = useCallback(
+    (chapterId: number, phraseIndex: number) => {
+      persistPosition(chapterId, phraseIndex);
+      void applyChapterProgressUpdatesAsync(learningModule, [
+        { chapterId, phraseIndex },
+      ]);
+    },
+    [learningModule, persistPosition],
+  );
   const showOptionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -412,38 +419,38 @@ export default function HomeScreen() {
       setSelectedOptionId(null);
       setShowOptions(false);
       setAnswerLocked(false);
-      AsyncStorage.getItem('pinned_phrases').then((val) => {
-        if (val) setPinnedIds(JSON.parse(val));
-      });
-      void hasDisc101FullAccess().then((full) => setDisc101FullUnlocked(full));
-      AsyncStorage.getItem(LAST_POSITION_KEY).then((val) => {
-        if (!val) return;
+      void (async () => {
         try {
-          const { chapterId, phraseIndex } = JSON.parse(val) as {
-            chapterId?: unknown;
-            phraseIndex?: unknown;
-          };
-          const ch = Number(chapterId);
-          const idx = Number(phraseIndex);
-          if (!Number.isFinite(ch) || !Number.isFinite(idx)) return;
-          if (ch < 1 || ch > 7) return;
-          const maxInCh = SENTENCES.filter((p) => p.chapterId === ch).length;
-          const clampedIdx = Math.min(Math.max(0, idx), maxInCh);
-          setCurrentChapter(ch);
+          const { module, chapterId, phraseIndex } = await resolveHomeResume();
+          const pack = getSentencesForModule(module);
+          setLearningModule(module);
+          setPinnedIds(await loadPinnedIdsForModule(module));
+          void hasDisc101FullAccess().then((full) =>
+            setDisc101FullUnlocked(full),
+          );
+          setHomeHeaderSubtitle(titleForModule(module));
+          const maxInCh = pack.filter((p) => p.chapterId === chapterId).length;
+          const clampedIdx =
+            pack.length === 0
+              ? 0
+              : Math.min(Math.max(0, phraseIndex), maxInCh);
+          setCurrentChapter(chapterId);
           setCurrentIndex(clampedIdx);
         } catch {
-          /* ignore invalid stored position */
+          setHomeHeaderSubtitle(titleForModule('101'));
+        } finally {
+          setBootReady(true);
         }
-      });
+      })();
     }, []),
   );
 
   const chPhrases = useMemo(
     () =>
-      SENTENCES.filter((p) => p.chapterId === currentChapter).sort(
+      sentences.filter((p) => p.chapterId === currentChapter).sort(
         (a, b) => a.id - b.id,
       ) as Phrase[],
-    [currentChapter],
+    [currentChapter, sentences],
   );
   const chapterPhraseIds = useMemo(
     () => chPhrases.map((p) => p.id),
@@ -453,32 +460,31 @@ export default function HomeScreen() {
   const categoryTitle = chPhrases[0]?.category ?? `Kapitel ${currentChapter}`;
 
   const phrasesBefore = useMemo(
-    () => SENTENCES.filter((p) => p.chapterId < currentChapter).length,
-    [currentChapter],
+    () => sentences.filter((p) => p.chapterId < currentChapter).length,
+    [currentChapter, sentences],
   );
 
-  const mergeWrongIntoPinned = useCallback(async (wrongIds: number[]) => {
-    try {
-      const toAdd = disc101FullUnlocked
-        ? wrongIds
-        : wrongIds.filter((wid) => {
-            const m = SENTENCES.find((p) => p.id === wid);
-            return (
-              m != null && !isChapterLockedWithoutPurchase(m.chapterId)
-            );
-          });
-      const raw = await AsyncStorage.getItem('pinned_phrases');
-      const parsed = raw ? JSON.parse(raw) : [];
-      const existing = Array.isArray(parsed)
-        ? parsed.filter((x: unknown) => typeof x === 'number')
-        : [];
-      const merged = Array.from(new Set([...existing, ...toAdd]));
-      setPinnedIds(merged);
-      await AsyncStorage.setItem('pinned_phrases', JSON.stringify(merged));
-    } catch {
-      /* ignore */
-    }
-  }, [disc101FullUnlocked]);
+  const mergeWrongIntoPinned = useCallback(
+    async (wrongIds: number[]) => {
+      try {
+        const toAdd = disc101FullUnlocked
+          ? wrongIds
+          : wrongIds.filter((wid) => {
+              const m = sentences.find((p) => p.id === wid);
+              return (
+                m != null && !isChapterLockedWithoutPurchase(m.chapterId)
+              );
+            });
+        const existing = await loadPinnedIdsForModule(learningModule);
+        const merged = Array.from(new Set([...existing, ...toAdd]));
+        setPinnedIds(merged);
+        await persistPinnedIdsForModule(learningModule, merged);
+      } catch {
+        /* ignore */
+      }
+    },
+    [disc101FullUnlocked, learningModule, sentences],
+  );
 
   useEffect(() => {
     safePlayerPause(testPlaybackPlayer);
@@ -557,18 +563,18 @@ export default function HomeScreen() {
   const completedForProgress =
     phrasesBefore + (isChapterComplete ? chCount : currentIndex);
   const globalBarPct =
-    TOTAL_PHRASES > 0
+    totalPhrases > 0
       ? Math.min(
           100,
           Math.round(
-            (completedForProgress / TOTAL_PHRASES) * 10000,
+            (completedForProgress / totalPhrases) * 10000,
           ) / 100,
         )
       : 0;
   const globalProgressText = `${Math.min(
-    TOTAL_PHRASES,
+    totalPhrases,
     completedForProgress,
-  )}/${TOTAL_PHRASES}`;
+  )}/${totalPhrases}`;
 
   const advanceToNextChapter = () => {
     if (currentChapter < 7) {
@@ -626,8 +632,8 @@ export default function HomeScreen() {
         const nextCh = currentChapter + 1;
         setCurrentChapter(nextCh);
         setCurrentIndex(0);
-        saveLastPosition(nextCh, 0);
-        applyChapterProgress([
+        persistPosition(nextCh, 0);
+        void applyChapterProgressUpdatesAsync(learningModule, [
           { chapterId: currentChapter, phraseIndex: chCount },
           { chapterId: nextCh, phraseIndex: 0 },
         ]);
@@ -692,7 +698,7 @@ export default function HomeScreen() {
   const testShowDiscoBall = showTestDone && testScorePct >= 80;
   const testIsPerfect = showTestDone && wrongAnswers.length === 0;
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !bootReady) {
     return (
       <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
         <ActivityIndicator size="large" color={BRAND} />
@@ -700,9 +706,22 @@ export default function HomeScreen() {
     );
   }
 
+  if (sentences.length === 0) {
+    return (
+      <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
+        <Header subtitle={homeHeaderSubtitle} />
+        <View style={[styles.homeBody, styles.homeEmptyPack]}>
+          <Text style={styles.homeEmptyPackText}>
+            Die Phrasen für diese Unit werden bald ergänzt.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
-      <Header />
+      <Header subtitle={homeHeaderSubtitle} />
       <View style={styles.homeBody}>
         {showTestSelection ? (
           <View style={styles.testSelectionOuter}>
@@ -1095,7 +1114,7 @@ export default function HomeScreen() {
             chapterPhraseIds={chapterPhraseIds}
             isPinned={phrase ? pinnedIds.includes(phrase.id) : false}
             onTogglePin={(id) => {
-              const meta = SENTENCES.find((p) => p.id === id);
+              const meta = sentences.find((p) => p.id === id);
               if (
                 meta &&
                 isChapterLockedWithoutPurchase(meta.chapterId) &&
@@ -1107,7 +1126,7 @@ export default function HomeScreen() {
                 ? pinnedIds.filter((x) => x !== id)
                 : [...pinnedIds, id];
               setPinnedIds(updated);
-              AsyncStorage.setItem('pinned_phrases', JSON.stringify(updated));
+              void persistPinnedIdsForModule(learningModule, updated);
             }}
             onStartTest={() => setShowTestSelection(true)}
             onRepeatChapter={onRepeatChapter}
@@ -1139,6 +1158,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: '3%',
     paddingBottom: 90, // schwebende Tab-Bar
+  },
+  homeEmptyPack: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  homeEmptyPackText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: CARD_DE,
+    textAlign: 'center',
   },
   testSelectionOuter: {
     flex: 1,

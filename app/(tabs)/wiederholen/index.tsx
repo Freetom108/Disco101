@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -24,11 +23,15 @@ import {
   filterPhraseIdsForRepeatAccess,
   hasDisc101FullAccess,
 } from '../../../constants/chapterUnlock';
-import SENTENCES from '../../../data/sentences.json';
+import { getActiveLearningModule } from '../../../constants/activeLearningModule';
+import { loadPinnedIdsForModule } from '../../../constants/learningResume';
+import type { ModuleCode } from '../../../constants/products';
+import {
+  getSentencesForModule,
+  type SentenceRecord,
+} from '../../../constants/sentencePacks';
 
-const PINNED_KEY = 'pinned_phrases';
-
-type Phrase = (typeof SENTENCES)[number];
+type Phrase = SentenceRecord;
 
 type ChapterPinGroup = {
   chapterId: number;
@@ -67,6 +70,7 @@ export default function RepeatOverviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [activeModule, setActiveModule] = useState<ModuleCode>('101');
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
 
@@ -75,16 +79,14 @@ export default function RepeatOverviewScreen() {
       let cancelled = false;
       (async () => {
         try {
-          const [raw, full101] = await Promise.all([
-            AsyncStorage.getItem(PINNED_KEY),
+          const mod = await getActiveLearningModule();
+          const [pins, full101] = await Promise.all([
+            loadPinnedIdsForModule(mod),
             hasDisc101FullAccess(),
           ]);
-          const parsed = raw ? JSON.parse(raw) : [];
-          const ids = Array.isArray(parsed)
-            ? parsed.filter((x: unknown) => typeof x === 'number')
-            : [];
           if (!cancelled) {
-            setPinnedIds(ids);
+            setActiveModule(mod);
+            setPinnedIds(pins);
             setDisc101FullUnlocked(full101);
           }
         } catch {
@@ -102,13 +104,18 @@ export default function RepeatOverviewScreen() {
     }, []),
   );
 
+  const sentences = useMemo(
+    () => getSentencesForModule(activeModule),
+    [activeModule],
+  );
+
   const chapter1PhraseIds = useMemo(
     () =>
-      (SENTENCES as Phrase[])
+      sentences
         .filter((p) => p.chapterId === 1)
         .sort((a, b) => a.id - b.id)
         .map((p) => p.id),
-    [],
+    [sentences],
   );
 
   const allowedPinnedIds = useMemo(
@@ -116,14 +123,14 @@ export default function RepeatOverviewScreen() {
       filterPhraseIdsForRepeatAccess(
         pinnedIds,
         disc101FullUnlocked,
-        SENTENCES as Phrase[],
+        sentences,
       ),
-    [pinnedIds, disc101FullUnlocked],
+    [pinnedIds, disc101FullUnlocked, sentences],
   );
 
   const groups = useMemo(
-    () => buildChapterGroups(allowedPinnedIds, SENTENCES as Phrase[]),
-    [allowedPinnedIds],
+    () => buildChapterGroups(allowedPinnedIds, sentences),
+    [allowedPinnedIds, sentences],
   );
 
   const totalPinnedAllowed = allowedPinnedIds.length;
@@ -134,7 +141,10 @@ export default function RepeatOverviewScreen() {
     if (allowedPinnedIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
-      params: { phraseIds: JSON.stringify(allowedPinnedIds) },
+      params: {
+        phraseIds: JSON.stringify(allowedPinnedIds),
+        moduleCode: activeModule,
+      },
     });
   };
 
@@ -142,7 +152,10 @@ export default function RepeatOverviewScreen() {
     if (chapter1PhraseIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
-      params: { phraseIds: JSON.stringify(chapter1PhraseIds) },
+      params: {
+        phraseIds: JSON.stringify(chapter1PhraseIds),
+        moduleCode: activeModule,
+      },
     });
   };
 
@@ -150,7 +163,10 @@ export default function RepeatOverviewScreen() {
     if (g.phraseIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
-      params: { phraseIds: JSON.stringify(g.phraseIds) },
+      params: {
+        phraseIds: JSON.stringify(g.phraseIds),
+        moduleCode: activeModule,
+      },
     });
   };
 

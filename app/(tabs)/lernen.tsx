@@ -15,15 +15,14 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BRAND,
-  BUTTON_TEXT,
   HEADER_DARK,
   HEADER_TEXT_SUB,
   INACTIVE,
   SCREEN_BG,
 } from '../../constants/theme';
 import {
-  coerceModuleCode,
   getActiveLearningModule,
+  setActiveLearningModule,
 } from '../../constants/activeLearningModule';
 import {
   hasDisc101FullAccess,
@@ -34,57 +33,96 @@ import {
   parseChapterProgressRecord,
   readChapterProgressRaw,
 } from '../../constants/learningResume';
-import type { ModuleCode } from '../../constants/products';
+import {
+  MODULE_PRODUCTS,
+  type ModuleCode,
+} from '../../constants/products';
 import { getSentencesForModule } from '../../constants/sentencePacks';
 
-type LastPosition = { chapterId: number; phraseIndex: number };
+/** App accent red for Learn tab unit accordion headers */
+const UNIT_HEADER_RED = '#CF142B';
+const UNIT_HEADER_ON_RED = '#FFFFFF';
 
-function parseLastPositionForModule(
-  val: string | null,
-  activeModule: ModuleCode,
-): LastPosition | null {
-  if (!val) return null;
-  try {
-    const p = JSON.parse(val) as {
-      chapterId?: unknown;
-      phraseIndex?: unknown;
-      moduleCode?: unknown;
+type ChapterRowMeta = {
+  chapterId: number;
+  title: string;
+  y: number;
+  x: number;
+  completed: boolean;
+  barPct: number;
+  displayX: number;
+};
+
+function buildChapterRows(
+  sentences: ReturnType<typeof getSentencesForModule>,
+  chapterProgress: Record<string, number>,
+): ChapterRowMeta[] {
+  return [1, 2, 3, 4, 5, 6, 7].map((chapterId) => {
+    const phrases = sentences
+      .filter((p) => p.chapterId === chapterId)
+      .sort((a, b) => a.id - b.id);
+    const y = phrases.length;
+    const title = phrases[0]?.category ?? `Kapitel ${chapterId}`;
+    const raw = chapterProgress[String(chapterId)] ?? 0;
+    const x = Math.max(0, raw);
+    const completed = y > 0 && x >= y;
+    const barPct =
+      y > 0 && !completed
+        ? Math.min(100, Math.round(((x + 1) / y) * 10000) / 100)
+        : completed
+          ? 100
+          : 0;
+    const displayX = x >= y ? y : x + 1;
+    return {
+      chapterId,
+      title,
+      y,
+      x,
+      completed,
+      barPct,
+      displayX,
     };
-    const mc =
-      p.moduleCode != null ? coerceModuleCode(p.moduleCode) : ('101' as ModuleCode);
-    if (mc !== activeModule) return null;
-    const ch = Number(p.chapterId);
-    const idx = Number(p.phraseIndex);
-    if (!Number.isFinite(ch) || !Number.isFinite(idx)) return null;
-    if (ch < 1 || ch > 7) return null;
-    return { chapterId: ch, phraseIndex: idx };
-  } catch {
-    return null;
-  }
+  });
 }
+
+const EMPTY_PROGRESS: Record<ModuleCode, Record<string, number>> = {
+  '101': {},
+  '102': {},
+  '103': {},
+  '104': {},
+};
 
 export default function LernenScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [activeModule, setActiveModule] = useState<ModuleCode>('101');
-  const [lastPosition, setLastPosition] = useState<LastPosition | null>(null);
-  const [chapterProgress, setChapterProgress] = useState<Record<string, number>>(
-    {},
-  );
+  const [expandedUnit, setExpandedUnit] = useState<ModuleCode | null>('101');
+  const [progressByModule, setProgressByModule] =
+    useState<Record<ModuleCode, Record<string, number>>>(EMPTY_PROGRESS);
   const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-      (async () => {
+      void (async () => {
         const mod = await getActiveLearningModule();
         if (cancelled) return;
-        setActiveModule(mod);
-        const cpRaw = await readChapterProgressRaw(mod);
-        setChapterProgress(parseChapterProgressRecord(cpRaw));
-        const lp = await AsyncStorage.getItem(LAST_POSITION_KEY);
-        setLastPosition(parseLastPositionForModule(lp, mod));
-        setDisc101FullUnlocked(await hasDisc101FullAccess());
+        setExpandedUnit(mod);
+
+        const progressEntries = await Promise.all(
+          MODULE_PRODUCTS.map(async (p) => {
+            const raw = await readChapterProgressRaw(p.code);
+            const rec = parseChapterProgressRecord(raw);
+            return [p.code, rec] as const;
+          }),
+        );
+        const nextProgress = { ...EMPTY_PROGRESS };
+        for (const [code, rec] of progressEntries) {
+          nextProgress[code] = rec;
+        }
+        if (!cancelled) {
+          setProgressByModule(nextProgress);
+          setDisc101FullUnlocked(await hasDisc101FullAccess());
+        }
       })();
       return () => {
         cancelled = true;
@@ -92,90 +130,42 @@ export default function LernenScreen() {
     }, []),
   );
 
-  const sentences = useMemo(
-    () => getSentencesForModule(activeModule),
-    [activeModule],
+  const sentencesByModule = useMemo(() => {
+    const o = {} as Record<ModuleCode, ReturnType<typeof getSentencesForModule>>;
+    for (const p of MODULE_PRODUCTS) {
+      o[p.code] = getSentencesForModule(p.code);
+    }
+    return o;
+  }, []);
+
+  const toggleUnitAccordion = useCallback((code: ModuleCode) => {
+    setExpandedUnit((prev) => (prev === code ? null : code));
+  }, []);
+
+  const selectChapter = useCallback(
+    async (chapterId: number, moduleCode: ModuleCode) => {
+      const locked =
+        isChapterLockedWithoutPurchase(chapterId) && !disc101FullUnlocked;
+      if (locked) {
+        router.push({
+          pathname: '/paywall',
+          params: { focusModule: moduleCode },
+        });
+        return;
+      }
+      await setActiveLearningModule(moduleCode);
+      await AsyncStorage.setItem(
+        LAST_POSITION_KEY,
+        JSON.stringify({
+          chapterId,
+          phraseIndex: 0,
+          moduleCode,
+        }),
+      );
+      router.replace('/(tabs)');
+    },
+    [disc101FullUnlocked, router],
   );
-
-  const chapterRows = useMemo(() => {
-    return [1, 2, 3, 4, 5, 6, 7].map((chapterId) => {
-      const phrases = sentences
-        .filter((p) => p.chapterId === chapterId)
-        .sort((a, b) => a.id - b.id);
-      const y = phrases.length;
-      const title = phrases[0]?.category ?? `Kapitel ${chapterId}`;
-      const raw = chapterProgress[String(chapterId)] ?? 0;
-      const x = Math.max(0, raw);
-      const completed = y > 0 && x >= y;
-      const barPct =
-        y > 0 && !completed
-          ? Math.min(100, Math.round(((x + 1) / y) * 10000) / 100)
-          : completed
-            ? 100
-            : 0;
-      const displayX = x >= y ? y : x + 1;
-      return {
-        chapterId,
-        title,
-        y,
-        x,
-        completed,
-        barPct,
-        displayX,
-      };
-    });
-  }, [chapterProgress, sentences]);
-
-  const weitermachenMeta = useMemo(() => {
-    if (!lastPosition) return null;
-    const { chapterId, phraseIndex } = lastPosition;
-    const phrases = sentences
-      .filter((p) => p.chapterId === chapterId)
-      .sort((a, b) => a.id - b.id);
-    const y = phrases.length;
-    if (y === 0) return null;
-    const name = phrases[0]?.category ?? `Kapitel ${chapterId}`;
-    const idx = Math.min(Math.max(0, phraseIndex), y);
-    const displayPhrase = idx >= y ? y : idx + 1;
-    return { name, displayPhrase, y };
-  }, [lastPosition, sentences]);
-
-  const goHome = () => {
-    if (
-      lastPosition &&
-      isChapterLockedWithoutPurchase(lastPosition.chapterId) &&
-      !disc101FullUnlocked
-    ) {
-      router.push({
-        pathname: '/paywall',
-        params: { focusModule: activeModule },
-      });
-      return;
-    }
-    router.replace('/(tabs)');
-  };
-
-  const selectChapter = async (chapterId: number) => {
-    const locked =
-      isChapterLockedWithoutPurchase(chapterId) && !disc101FullUnlocked;
-    const mod = await getActiveLearningModule();
-    if (locked) {
-      router.push({
-        pathname: '/paywall',
-        params: { focusModule: mod },
-      });
-      return;
-    }
-    await AsyncStorage.setItem(
-      LAST_POSITION_KEY,
-      JSON.stringify({
-        chapterId,
-        phraseIndex: 0,
-        moduleCode: mod,
-      }),
-    );
-    router.replace('/(tabs)');
-  };
 
   return (
     <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
@@ -203,74 +193,107 @@ export default function LernenScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.sectionBlock}>
-          <Pressable
-            onPress={goHome}
-            style={({ pressed }) => [
-              styles.weiterBtn,
-              pressed && { opacity: 0.92 },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Weitermachen"
-          >
-            <Text style={styles.weiterBtnText}>Weitermachen →</Text>
-          </Pressable>
-          {weitermachenMeta ? (
-            <Text style={styles.weiterSub} numberOfLines={2}>
-              {weitermachenMeta.name}
-              {' · '}
-              Phrase {weitermachenMeta.displayPhrase} / {weitermachenMeta.y}
-            </Text>
-          ) : (
-            <Text style={styles.weiterSubMuted}>
-              Noch keine Lernposition gespeichert.
-            </Text>
-          )}
-        </View>
+        {MODULE_PRODUCTS.map((product) => {
+          const code = product.code;
+          const isOpen = expandedUnit === code;
+          const pack = sentencesByModule[code];
+          const hasChapters = pack.length > 0;
+          const chapterRows = hasChapters
+            ? buildChapterRows(pack, progressByModule[code] ?? {})
+            : [];
 
-        <Text style={styles.listHeading}>Kapitel</Text>
-
-        {chapterRows.map((row) => {
-          const locked =
-            isChapterLockedWithoutPurchase(row.chapterId) && !disc101FullUnlocked;
           return (
-          <Pressable
-            key={row.chapterId}
-            onPress={() => void selectChapter(row.chapterId)}
-            style={({ pressed }) => [
-              styles.chapterCard,
-              locked && styles.chapterCardLocked,
-              pressed && { opacity: locked ? 0.92 : 0.88 },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={
-              locked ? `${row.title} gesperrt` : `${row.title} öffnen`
-            }
-          >
-            <View style={styles.chapterCardTop}>
-              <Text style={styles.chapterName} numberOfLines={2}>
-                {row.title}
-              </Text>
-              {locked ? (
-                <Ionicons name="lock-closed" size={18} color="#8E8E93" />
-              ) : (
-                <Text style={styles.chapterFrac}>
-                  {row.displayX} / {row.y}
-                </Text>
-              )}
-            </View>
-            {locked ? (
-              <Text style={styles.chapterLockedHint}>Tippe zum Freischalten</Text>
-            ) : row.completed ? (
-              <Text style={styles.chapterCheck}>✓</Text>
-            ) : (
-              <View style={styles.progressTrack}>
-                <View
-                  style={[styles.progressFill, { width: `${row.barPct}%` }]}
+            <View key={code} style={styles.accordionBlock}>
+              <Pressable
+                onPress={() => toggleUnitAccordion(code)}
+                style={({ pressed }) => [
+                  styles.accordionHeader,
+                  pressed && { opacity: 0.92 },
+                ]}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: isOpen }}
+                accessibilityLabel={`${product.title}${isOpen ? ' einklappen' : ' aufklappen'}`}
+              >
+                <Text style={styles.accordionTitle}>{product.title}</Text>
+                <Ionicons
+                  name={isOpen ? 'chevron-up' : 'chevron-down'}
+                  size={22}
+                  color={UNIT_HEADER_ON_RED}
                 />
-              </View>
-            )}
-          </Pressable>
+              </Pressable>
+
+              {isOpen ? (
+                hasChapters ? (
+                  <View style={styles.accordionBody}>
+                    {chapterRows.map((row) => {
+                      const locked =
+                        isChapterLockedWithoutPurchase(row.chapterId) &&
+                        !disc101FullUnlocked;
+                      return (
+                        <Pressable
+                          key={row.chapterId}
+                          onPress={() => void selectChapter(row.chapterId, code)}
+                          style={({ pressed }) => [
+                            styles.chapterCard,
+                            locked && styles.chapterCardLocked,
+                            pressed && { opacity: locked ? 0.92 : 0.88 },
+                          ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={
+                            locked ? `${row.title} gesperrt` : `${row.title} öffnen`
+                          }
+                        >
+                          <View style={styles.chapterCardTop}>
+                            <View style={styles.chapterTitleBlock}>
+                              <Text style={styles.chapterLabel}>
+                                Kapitel {row.chapterId}
+                              </Text>
+                              <Text
+                                style={styles.chapterName}
+                                numberOfLines={2}
+                              >
+                                {row.title}
+                              </Text>
+                            </View>
+                            {locked ? (
+                              <Ionicons
+                                name="lock-closed"
+                                size={18}
+                                color="#8E8E93"
+                              />
+                            ) : (
+                              <Text style={styles.chapterFrac}>
+                                {row.displayX} / {row.y}
+                              </Text>
+                            )}
+                          </View>
+                          {locked ? (
+                            <Text style={styles.chapterLockedHint}>
+                              Tippe zum Freischalten
+                            </Text>
+                          ) : row.completed ? (
+                            <Text style={styles.chapterCheck}>✓</Text>
+                          ) : (
+                            <View style={styles.progressTrack}>
+                              <View
+                                style={[
+                                  styles.progressFill,
+                                  { width: `${row.barPct}%` },
+                                ]}
+                              />
+                            </View>
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <View style={styles.accordionPlaceholderWrap}>
+                    <Text style={styles.accordionPlaceholder}>Kommt bald</Text>
+                  </View>
+                )
+              ) : null}
+            </View>
           );
         })}
       </ScrollView>
@@ -331,38 +354,49 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: '3%',
   },
-  sectionBlock: {
-    marginBottom: 24,
+  accordionBlock: {
+    marginBottom: 10,
   },
-  weiterBtn: {
-    backgroundColor: '#CF142B',
-    borderRadius: 12,
-    paddingVertical: 16,
+  accordionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: UNIT_HEADER_RED,
+    borderRadius: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    ...Platform.select({
+      android: { elevation: 2 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+      },
+    }),
   },
-  weiterBtnText: {
-    color: BUTTON_TEXT,
+  accordionTitle: {
+    flex: 1,
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: UNIT_HEADER_ON_RED,
+    marginRight: 12,
   },
-  weiterSub: {
+  accordionBody: {
     marginTop: 8,
-    fontSize: 13,
+    paddingLeft: 2,
+  },
+  accordionPlaceholderWrap: {
+    marginTop: 8,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    borderRadius: 12,
+  },
+  accordionPlaceholder: {
+    fontSize: 15,
     color: HEADER_TEXT_SUB,
     textAlign: 'center',
-  },
-  weiterSubMuted: {
-    marginTop: 8,
-    fontSize: 13,
-    color: '#AAAAAA',
-    textAlign: 'center',
-  },
-  listHeading: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#888888',
-    textTransform: 'uppercase',
-    marginBottom: 8,
   },
   chapterCard: {
     backgroundColor: '#FFFFFF',
@@ -385,12 +419,22 @@ const styles = StyleSheet.create({
   },
   chapterCardTop: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
   },
-  chapterName: {
+  chapterTitleBlock: {
     flex: 1,
+    minWidth: 0,
+  },
+  chapterLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8E8E93',
+    marginBottom: 4,
+    letterSpacing: 0.2,
+  },
+  chapterName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1A1A1A',

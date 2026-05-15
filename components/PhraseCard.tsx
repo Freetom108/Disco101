@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
+  Dimensions,
   Easing,
+  PanResponder,
   Platform,
   Pressable,
   StyleSheet,
@@ -25,7 +27,7 @@ import { preloadPhraseAudio } from '../utils/audioPreloader';
 const CHRIS_AVATAR = require('../assets/chris.png');
 const ANN_AVATAR = require('../assets/ann.png');
 
-const SLIDE_OFFSET = 400;
+const SLIDE_OFFSET = Math.min(520, Math.round(Dimensions.get('window').height * 0.42));
 const SLIDE_DURATION_MS = 380;
 const SLIDE_EASING = Easing.inOut(Easing.ease);
 
@@ -50,8 +52,6 @@ export type PhraseCardProps = {
   isPinned: boolean;
   onTogglePin: (id: number) => void;
   onStartTest: () => void;
-  onRepeatChapter: () => void;
-  onRestartChapter: () => void;
   onNextChapter: () => void;
   onBack: () => void;
   onNext: () => void;
@@ -77,8 +77,6 @@ export default function PhraseCard({
   isPinned,
   onTogglePin,
   onStartTest,
-  onRepeatChapter,
-  onRestartChapter,
   onNextChapter,
   onBack,
   onNext,
@@ -86,14 +84,17 @@ export default function PhraseCard({
   const showChapterMenu = isChapterComplete;
   const isBackDisabled = false;
 
-  const slideX = useRef(new Animated.Value(0)).current;
+  const slideY = useRef(new Animated.Value(0)).current;
   const [isSlideAnimating, setIsSlideAnimating] = useState(false);
+
+  const swipeGesturesEnabled =
+    !isChapterComplete && !isAllPhrasesComplete && !isSlideAnimating;
 
   useEffect(() => {
     if (!isSlideAnimating) {
-      slideX.setValue(0);
+      slideY.setValue(0);
     }
-  }, [phraseId, slideX, isSlideAnimating]);
+  }, [phraseId, slideY, isSlideAnimating]);
 
   useEffect(() => {
     preloadPhraseAudio(chapterPhraseIds, moduleCode);
@@ -101,36 +102,9 @@ export default function PhraseCard({
 
   const runAnimatedNext = useCallback(() => {
     if (isSlideAnimating || isAllPhrasesComplete) return;
+    slideY.stopAnimation();
     setIsSlideAnimating(true);
-    Animated.timing(slideX, {
-      toValue: SLIDE_OFFSET,
-      duration: SLIDE_DURATION_MS,
-      easing: SLIDE_EASING,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (!finished) {
-        setIsSlideAnimating(false);
-        return;
-      }
-      slideX.setValue(-SLIDE_OFFSET);
-      onNext();
-      requestAnimationFrame(() => {
-        Animated.timing(slideX, {
-          toValue: 0,
-          duration: SLIDE_DURATION_MS,
-          easing: SLIDE_EASING,
-          useNativeDriver: true,
-        }).start(() => {
-          setIsSlideAnimating(false);
-        });
-      });
-    });
-  }, [slideX, onNext, isAllPhrasesComplete, isSlideAnimating]);
-
-  const runAnimatedBack = useCallback(() => {
-    if (isSlideAnimating || isBackDisabled) return;
-    setIsSlideAnimating(true);
-    Animated.timing(slideX, {
+    Animated.timing(slideY, {
       toValue: -SLIDE_OFFSET,
       duration: SLIDE_DURATION_MS,
       easing: SLIDE_EASING,
@@ -140,10 +114,10 @@ export default function PhraseCard({
         setIsSlideAnimating(false);
         return;
       }
-      slideX.setValue(SLIDE_OFFSET);
-      onBack();
+      slideY.setValue(SLIDE_OFFSET);
+      onNext();
       requestAnimationFrame(() => {
-        Animated.timing(slideX, {
+        Animated.timing(slideY, {
           toValue: 0,
           duration: SLIDE_DURATION_MS,
           easing: SLIDE_EASING,
@@ -153,14 +127,66 @@ export default function PhraseCard({
         });
       });
     });
-  }, [slideX, onBack, isBackDisabled, isSlideAnimating]);
+  }, [slideY, onNext, isAllPhrasesComplete, isSlideAnimating]);
+
+  const runAnimatedBack = useCallback(() => {
+    if (isSlideAnimating || isBackDisabled) return;
+    slideY.stopAnimation();
+    setIsSlideAnimating(true);
+    Animated.timing(slideY, {
+      toValue: SLIDE_OFFSET,
+      duration: SLIDE_DURATION_MS,
+      easing: SLIDE_EASING,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (!finished) {
+        setIsSlideAnimating(false);
+        return;
+      }
+      slideY.setValue(-SLIDE_OFFSET);
+      onBack();
+      requestAnimationFrame(() => {
+        Animated.timing(slideY, {
+          toValue: 0,
+          duration: SLIDE_DURATION_MS,
+          easing: SLIDE_EASING,
+          useNativeDriver: true,
+        }).start(() => {
+          setIsSlideAnimating(false);
+        });
+      });
+    });
+  }, [slideY, onBack, isBackDisabled, isSlideAnimating]);
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, g) => {
+          if (!swipeGesturesEnabled) return false;
+          const { dx, dy } = g;
+          return Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 14;
+        },
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderRelease: (_, g) => {
+          if (!swipeGesturesEnabled) return;
+          const { dy, vy } = g;
+          if (dy < -56 || vy < -0.35) {
+            runAnimatedNext();
+          } else if (dy > 56 || vy > 0.35) {
+            runAnimatedBack();
+          }
+        },
+      }),
+    [swipeGesturesEnabled, runAnimatedNext, runAnimatedBack],
+  );
 
   return (
     <View style={styles.phraseCardOuter}>
       <Animated.View
         style={[
           styles.phraseCardShadow,
-          { transform: [{ translateX: slideX }] },
+          { transform: [{ translateY: slideY }] },
         ]}
       >
         <View style={styles.phraseCard}>
@@ -181,30 +207,34 @@ export default function PhraseCard({
               />
             </Pressable>
           ) : null}
-          <View>
-            <View style={styles.cardHeaderTop}>
-              <Text
-                style={[styles.cardChapter, styles.cardChapterFlex]}
-                numberOfLines={2}
-              >
-                {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
-              </Text>
+          <View
+            style={styles.swipeZone}
+            {...panResponder.panHandlers}
+          >
+            <View>
+              <View style={styles.cardHeaderTop}>
+                <Text
+                  style={[styles.cardChapter, styles.cardChapterFlex]}
+                  numberOfLines={2}
+                >
+                  {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
+                </Text>
+              </View>
+              <View style={styles.cardGlobalRow}>
+                <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
+                <Text style={styles.cardGlobalValue}>{globalProgressText}</Text>
+              </View>
+              <View style={styles.cardProgressTrack}>
+                <View
+                  style={[
+                    styles.cardProgressFill,
+                    { width: `${globalBarPct}%` },
+                  ]}
+                />
+              </View>
             </View>
-            <View style={styles.cardGlobalRow}>
-              <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
-              <Text style={styles.cardGlobalValue}>{globalProgressText}</Text>
-            </View>
-            <View style={styles.cardProgressTrack}>
-              <View
-                style={[
-                  styles.cardProgressFill,
-                  { width: `${globalBarPct}%` },
-                ]}
-              />
-            </View>
-          </View>
 
-          <View style={styles.cardMid}>
+            <View style={styles.cardMid}>
             {showChapterMenu ? (
               <View style={styles.chapterMenuBlock}>
                 <Text
@@ -232,19 +262,6 @@ export default function PhraseCard({
                   >
                     <Text style={styles.chapterMenuBtnPrimaryText}>
                       📝 Tests starten
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Kapitel wiederholen"
-                    style={({ pressed }) => [
-                      styles.chapterMenuBtnOutline,
-                      pressed && { opacity: 0.9 },
-                    ]}
-                    onPress={onRepeatChapter}
-                  >
-                    <Text style={styles.chapterMenuBtnOutlineText}>
-                      🔁 Kapitel wiederholen
                     </Text>
                   </Pressable>
                   {chapterNumber < 7 ? (
@@ -295,97 +312,78 @@ export default function PhraseCard({
             )}
           </View>
 
-          <View
-            style={[
-              styles.speakerAndFooter,
-              isChapterComplete && styles.speakerAndFooterComplete,
-            ]}
-          >
             {!isChapterComplete ? (
-              <>
-                <View style={styles.cardMFRow}>
-                  <SpeakerButton
-                    accessibilityLabel="Male speaker"
-                    letter="M"
-                    phraseId={phraseId}
-                    moduleCode={moduleCode}
-                    avatarSource={CHRIS_AVATAR}
-                  />
-                  <SpeakerButton
-                    accessibilityLabel="Female speaker"
-                    letter="F"
-                    phraseId={phraseId}
-                    moduleCode={moduleCode}
-                    avatarSource={ANN_AVATAR}
-                  />
-                </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Kapitel wiederholen"
-                  onPress={() => {
-                    slideX.stopAnimation();
-                    slideX.setValue(0);
-                    setIsSlideAnimating(false);
-                    onRestartChapter();
-                  }}
-                  style={({ pressed }) => [
-                    styles.restartChapterRow,
-                    pressed && { opacity: 0.75 },
-                  ]}
-                >
-                  <Ionicons
-                    name="refresh-outline"
-                    size={14}
-                    color="#AAAAAA"
-                  />
-                  <Text style={styles.restartChapterText}>
-                    Kapitel wiederholen
-                  </Text>
-                </Pressable>
-              </>
+              <View style={styles.cardMFRow}>
+                <SpeakerButton
+                  accessibilityLabel="Male speaker"
+                  letter="M"
+                  phraseId={phraseId}
+                  moduleCode={moduleCode}
+                  avatarSource={CHRIS_AVATAR}
+                />
+                <SpeakerButton
+                  accessibilityLabel="Female speaker"
+                  letter="F"
+                  phraseId={phraseId}
+                  moduleCode={moduleCode}
+                  avatarSource={ANN_AVATAR}
+                />
+              </View>
             ) : null}
-            <View style={styles.cardFooterRow}>
+          </View>
+
+          <View style={styles.cardFooterColumn}>
+            {!(isChapterComplete && !isAllPhrasesComplete) ? (
               <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Zurück"
-                onPress={runAnimatedBack}
-                disabled={isBackDisabled || isSlideAnimating}
                 style={({ pressed }) => [
-                  pressed && !isBackDisabled && { opacity: 0.7 },
+                  styles.cardNext,
+                  isAllPhrasesComplete && styles.cardNextDisabled,
+                  pressed && !isAllPhrasesComplete && { opacity: 0.92 },
                 ]}
+                accessibilityRole="button"
+                accessibilityLabel="Nächste Phrase"
+                onPress={runAnimatedNext}
+                disabled={isAllPhrasesComplete || isSlideAnimating}
               >
-                <Text
-                  style={[
-                    styles.cardBack,
-                    isBackDisabled && styles.cardBackDisabled,
-                  ]}
-                >
-                  Zurück
-                </Text>
-              </Pressable>
-              {!(isChapterComplete && !isAllPhrasesComplete) ? (
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.cardNext,
-                    isAllPhrasesComplete && styles.cardNextDisabled,
-                    pressed && !isAllPhrasesComplete && { opacity: 0.92 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Nächste Phrase"
-                  onPress={runAnimatedNext}
-                  disabled={isAllPhrasesComplete || isSlideAnimating}
-                >
+                <View style={styles.cardNextInner}>
                   <Text
                     style={[
                       styles.cardNextText,
                       isAllPhrasesComplete && styles.cardNextTextDisabled,
                     ]}
                   >
-                    Nächste Phrase →
+                    Nächste Phrase
                   </Text>
-                </Pressable>
-              ) : null}
-            </View>
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                </View>
+              </Pressable>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Zurück"
+              onPress={runAnimatedBack}
+              disabled={isBackDisabled || isSlideAnimating}
+              style={({ pressed }) => [
+                styles.cardBackBelowWrap,
+                (isBackDisabled || isSlideAnimating) && styles.cardBackBelowDisabled,
+                pressed && !isBackDisabled && !isSlideAnimating && {
+                  opacity: 0.72,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.cardBackBelowText,
+                  isBackDisabled && styles.cardBackDisabled,
+                ]}
+              >
+                Zurück
+              </Text>
+            </Pressable>
           </View>
         </View>
       </Animated.View>
@@ -482,9 +480,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
     justifyContent: 'center',
   },
-  speakerAndFooter: {},
-  speakerAndFooterComplete: {
-    marginTop: 4,
+  swipeZone: {
+    flex: 1,
+    minHeight: 0,
   },
   cardBackDisabled: {
     opacity: 0.35,
@@ -540,33 +538,37 @@ const styles = StyleSheet.create({
   cardMFRow: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 14,
   },
-  restartChapterRow: {
+  cardFooterColumn: {
+    marginTop: 18,
+    width: '100%',
+    alignItems: 'stretch',
+  },
+  cardNextInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    marginTop: 12,
+    gap: 10,
   },
-  restartChapterText: {
-    fontSize: 12,
-    color: '#AAAAAA',
+  cardBackBelowWrap: {
+    alignSelf: 'center',
+    marginTop: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
   },
-  cardFooterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 16,
-    gap: 12,
-  },
-  cardBack: {
-    color: INACTIVE,
-    fontSize: 16,
+  cardBackBelowText: {
+    fontSize: 13,
+    color: '#888888',
     fontWeight: '500',
+    textAlign: 'center',
+  },
+  cardBackBelowDisabled: {
+    opacity: 0.45,
   },
   cardNext: {
-    flex: 1,
-    minWidth: 0,
+    alignSelf: 'stretch',
+    width: '100%',
     backgroundColor: '#C8102E',
     borderRadius: 12,
     paddingVertical: 14,

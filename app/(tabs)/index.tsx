@@ -658,9 +658,6 @@ export default function HomeScreen() {
   };
 
   const onNextChapter = advanceToNextChapter;
-  const onRepeatChapter = () => {
-    setCurrentIndex(0);
-  };
 
   const onBack = () => {
     setShowTestSelection(false);
@@ -1139,8 +1136,6 @@ export default function HomeScreen() {
               void persistPinnedIdsForModule(learningModule, updated);
             }}
             onStartTest={() => setShowTestSelection(true)}
-            onRepeatChapter={onRepeatChapter}
-            onRestartChapter={() => setCurrentIndex(0)}
             onNextChapter={onNextChapter}
             onBack={onBack}
             onNext={onNext}

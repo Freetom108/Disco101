@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,7 +12,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  BUTTON_TEXT,
   HEADER_DARK,
   HEADER_TEXT_SUB,
   INACTIVE,
@@ -23,15 +21,12 @@ import {
   filterPhraseIdsForRepeatAccess,
   hasDisc101FullAccess,
 } from '../../../constants/chapterUnlock';
-import { getActiveLearningModule } from '../../../constants/activeLearningModule';
 import { loadPinnedIdsForModule } from '../../../constants/learningResume';
-import type { ModuleCode } from '../../../constants/products';
+import { MODULE_PRODUCTS, type ModuleCode } from '../../../constants/products';
 import {
   getSentencesForModule,
   type SentenceRecord,
 } from '../../../constants/sentencePacks';
-
-type Phrase = SentenceRecord;
 
 type ChapterPinGroup = {
   chapterId: number;
@@ -40,9 +35,19 @@ type ChapterPinGroup = {
   phraseIds: number[];
 };
 
+type ModulePinOverview = {
+  code: ModuleCode;
+  unitTitle: string;
+  allowedPinnedIds: number[];
+  groups: ChapterPinGroup[];
+};
+
+const ACCENT_RED = '#CF142B';
+const ON_RED = '#FFFFFF';
+
 function buildChapterGroups(
   pinnedIds: number[],
-  sentences: Phrase[],
+  sentences: SentenceRecord[],
 ): ChapterPinGroup[] {
   const byId = new Map(sentences.map((s) => [s.id, s]));
   const map = new Map<number, number[]>();
@@ -66,33 +71,57 @@ function buildChapterGroups(
     });
 }
 
+function kartenZuUbenLabel(n: number): string {
+  return n === 1 ? '1 Karte zu üben' : `${n} Karten zu üben`;
+}
+
 export default function RepeatOverviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeModule, setActiveModule] = useState<ModuleCode>('101');
-  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
-  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
+  const [modulePinOverviews, setModulePinOverviews] = useState<
+    ModulePinOverview[]
+  >([]);
+  const [expandedUnit, setExpandedUnit] = useState<ModuleCode | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
       (async () => {
         try {
-          const mod = await getActiveLearningModule();
-          const [pins, full101] = await Promise.all([
-            loadPinnedIdsForModule(mod),
-            hasDisc101FullAccess(),
-          ]);
+          const full101 = await hasDisc101FullAccess();
+          const overviewPromises = MODULE_PRODUCTS.map(async (product) => {
+            const pack = getSentencesForModule(product.code);
+            if (pack.length === 0) return null;
+            const pins = await loadPinnedIdsForModule(product.code);
+            const allowed = filterPhraseIdsForRepeatAccess(
+              pins,
+              full101,
+              pack,
+            );
+            if (allowed.length === 0) return null;
+            return {
+              code: product.code,
+              unitTitle: product.title,
+              allowedPinnedIds: allowed,
+              groups: buildChapterGroups(allowed, pack),
+            } satisfies ModulePinOverview;
+          });
+          const resolved = (await Promise.all(overviewPromises)).filter(
+            (x): x is ModulePinOverview => x != null,
+          );
           if (!cancelled) {
-            setActiveModule(mod);
-            setPinnedIds(pins);
-            setDisc101FullUnlocked(full101);
+            setModulePinOverviews(resolved);
+            setExpandedUnit((prev) =>
+              prev != null && resolved.some((o) => o.code === prev)
+                ? prev
+                : null,
+            );
           }
         } catch {
           if (!cancelled) {
-            setPinnedIds([]);
-            setDisc101FullUnlocked(false);
+            setModulePinOverviews([]);
+            setExpandedUnit(null);
           }
         } finally {
           if (!cancelled) setLoading(false);
@@ -104,68 +133,35 @@ export default function RepeatOverviewScreen() {
     }, []),
   );
 
-  const sentences = useMemo(
-    () => getSentencesForModule(activeModule),
-    [activeModule],
+  const totalPinnedAllowed = modulePinOverviews.reduce(
+    (acc, m) => acc + m.allowedPinnedIds.length,
+    0,
   );
-
-  const chapter1PhraseIds = useMemo(
-    () =>
-      sentences
-        .filter((p) => p.chapterId === 1)
-        .sort((a, b) => a.id - b.id)
-        .map((p) => p.id),
-    [sentences],
-  );
-
-  const allowedPinnedIds = useMemo(
-    () =>
-      filterPhraseIdsForRepeatAccess(
-        pinnedIds,
-        disc101FullUnlocked,
-        sentences,
-      ),
-    [pinnedIds, disc101FullUnlocked, sentences],
-  );
-
-  const groups = useMemo(
-    () => buildChapterGroups(allowedPinnedIds, sentences),
-    [allowedPinnedIds, sentences],
-  );
-
-  const totalPinnedAllowed = allowedPinnedIds.length;
 
   const showEmpty = !loading && totalPinnedAllowed === 0;
 
-  const startAllSession = () => {
-    if (allowedPinnedIds.length === 0) return;
+  const toggleUnitAccordion = (code: ModuleCode) => {
+    setExpandedUnit((prev) => (prev === code ? null : code));
+  };
+
+  const startAllSessionForModule = (overview: ModulePinOverview) => {
+    if (overview.allowedPinnedIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
       params: {
-        phraseIds: JSON.stringify(allowedPinnedIds),
-        moduleCode: activeModule,
+        phraseIds: JSON.stringify(overview.allowedPinnedIds),
+        moduleCode: overview.code,
       },
     });
   };
 
-  const startChapter1Session = () => {
-    if (chapter1PhraseIds.length === 0) return;
-    router.push({
-      pathname: '/(tabs)/wiederholen/session',
-      params: {
-        phraseIds: JSON.stringify(chapter1PhraseIds),
-        moduleCode: activeModule,
-      },
-    });
-  };
-
-  const startChapterSession = (g: ChapterPinGroup) => {
+  const startChapterSession = (moduleCode: ModuleCode, g: ChapterPinGroup) => {
     if (g.phraseIds.length === 0) return;
     router.push({
       pathname: '/(tabs)/wiederholen/session',
       params: {
         phraseIds: JSON.stringify(g.phraseIds),
-        moduleCode: activeModule,
+        moduleCode,
       },
     });
   };
@@ -199,28 +195,6 @@ export default function RepeatOverviewScreen() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.chapter1Block}>
-            <Text style={styles.chapter1Title}>Kapitel 1 · Alle Phrasen</Text>
-            <Text style={styles.chapter1Sub}>
-              {chapter1PhraseIds.length} Karten · für alle Nutzer (Unit 1 Basics)
-            </Text>
-            <Pressable
-              onPress={startChapter1Session}
-              style={({ pressed }) => [
-                styles.chapter1Btn,
-                pressed && { opacity: 0.92 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Alle Phrasen aus Kapitel 1 wiederholen"
-            >
-              <Text style={styles.chapter1BtnText}>
-                🔁 Alle Phrasen aus Kapitel 1 üben
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.divider} />
-
           {showEmpty ? (
             <View style={styles.pinnedEmptyWrap}>
               <Ionicons name="pin" size={40} color="#AAAAAA" />
@@ -229,67 +203,82 @@ export default function RepeatOverviewScreen() {
               </Text>
               <Text style={styles.pinnedEmptySubtext}>
                 Tippe die Stecknadel auf einer Karte im Home-Tab – gespeicherte
-                Phrasen aus Kapitel 1 erscheinen hier zum Üben. (Weitere Kapitel:
+                Phrasen erscheinen hier nach Unit gruppiert. (Weitere Kapitel:
                 nach Freischaltung.)
               </Text>
             </View>
           ) : (
-            <>
-              <View style={styles.stackHeaderBlock}>
-                <Text style={styles.stackHeaderTitle}>
-                  Dein Stapel (Stecknadel)
-                </Text>
-                <Text style={styles.stackHeaderSub}>
-                  {totalPinnedAllowed} Karte{totalPinnedAllowed === 1 ? '' : 'n'}{' '}
-                  gespeichert
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={startAllSession}
-                style={({ pressed }) => [
-                  styles.shuffleBtn,
-                  pressed && { opacity: 0.92 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Alle gespeicherten Karten wiederholen"
-              >
-                <Text style={styles.shuffleBtnText}>
-                  🔀 Alle gespeicherten Karten wiederholen
-                </Text>
-              </Pressable>
-
-              <View style={styles.divider} />
-
-              {groups.map((g) => (
-                <Pressable
-                  key={g.chapterId}
-                  onPress={() => startChapterSession(g)}
-                  style={({ pressed }) => [
-                    styles.chapterCard,
-                    pressed && { opacity: 0.85 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${g.title}, ${g.count} Karten wiederholen`}
-                >
-                  <View style={styles.chapterRowInner}>
-                    <Text style={styles.chapterTitle} numberOfLines={2}>
-                      {g.title}
+            modulePinOverviews.map((overview) => {
+              const n = overview.allowedPinnedIds.length;
+              const open = expandedUnit === overview.code;
+              return (
+                <View key={overview.code} style={styles.accordionBlock}>
+                  <Pressable
+                    onPress={() => toggleUnitAccordion(overview.code)}
+                    style={({ pressed }) => [
+                      styles.accordionHeader,
+                      pressed && { opacity: 0.94 },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: open }}
+                    accessibilityLabel={`${overview.unitTitle}, ${kartenZuUbenLabel(n)}, ${open ? 'einklappen' : 'aufklappen'}`}
+                  >
+                    <Text style={styles.accordionHeaderText} numberOfLines={2}>
+                      {`${overview.unitTitle} · ${kartenZuUbenLabel(n)}`}
                     </Text>
-                    <View style={styles.chapterMeta}>
-                      <Text style={styles.chapterCount}>
-                        {g.count} {g.count === 1 ? 'Karte' : 'Karten'}
-                      </Text>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="#8E8E93"
-                      />
+                    <Ionicons
+                      name={open ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color={ON_RED}
+                    />
+                  </Pressable>
+
+                  {open ? (
+                    <View style={styles.accordionBody}>
+                      <Pressable
+                        onPress={() => startAllSessionForModule(overview)}
+                        style={({ pressed }) => [
+                          styles.repeatAllOutlineBtn,
+                          pressed && { opacity: 0.88 },
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Alle Karten aus ${overview.unitTitle} wiederholen`}
+                      >
+                        <Text style={styles.repeatAllOutlineBtnText}>
+                          Alle Karten wiederholen · {n}{' '}
+                          {n === 1 ? 'Karte' : 'Karten'}
+                        </Text>
+                      </Pressable>
+
+                      {overview.groups.map((g) => (
+                        <Pressable
+                          key={`${overview.code}-${g.chapterId}`}
+                          onPress={() =>
+                            startChapterSession(overview.code, g)
+                          }
+                          style={({ pressed }) => [
+                            styles.chapterTile,
+                            pressed && { opacity: 0.88 },
+                          ]}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Kapitel ${g.chapterId} ${g.title}, ${g.count} Karten`}
+                        >
+                          <Text style={styles.chapterTileLine1}>
+                            Kapitel {g.chapterId}
+                          </Text>
+                          <Text style={styles.chapterTileLine2} numberOfLines={2}>
+                            {g.title}
+                          </Text>
+                          <Text style={styles.chapterTileLine3}>
+                            {kartenZuUbenLabel(g.count)}
+                          </Text>
+                        </Pressable>
+                      ))}
                     </View>
-                  </View>
-                </Pressable>
-              ))}
-            </>
+                  ) : null}
+                </View>
+              );
+            })
           )}
         </ScrollView>
       )}
@@ -346,31 +335,6 @@ const styles = StyleSheet.create({
   loadingBody: {
     flex: 1,
   },
-  chapter1Block: {
-    marginBottom: 8,
-  },
-  chapter1Title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  chapter1Sub: {
-    fontSize: 14,
-    color: INACTIVE,
-    marginTop: 4,
-    marginBottom: 14,
-  },
-  chapter1Btn: {
-    backgroundColor: '#C8102E',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  chapter1BtnText: {
-    color: BUTTON_TEXT,
-    fontSize: 17,
-    fontWeight: '600',
-  },
   pinnedEmptyWrap: {
     alignItems: 'center',
     paddingVertical: 28,
@@ -397,68 +361,69 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: '3%',
   },
-  stackHeaderBlock: {
-    marginBottom: 16,
+  accordionBlock: {
+    marginBottom: 10,
   },
-  stackHeaderTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  stackHeaderSub: {
-    fontSize: 14,
-    color: INACTIVE,
-  },
-  shuffleBtn: {
-    backgroundColor: '#C8102E',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  shuffleBtnText: {
-    color: BUTTON_TEXT,
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#C6C6C8',
-    marginBottom: 16,
-  },
-  chapterCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
-    ...Platform.select({
-      android: { elevation: 3 },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
-      },
-    }),
-  },
-  chapterRowInner: {
+  accordionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    backgroundColor: ACCENT_RED,
+    borderRadius: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    gap: 12,
   },
-  chapterTitle: {
+  accordionHeaderText: {
     flex: 1,
-    fontSize: 16,
-    color: '#1A1A1A',
-    marginRight: 12,
+    color: ON_RED,
+    fontSize: 17,
+    fontWeight: '700',
   },
-  chapterMeta: {
-    flexDirection: 'row',
+  accordionBody: {
+    marginTop: 10,
+    gap: 10,
+  },
+  repeatAllOutlineBtn: {
+    backgroundColor: '#F2F2F7',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C6C6C8',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     alignItems: 'center',
-    gap: 6,
   },
-  chapterCount: {
-    fontSize: 15,
+  repeatAllOutlineBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#3A3A3C',
+    textAlign: 'center',
+  },
+  chapterTile: {
+    backgroundColor: SCREEN_BG,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C6C6C8',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  chapterTileLine1: {
+    fontSize: 12,
+    fontWeight: '600',
     color: '#8E8E93',
+    letterSpacing: 0.2,
+  },
+  chapterTileLine2: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginTop: 6,
+    lineHeight: 22,
+  },
+  chapterTileLine3: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#8E8E93',
+    marginTop: 8,
   },
 });

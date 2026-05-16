@@ -45,12 +45,18 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const width = windowWidth > 0 ? windowWidth : 400;
-  const slideHeight = Math.max(
+  /** Fallback before onLayout; matches pager viewport ≈ screen minus footer overlay. */
+  const pageHeightFallback = Math.max(
     200,
     windowHeight - insets.top - insets.bottom - FOOTER_ZONE,
   );
   const scrollRef = useRef<ScrollView>(null);
   const [slideIndex, setSlideIndex] = useState(0);
+  const slideIndexRef = useRef(0);
+  slideIndexRef.current = slideIndex;
+  const [pagerViewportH, setPagerViewportH] = useState(0);
+  const pageH =
+    pagerViewportH > 0 ? pagerViewportH : pageHeightFallback;
   const welcomePlayer = useAudioPlayer(null, { updateInterval: 100 });
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../assets/fonts/DMSerifDisplay-Regular.ttf'),
@@ -94,23 +100,41 @@ export default function OnboardingScreen() {
     [welcomePlayer],
   );
 
-  const onScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      setSlideIndex(Math.round(x / width));
+  const goToSlide = useCallback(
+    (index: number) => {
+      const clamped = Math.min(3, Math.max(0, index));
+      const h = pagerViewportH > 0 ? pagerViewportH : pageHeightFallback;
+      scrollRef.current?.scrollTo({
+        y: clamped * h,
+        animated: true,
+      });
+      setSlideIndex(clamped);
     },
-    [width],
+    [pageHeightFallback, pagerViewportH],
   );
 
-  const goToSlide = (index: number) => {
-    scrollRef.current?.scrollTo({ x: index * width, animated: true });
-    setSlideIndex(index);
-  };
+  const onPagerScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const y = e.nativeEvent.contentOffset.y;
+      const h = pagerViewportH > 0 ? pagerViewportH : pageHeightFallback;
+      if (h <= 0) return;
+      const idx = Math.round(y / h);
+      setSlideIndex(Math.min(3, Math.max(0, idx)));
+    },
+    [pageHeightFallback, pagerViewportH],
+  );
+
+  /** After measuring the pager, realign offset without animation (viewport height changed). */
+  useEffect(() => {
+    if (pagerViewportH <= 0) return;
+    scrollRef.current?.scrollTo({
+      y: slideIndexRef.current * pagerViewportH,
+      animated: false,
+    });
+  }, [pagerViewportH]);
 
   const onWeiter = () => {
-    if (slideIndex < 3) {
-      goToSlide(slideIndex + 1);
-    }
+    if (slideIndex < 3) goToSlide(slideIndex + 1);
   };
 
   const onLos = async () => {
@@ -125,17 +149,26 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <ScrollView
-          ref={scrollRef}
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={onScrollEnd}
-          scrollEventThrottle={16}
+        <View
+          style={styles.pagerOuter}
+          onLayout={(e) => {
+            const h = Math.round(e.nativeEvent.layout.height);
+            if (h > 0 && h !== pagerViewportH) setPagerViewportH(h);
+          }}
         >
-          <View style={[styles.slide, { width, height: slideHeight }]}>
+          <ScrollView
+            ref={scrollRef}
+            style={[styles.scroll, { width }]}
+            contentContainerStyle={{ width }}
+            pagingEnabled
+            nestedScrollEnabled
+            scrollEventThrottle={16}
+            onMomentumScrollEnd={onPagerScrollEnd}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+          >
+          <View style={[styles.slide, { width, height: pageH }]}>
             <View style={styles.slide1Wrap}>
               <Image
                 source={require('../assets/images/logo.png')}
@@ -199,8 +232,16 @@ export default function OnboardingScreen() {
               </View>
             </View>
           </View>
-          <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={[styles.slideInnerCentered, styles.slideInnerLearn]}>
+          <View style={[styles.slide, { width, height: pageH }]}>
+            <ScrollView
+              style={styles.slideBodyScroll}
+              contentContainerStyle={styles.slideBodyScrollContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
+              <View style={[styles.slideInnerCentered, styles.slideInnerLearn]}>
               <Text
                 style={[
                   styles.titleSection,
@@ -226,10 +267,19 @@ export default function OnboardingScreen() {
                   wo du sie üben kannst bis sie sicher sitzen
                 </Text>
               </View>
-            </View>
+              </View>
+            </ScrollView>
           </View>
-          <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={styles.slideInnerCentered}>
+          <View style={[styles.slide, { width, height: pageH }]}>
+            <ScrollView
+              style={styles.slideBodyScroll}
+              contentContainerStyle={styles.slideBodyScrollContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
+              <View style={styles.slideInnerCentered}>
               <Text
                 style={[
                   styles.titleSection,
@@ -258,9 +308,18 @@ export default function OnboardingScreen() {
                 </Text>
               </View>
             </View>
+            </ScrollView>
           </View>
-          <View style={[styles.slide, { width, height: slideHeight }]}>
-            <View style={styles.slideInnerCentered}>
+          <View style={[styles.slide, { width, height: pageH }]}>
+            <ScrollView
+              style={styles.slideBodyScroll}
+              contentContainerStyle={styles.slideBodyScrollContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
+              <View style={styles.slideInnerCentered}>
               <Text
                 style={[
                   styles.titleSection,
@@ -284,8 +343,10 @@ export default function OnboardingScreen() {
                 </Text>
               </View>
             </View>
+            </ScrollView>
           </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
         <View
           style={[styles.footerFixed, { paddingBottom: Math.max(insets.bottom, 12) }]}
         >
@@ -307,7 +368,7 @@ export default function OnboardingScreen() {
               accessibilityRole="button"
               accessibilityLabel="Weiter"
             >
-              <Text style={styles.btnGhostText}>Weiter →</Text>
+              <Text style={styles.btnGhostText}>Weiter ↑</Text>
             </Pressable>
           ) : (
             <Pressable
@@ -319,7 +380,7 @@ export default function OnboardingScreen() {
               accessibilityRole="button"
               accessibilityLabel="Los geht's"
             >
-              <Text style={styles.btnPrimaryText}>Los geht's →</Text>
+              <Text style={styles.btnPrimaryText}>Los geht's ↑</Text>
             </Pressable>
           )}
         </View>
@@ -339,15 +400,22 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
   },
+  pagerOuter: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    alignItems: 'stretch',
-  },
   slide: {
     minHeight: 200,
+    overflow: 'hidden',
+  },
+  slideBodyScroll: {
+    flex: 1,
+  },
+  slideBodyScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
   },
   slide1Wrap: {
     flex: 1,
@@ -471,6 +539,11 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingTop: 8,
+    backgroundColor: ONBOARDING_BG,
+    zIndex: 50,
+    ...Platform.select({
+      android: { elevation: 24 },
+    }),
   },
   dotsRow: {
     flexDirection: 'row',

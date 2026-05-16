@@ -223,9 +223,17 @@ export default function RepeatOverviewScreen() {
                     accessibilityState={{ expanded: open }}
                     accessibilityLabel={`${overview.unitTitle}, ${kartenZuUbenLabel(n)}, ${open ? 'einklappen' : 'aufklappen'}`}
                   >
-                    <Text style={styles.accordionHeaderText} numberOfLines={2}>
-                      {`${overview.unitTitle} · ${kartenZuUbenLabel(n)}`}
-                    </Text>
+                    <View style={styles.accordionHeaderTextCol}>
+                      <Text
+                        style={styles.accordionHeaderTitleLine}
+                        numberOfLines={2}
+                      >
+                        {overview.unitTitle}
+                      </Text>
+                      <Text style={styles.accordionHeaderSubtitleLine}>
+                        {kartenZuUbenLabel(n)}
+                      </Text>
+                    </View>
                     <Ionicons
                       name={open ? 'chevron-up' : 'chevron-down'}
                       size={22}
@@ -370,15 +378,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: ACCENT_RED,
     borderRadius: 12,
-    paddingVertical: 18,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     gap: 12,
   },
-  accordionHeaderText: {
+  accordionHeaderTextCol: {
     flex: 1,
+    minWidth: 0,
+  },
+  accordionHeaderTitleLine: {
     color: ON_RED,
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: '700',
+    lineHeight: 24,
+  },
+  accordionHeaderSubtitleLine: {
+    marginTop: 4,
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 18,
+    color: 'rgba(255,255,255,0.8)',
   },
   accordionBody: {
     marginTop: 10,

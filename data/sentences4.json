@@ -1,1 +1,709 @@
-[]
+[
+  {
+    "id": 1,
+    "chapterId": 1,
+    "english": "I would like to register my new address at the local council please.",
+    "german": "Ich möchte bitte meine neue Adresse beim lokalen Amt anmelden.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 2,
+    "chapterId": 1,
+    "english": "Could you tell me how long it takes to process this application?",
+    "german": "Könnten Sie mir sagen, wie lange die Bearbeitung dieses Antrags dauert?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 3,
+    "chapterId": 1,
+    "english": "I have just moved to this area and I am looking for a flat to rent.",
+    "german": "Ich bin gerade in diese Gegend gezogen und suche eine Wohnung zur Miete.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 4,
+    "chapterId": 1,
+    "english": "Is the deposit refundable at the end of the tenancy?",
+    "german": "Ist die Kaution am Ende der Mietzeit rückerstattbar?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 5,
+    "chapterId": 1,
+    "english": "Could you explain what is included in the monthly rent?",
+    "german": "Könnten Sie erklären, was in der monatlichen Miete enthalten ist?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 6,
+    "chapterId": 1,
+    "english": "I would like to report a problem with the heating in my flat.",
+    "german": "Ich möchte ein Problem mit der Heizung in meiner Wohnung melden.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 7,
+    "chapterId": 1,
+    "english": "How much notice do I need to give before moving out?",
+    "german": "Wie viel Kündigungsfrist muss ich einhalten, bevor ich ausziehe?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 8,
+    "chapterId": 1,
+    "english": "Is there a recycling system here and how does it work?",
+    "german": "Gibt es hier ein Recyclingsystem und wie funktioniert es?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 9,
+    "chapterId": 1,
+    "english": "Could you recommend a good removal company in this area?",
+    "german": "Könnten Sie ein gutes Umzugsunternehmen in dieser Gegend empfehlen?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 10,
+    "chapterId": 1,
+    "english": "I need to set up a direct debit for my rent payments.",
+    "german": "Ich muss einen Dauerauftrag für meine Mietzahlungen einrichten.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 11,
+    "chapterId": 1,
+    "english": "Is parking included with the flat or do I need a separate permit?",
+    "german": "Ist Parken in der Wohnung inbegriffen oder brauche ich einen separaten Ausweis?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 12,
+    "chapterId": 1,
+    "english": "Could I have a copy of the tenancy agreement please?",
+    "german": "Könnte ich bitte eine Kopie des Mietvertrags haben?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 13,
+    "chapterId": 1,
+    "english": "The landlord has not fixed the problem I reported two weeks ago.",
+    "german": "Der Vermieter hat das Problem, das ich vor zwei Wochen gemeldet habe, nicht behoben.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 14,
+    "chapterId": 1,
+    "english": "I would like to know if pets are allowed in this property.",
+    "german": "Ich möchte wissen, ob Haustiere in dieser Wohnung erlaubt sind.",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 15,
+    "chapterId": 1,
+    "english": "Could you show me how the heating system works please?",
+    "german": "Könnten Sie mir bitte zeigen, wie das Heizsystem funktioniert?",
+    "category": "Ankommen & Wohnen"
+  },
+  {
+    "id": 16,
+    "chapterId": 2,
+    "english": "I need to apply for a residence permit as soon as possible.",
+    "german": "Ich muss so bald wie möglich eine Aufenthaltsgenehmigung beantragen.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 17,
+    "chapterId": 2,
+    "english": "Could you tell me which documents I need to bring with me?",
+    "german": "Könnten Sie mir sagen, welche Dokumente ich mitbringen muss?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 18,
+    "chapterId": 2,
+    "english": "I would like to make an appointment at the registration office.",
+    "german": "Ich möchte einen Termin beim Einwohnermeldeamt vereinbaren.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 19,
+    "chapterId": 2,
+    "english": "How long does it take to receive the residence permit?",
+    "german": "Wie lange dauert es, die Aufenthaltsgenehmigung zu erhalten?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 20,
+    "chapterId": 2,
+    "english": "I need to have my documents officially translated and certified.",
+    "german": "Ich muss meine Dokumente offiziell übersetzen und beglaubigen lassen.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 21,
+    "chapterId": 2,
+    "english": "Could you tell me where I can get my driving licence exchanged?",
+    "german": "Könnten Sie mir sagen, wo ich meinen Führerschein umtauschen kann?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 22,
+    "chapterId": 2,
+    "english": "I would like to register as a taxpayer in this country.",
+    "german": "Ich möchte mich als Steuerzahler in diesem Land anmelden.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 23,
+    "chapterId": 2,
+    "english": "Could I speak to someone who speaks German or French please?",
+    "german": "Könnte ich bitte mit jemandem sprechen, der Deutsch oder Französisch spricht?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 24,
+    "chapterId": 2,
+    "english": "I am not sure if I need a work permit for this type of employment.",
+    "german": "Ich bin nicht sicher, ob ich für diese Art von Beschäftigung eine Arbeitserlaubnis benötige.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 25,
+    "chapterId": 2,
+    "english": "Could you give me a written confirmation of my registration?",
+    "german": "Könnten Sie mir eine schriftliche Bestätigung meiner Anmeldung geben?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 26,
+    "chapterId": 2,
+    "english": "I would like to apply for a local identity card if that is possible.",
+    "german": "Ich möchte einen lokalen Personalausweis beantragen, wenn das möglich ist.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 27,
+    "chapterId": 2,
+    "english": "My visa is expiring soon – what do I need to do to extend it?",
+    "german": "Mein Visum läuft bald ab – was muss ich tun, um es zu verlängern?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 28,
+    "chapterId": 2,
+    "english": "Could you point me to the right department for this matter?",
+    "german": "Könnten Sie mich zur richtigen Abteilung für diese Angelegenheit leiten?",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 29,
+    "chapterId": 2,
+    "english": "I would like to report a change of address to the authorities.",
+    "german": "Ich möchte eine Adressänderung den Behörden melden.",
+    "category": "Behörden & Ämter"
+  },
+  {
+    "id": 30,
+    "chapterId": 3,
+    "english": "I would like to register with a local doctor as a new patient.",
+    "german": "Ich möchte mich bei einem lokalen Arzt als neuer Patient anmelden.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 31,
+    "chapterId": 3,
+    "english": "Could I make an appointment for a general check-up please?",
+    "german": "Könnte ich bitte einen Termin für eine allgemeine Untersuchung vereinbaren?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 32,
+    "chapterId": 3,
+    "english": "I have had this pain for three days and it is getting worse.",
+    "german": "Ich habe diesen Schmerz seit drei Tagen und er wird schlimmer.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 33,
+    "chapterId": 3,
+    "english": "Could you tell me if this medication is available without a prescription?",
+    "german": "Könnten Sie mir sagen, ob dieses Medikament ohne Rezept erhältlich ist?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 34,
+    "chapterId": 3,
+    "english": "I am allergic to penicillin – please make a note of that.",
+    "german": "Ich bin allergisch gegen Penizillin – bitte notieren Sie das.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 35,
+    "chapterId": 3,
+    "english": "Could I have a sick note for my employer please?",
+    "german": "Könnte ich bitte eine Krankmeldung für meinen Arbeitgeber haben?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 36,
+    "chapterId": 3,
+    "english": "I need to be referred to a specialist for further tests.",
+    "german": "Ich muss für weitere Untersuchungen an einen Spezialisten überwiesen werden.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 37,
+    "chapterId": 3,
+    "english": "Could you explain the diagnosis to me in simple terms please?",
+    "german": "Könnten Sie mir die Diagnose bitte in einfachen Worten erklären?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 38,
+    "chapterId": 3,
+    "english": "I would like to know if this treatment is covered by my insurance.",
+    "german": "Ich möchte wissen, ob diese Behandlung von meiner Versicherung abgedeckt wird.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 39,
+    "chapterId": 3,
+    "english": "Could I have a copy of my medical records please?",
+    "german": "Könnte ich bitte eine Kopie meiner Krankenakte haben?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 40,
+    "chapterId": 3,
+    "english": "I have not slept properly for several weeks and I am exhausted.",
+    "german": "Ich habe seit mehreren Wochen nicht richtig geschlafen und bin erschöpft.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 41,
+    "chapterId": 3,
+    "english": "Could you recommend a good dentist in this area please?",
+    "german": "Könnten Sie bitte einen guten Zahnarzt in dieser Gegend empfehlen?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 42,
+    "chapterId": 3,
+    "english": "I need to renew my prescription for my regular medication.",
+    "german": "Ich muss mein Rezept für mein reguläres Medikament erneuern.",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 43,
+    "chapterId": 3,
+    "english": "Is there an emergency clinic nearby that is open at the weekend?",
+    "german": "Gibt es in der Nähe eine Notaufnahme, die am Wochenende geöffnet ist?",
+    "category": "Krankenhaus & Arzt"
+  },
+  {
+    "id": 44,
+    "chapterId": 4,
+    "english": "I would like to open a bank account as a foreign resident.",
+    "german": "Ich möchte als ausländischer Einwohner ein Bankkonto eröffnen.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 45,
+    "chapterId": 4,
+    "english": "Could you explain the different types of health insurance available?",
+    "german": "Könnten Sie die verschiedenen Arten der verfügbaren Krankenversicherung erklären?",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 46,
+    "chapterId": 4,
+    "english": "I need to take out contents insurance for my new flat.",
+    "german": "Ich muss eine Hausratversicherung für meine neue Wohnung abschließen.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 47,
+    "chapterId": 4,
+    "english": "Could you tell me what documents I need to open a bank account?",
+    "german": "Könnten Sie mir sagen, welche Dokumente ich benötige, um ein Bankkonto zu eröffnen?",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 48,
+    "chapterId": 4,
+    "english": "I would like to set up an international transfer to my home country.",
+    "german": "Ich möchte eine internationale Überweisung in mein Heimatland einrichten.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 49,
+    "chapterId": 4,
+    "english": "Could I get travel insurance that also covers my home visits?",
+    "german": "Könnte ich eine Reiseversicherung bekommen, die auch meine Heimatbesuche abdeckt?",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 50,
+    "chapterId": 4,
+    "english": "I am not sure how the pension system works here for foreign workers.",
+    "german": "Ich bin nicht sicher, wie das Rentensystem hier für ausländische Arbeitnehmer funktioniert.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 51,
+    "chapterId": 4,
+    "english": "Could you help me understand my payslip – some things are unclear.",
+    "german": "Könnten Sie mir helfen, meine Gehaltsabrechnung zu verstehen – einiges ist unklar.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 52,
+    "chapterId": 4,
+    "english": "I would like to know if I am entitled to any tax refund this year.",
+    "german": "Ich möchte wissen, ob ich dieses Jahr Anspruch auf eine Steuerrückerstattung habe.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 53,
+    "chapterId": 4,
+    "english": "Could I speak to a financial advisor about my situation please?",
+    "german": "Könnte ich bitte mit einem Finanzberater über meine Situation sprechen?",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 54,
+    "chapterId": 4,
+    "english": "I need to cancel my insurance policy as I am moving back home.",
+    "german": "Ich muss meine Versicherungspolice kündigen, da ich nach Hause zurückziehe.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 55,
+    "chapterId": 4,
+    "english": "Could you send me a monthly statement by email instead of post?",
+    "german": "Könnten Sie mir einen monatlichen Kontoauszug per E-Mail statt per Post schicken?",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 56,
+    "chapterId": 4,
+    "english": "I would like to increase my monthly savings contribution if possible.",
+    "german": "Ich möchte meinen monatlichen Sparbeitrag wenn möglich erhöhen.",
+    "category": "Versicherungen & Finanzen"
+  },
+  {
+    "id": 57,
+    "chapterId": 5,
+    "english": "Could you tell me where the nearest supermarket is please?",
+    "german": "Könnten Sie mir bitte sagen, wo der nächste Supermarkt ist?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 58,
+    "chapterId": 5,
+    "english": "Is there a weekly market in this area where I can buy fresh produce?",
+    "german": "Gibt es in dieser Gegend einen Wochenmarkt, wo ich frische Produkte kaufen kann?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 59,
+    "chapterId": 5,
+    "english": "Could you help me find a good local plumber or electrician?",
+    "german": "Könnten Sie mir helfen, einen guten lokalen Klempner oder Elektriker zu finden?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 60,
+    "chapterId": 5,
+    "english": "I am looking for a good language school to improve my English further.",
+    "german": "Ich suche eine gute Sprachschule, um mein Englisch weiter zu verbessern.",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 61,
+    "chapterId": 5,
+    "english": "Could you recommend a reliable childcare option in this neighbourhood?",
+    "german": "Könnten Sie eine zuverlässige Kinderbetreuungsmöglichkeit in dieser Nachbarschaft empfehlen?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 62,
+    "chapterId": 5,
+    "english": "I need to find a good local school for my children.",
+    "german": "Ich muss eine gute lokale Schule für meine Kinder finden.",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 63,
+    "chapterId": 5,
+    "english": "Is there a community centre or expat group I could join?",
+    "german": "Gibt es ein Gemeindezentrum oder eine Expat-Gruppe, der ich beitreten könnte?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 64,
+    "chapterId": 5,
+    "english": "Could you tell me what the public transport options are in this area?",
+    "german": "Könnten Sie mir sagen, welche öffentlichen Verkehrsmittel in dieser Gegend verfügbar sind?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 65,
+    "chapterId": 5,
+    "english": "I would like to get a local library card if that is possible.",
+    "german": "Ich möchte einen lokalen Bibliotheksausweis bekommen, wenn das möglich ist?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 66,
+    "chapterId": 5,
+    "english": "Could you recommend a good local restaurant for a special occasion?",
+    "german": "Könnten Sie ein gutes lokales Restaurant für einen besonderen Anlass empfehlen?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 67,
+    "chapterId": 5,
+    "english": "I am looking for a sports club or gym to join in this area.",
+    "german": "Ich suche einen Sportverein oder ein Fitnessstudio, dem ich in dieser Gegend beitreten kann.",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 68,
+    "chapterId": 5,
+    "english": "Could you help me understand how the recycling and waste system works?",
+    "german": "Könnten Sie mir helfen zu verstehen, wie das Recycling- und Abfallsystem funktioniert?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 69,
+    "chapterId": 5,
+    "english": "I would like to find a good local hairdresser – could you recommend one?",
+    "german": "Ich möchte einen guten lokalen Friseur finden – könnten Sie einen empfehlen?",
+    "category": "Alltag & Einkaufen"
+  },
+  {
+    "id": 70,
+    "chapterId": 6,
+    "english": "I would like to report a theft – my bag was stolen this morning.",
+    "german": "Ich möchte einen Diebstahl melden – meine Tasche wurde heute Morgen gestohlen.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 71,
+    "chapterId": 6,
+    "english": "Could I have a crime reference number for my insurance claim please?",
+    "german": "Könnte ich bitte eine Vorgangsnummer für meinen Versicherungsanspruch haben?",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 72,
+    "chapterId": 6,
+    "english": "I have been involved in a car accident and need assistance.",
+    "german": "Ich war in einen Autounfall verwickelt und brauche Hilfe.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 73,
+    "chapterId": 6,
+    "english": "Could you call an ambulance please – someone is injured.",
+    "german": "Könnten Sie bitte einen Krankenwagen rufen – jemand ist verletzt.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 74,
+    "chapterId": 6,
+    "english": "I think there is a gas leak in my building – what should I do?",
+    "german": "Ich glaube, es gibt ein Gasleck in meinem Gebäude – was soll ich tun?",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 75,
+    "chapterId": 6,
+    "english": "My passport has been stolen – I need to report it immediately.",
+    "german": "Mein Reisepass wurde gestohlen – ich muss es sofort melden.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 76,
+    "chapterId": 6,
+    "english": "Could you help me contact my embassy or consulate please?",
+    "german": "Könnten Sie mir bitte helfen, meine Botschaft oder mein Konsulat zu kontaktieren?",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 77,
+    "chapterId": 6,
+    "english": "I do not feel safe in my current situation and need help.",
+    "german": "Ich fühle mich in meiner aktuellen Situation nicht sicher und brauche Hilfe.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 78,
+    "chapterId": 6,
+    "english": "Could I speak to an officer who speaks German or French please?",
+    "german": "Könnte ich bitte mit einem Beamten sprechen, der Deutsch oder Französisch spricht?",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 79,
+    "chapterId": 6,
+    "english": "I would like to report a neighbour dispute that has become serious.",
+    "german": "Ich möchte einen Nachbarschaftsstreit melden, der ernst geworden ist.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 80,
+    "chapterId": 6,
+    "english": "My car has been broken into and several items have been stolen.",
+    "german": "In mein Auto wurde eingebrochen und mehrere Gegenstände wurden gestohlen.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 81,
+    "chapterId": 6,
+    "english": "Could you tell me the non-emergency police number for this area?",
+    "german": "Könnten Sie mir die nicht-dringende Polizeirufnummer für diese Gegend nennen?",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 82,
+    "chapterId": 6,
+    "english": "I need a written police report for my insurance company.",
+    "german": "Ich brauche einen schriftlichen Polizeibericht für meine Versicherungsgesellschaft.",
+    "category": "Polizei & Notfälle"
+  },
+  {
+    "id": 83,
+    "chapterId": 7,
+    "english": "Hello – I have just moved in next door and wanted to introduce myself.",
+    "german": "Hallo – ich bin gerade nebenan eingezogen und wollte mich vorstellen.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 84,
+    "chapterId": 7,
+    "english": "We are having a small get-together on Saturday – would you like to come?",
+    "german": "Wir haben am Samstag eine kleine Zusammenkunft – möchten Sie kommen?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 85,
+    "chapterId": 7,
+    "english": "Could I borrow a cup of sugar – I seem to have run out.",
+    "german": "Könnte ich eine Tasse Zucker leihen – mir scheint es ausgegangen zu sein.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 86,
+    "chapterId": 7,
+    "english": "We are planning a barbecue in the garden – you are very welcome to join us.",
+    "german": "Wir planen ein Grillfest im Garten – Sie sind herzlich eingeladen, sich uns anzuschließen.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 87,
+    "chapterId": 7,
+    "english": "I really love living in this neighbourhood – everyone is so friendly.",
+    "german": "Ich liebe es wirklich, in dieser Nachbarschaft zu leben – alle sind so freundlich.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 88,
+    "chapterId": 7,
+    "english": "Could you recommend any local events or festivals coming up?",
+    "german": "Könnten Sie lokale Veranstaltungen oder bevorstehende Feste empfehlen?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 89,
+    "chapterId": 7,
+    "english": "I am still getting used to some of the local customs here.",
+    "german": "Ich gewöhne mich noch an einige der lokalen Gepflogenheiten hier.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 90,
+    "chapterId": 7,
+    "english": "Would you be able to keep an eye on my flat while I am away?",
+    "german": "Könnten Sie ein Auge auf meine Wohnung werfen, während ich weg bin?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 91,
+    "chapterId": 7,
+    "english": "Back home we have a tradition of bringing food when visiting someone for the first time.",
+    "german": "Bei uns zu Hause haben wir die Tradition, beim ersten Besuch Essen mitzubringen.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 92,
+    "chapterId": 7,
+    "english": "I find the pace of life here very different from what I am used to.",
+    "german": "Ich finde das Lebenstempo hier sehr anders als das, woran ich gewöhnt bin.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 93,
+    "chapterId": 7,
+    "english": "Could you tell me a little about the history of this area?",
+    "german": "Könnten Sie mir ein bisschen über die Geschichte dieser Gegend erzählen?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 94,
+    "chapterId": 7,
+    "english": "I would love to learn more about the local culture and traditions.",
+    "german": "Ich würde gerne mehr über die lokale Kultur und Traditionen lernen.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 95,
+    "chapterId": 7,
+    "english": "We should organise a street party sometime – it would be great fun.",
+    "german": "Wir sollten irgendwann ein Straßenfest organisieren – das wäre großartig.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 96,
+    "chapterId": 7,
+    "english": "I really miss some things from home but I am slowly settling in.",
+    "german": "Ich vermisse einige Dinge von zu Hause, aber ich gewöhne mich langsam ein.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 97,
+    "chapterId": 7,
+    "english": "Could I ask your advice about the best places to visit around here?",
+    "german": "Könnte ich Sie um Rat fragen, welche Orte man hier in der Umgebung besuchen sollte?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 98,
+    "chapterId": 7,
+    "english": "It has been so helpful having such welcoming neighbours – thank you.",
+    "german": "Es war so hilfreich, so herzliche Nachbarn zu haben – vielen Dank.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 99,
+    "chapterId": 7,
+    "english": "I am organising a small international dinner – would you like to join us?",
+    "german": "Ich organisiere ein kleines internationales Dinner – möchten Sie sich uns anschließen?",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 100,
+    "chapterId": 7,
+    "english": "Living abroad has taught me so much about myself and the world.",
+    "german": "Im Ausland zu leben hat mir so viel über mich selbst und die Welt beigebracht.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  },
+  {
+    "id": 101,
+    "chapterId": 7,
+    "english": "I feel very lucky to have found such a welcoming community to be part of.",
+    "german": "Ich fühle mich sehr glücklich, eine so herzliche Gemeinschaft gefunden zu haben, der ich angehören darf.",
+    "category": "Nachbarschaft & Gemeinschaft"
+  }
+]

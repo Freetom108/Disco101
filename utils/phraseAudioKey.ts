@@ -9,5 +9,6 @@ export function phraseAudioAssetKey(
   const base = `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
   if (moduleCode === '102') return `102_${base}`;
   if (moduleCode === '103') return `103_${base}`;
+  if (moduleCode === '104') return `104_${base}`;
   return base;
 }

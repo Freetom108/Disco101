@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Remove-Item \"C:\\\\Users\\\\tommi\\\\Documents\\\\apps\\\\Disco101\\\\app\\\\utils\\\\chaptersConfig.ts\" -Force)",
-      "Bash(Remove-Item \"C:\\\\Users\\\\tommi\\\\Documents\\\\apps\\\\Disco101\\\\app\\\\utils\\\\getAudioPath.ts\" -Force)",
-      "Bash(Write-Output \"Gelöscht\")"
-    ]
-  }
-}

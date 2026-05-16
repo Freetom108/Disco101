@@ -12,7 +12,7 @@ function cacheKey(
   return phraseAudioAssetKey(moduleCode, phraseId, voice);
 }
 
-/** Registers phrase audio sources for both voices in the preload cache. */
+/** Warms the phrase audio lookup cache for both voices. Assets are bundled via require() so no IO is performed — this just copies references from audioAssets into a fast local map used by getPreloadedSource(). */
 export function preloadPhraseAudio(
   phraseIds: number[],
   moduleCode: ModuleCode = '101',

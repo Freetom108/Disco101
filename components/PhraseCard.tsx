@@ -37,7 +37,8 @@ export type PhraseCardProps = {
   isChapterComplete: boolean;
   isAllPhrasesComplete: boolean;
   inChapterN: number;
-  ch1Count: number;
+  currentChapterCount: number;
+  totalPhraseCount: number;
   globalProgressText: string;
   globalBarPct: number;
   english: string;
@@ -63,7 +64,8 @@ export default function PhraseCard({
   isChapterComplete,
   isAllPhrasesComplete,
   inChapterN,
-  ch1Count,
+  currentChapterCount,
+  totalPhraseCount,
   globalProgressText,
   globalBarPct,
   english,
@@ -244,7 +246,7 @@ export default function PhraseCard({
                   ]}
                 >
                   {isAllPhrasesComplete
-                    ? 'Alle 101 Phrasen gelernt! 🎉'
+                    ? `Alle ${totalPhraseCount} Phrasen gelernt! 🎉`
                     : 'Kapitel abgeschlossen! 🎉'}
                 </Text>
                 <Text style={styles.chapterMenuSubtitle}>
@@ -286,7 +288,7 @@ export default function PhraseCard({
                 <View style={styles.cardNumberRow}>
                   <Text style={styles.cardBigNum}>{inChapterN}</Text>
                   <Text style={styles.cardNumHint}>
-                    / {ch1Count}  Phrase im Kapitel
+                    / {currentChapterCount}  Phrase im Kapitel
                   </Text>
                 </View>
                 <Text

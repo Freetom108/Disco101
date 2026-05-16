@@ -35,7 +35,9 @@ import {
 } from '../../../utils/audioPreloader';
 import {
   filterPhraseIdsForRepeatAccess,
-  hasDisc101FullAccess,
+  INITIAL_MODULE_PURCHASE_STATE,
+  loadModulePurchaseState,
+  type ModulePurchaseState,
 } from '../../../constants/chapterUnlock';
 import { coerceModuleCode } from '../../../constants/activeLearningModule';
 import {
@@ -48,7 +50,7 @@ import {
   type SentenceRecord,
 } from '../../../constants/sentencePacks';
 import { audioAssets } from '../../../utils/audioAssets';
-import { phraseAudioAssetKey } from '../../../utils/phraseAudioKey';
+import { buildQuizOptions, phraseAudioSource, shufflePhrases } from '../../../utils/phraseUtils';
 import {
   safePlayerPause,
   safePlayerPlay,
@@ -73,32 +75,6 @@ type Phrase = SentenceRecord;
 
 type RepeatSession = { phrases: Phrase[]; index: number };
 
-function shufflePhrases(phrases: Phrase[]): Phrase[] {
-  const a = [...phrases];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = a[i]!;
-    a[i] = a[j]!;
-    a[j] = t;
-  }
-  return a;
-}
-
-function buildSessionQuizOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
-  const others = shufflePhrases(pool.filter((p) => p.id !== correct.id));
-  const w1 = others[0] ?? correct;
-  const w2 = others[1] ?? others[0] ?? correct;
-  return shufflePhrases([correct, w1, w2]);
-}
-
-function sessionPhraseAudioSource(
-  phraseId: number,
-  gender: 'm' | 'f',
-  moduleCode: ModuleCode,
-) {
-  const key = phraseAudioAssetKey(moduleCode, phraseId, gender);
-  return audioAssets[key] ?? null;
-}
 
 function SessionChrisAnnButtons({
   player,
@@ -136,7 +112,7 @@ function SessionChrisAnnButtons({
   const playVoice = useCallback(
     async (gender: 'm' | 'f') => {
       if (isReleasedRef.current) return;
-      const src = sessionPhraseAudioSource(phraseId, gender, moduleCode);
+      const src = phraseAudioSource(phraseId, gender, moduleCode);
       if (!src) return;
       if (!showOptionsRef.current) {
         onOpenOptionsAfterFirstVoice();
@@ -267,7 +243,9 @@ export default function RepeatSessionScreen() {
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [repeatSession, setRepeatSession] = useState<RepeatSession | null>(null);
   const [purchaseResolved, setPurchaseResolved] = useState(false);
-  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
+  const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
+    INITIAL_MODULE_PURCHASE_STATE,
+  );
   const [sitztConfirmedPhraseIds, setSitztConfirmedPhraseIds] = useState<
     number[]
   >([]);
@@ -332,9 +310,9 @@ export default function RepeatSessionScreen() {
   useEffect(() => {
     void (async () => {
       try {
-        setDisc101FullUnlocked(await hasDisc101FullAccess());
+        setPurchaseState(await loadModulePurchaseState());
       } catch {
-        setDisc101FullUnlocked(false);
+        setPurchaseState(INITIAL_MODULE_PURCHASE_STATE);
       } finally {
         setPurchaseResolved(true);
       }
@@ -361,7 +339,8 @@ export default function RepeatSessionScreen() {
       }
       const ids = filterPhraseIdsForRepeatAccess(
         idsRaw,
-        disc101FullUnlocked,
+        purchaseState,
+        sessionModule,
         sentencesPack,
       );
       const phrases = ids
@@ -383,7 +362,7 @@ export default function RepeatSessionScreen() {
     }
   }, [
     purchaseResolved,
-    disc101FullUnlocked,
+    purchaseState,
     params.phraseIds,
     params.moduleCode,
     byId,
@@ -448,7 +427,7 @@ export default function RepeatSessionScreen() {
   const onOpenQuizOptions = useCallback(() => {
     if (!currentPhrase) return;
     setShowQuizOptions(true);
-    setQuizOptions(buildSessionQuizOptions(currentPhrase, chapterPhrasesPool));
+    setQuizOptions(buildQuizOptions(currentPhrase, chapterPhrasesPool));
   }, [currentPhrase, chapterPhrasesPool]);
 
   const onPickQuizOption = useCallback(

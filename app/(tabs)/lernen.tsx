@@ -25,8 +25,10 @@ import {
   setActiveLearningModule,
 } from '../../constants/activeLearningModule';
 import {
-  hasDisc101FullAccess,
+  INITIAL_MODULE_PURCHASE_STATE,
   isChapterLockedWithoutPurchase,
+  loadModulePurchaseState,
+  type ModulePurchaseState,
 } from '../../constants/chapterUnlock';
 import {
   LAST_POSITION_KEY,
@@ -98,7 +100,9 @@ export default function LernenScreen() {
   const [expandedUnit, setExpandedUnit] = useState<ModuleCode | null>('101');
   const [progressByModule, setProgressByModule] =
     useState<Record<ModuleCode, Record<string, number>>>(EMPTY_PROGRESS);
-  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
+  const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
+    INITIAL_MODULE_PURCHASE_STATE,
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -121,7 +125,7 @@ export default function LernenScreen() {
         }
         if (!cancelled) {
           setProgressByModule(nextProgress);
-          setDisc101FullUnlocked(await hasDisc101FullAccess());
+          setPurchaseState(await loadModulePurchaseState());
         }
       })();
       return () => {
@@ -144,8 +148,11 @@ export default function LernenScreen() {
 
   const selectChapter = useCallback(
     async (chapterId: number, moduleCode: ModuleCode) => {
-      const locked =
-        isChapterLockedWithoutPurchase(chapterId) && !disc101FullUnlocked;
+      const locked = isChapterLockedWithoutPurchase(
+        moduleCode,
+        chapterId,
+        purchaseState,
+      );
       if (locked) {
         router.push({
           pathname: '/paywall',
@@ -164,7 +171,7 @@ export default function LernenScreen() {
       );
       router.replace('/(tabs)');
     },
-    [disc101FullUnlocked, router],
+    [purchaseState, router],
   );
 
   return (
@@ -226,9 +233,11 @@ export default function LernenScreen() {
                 hasChapters ? (
                   <View style={styles.accordionBody}>
                     {chapterRows.map((row) => {
-                      const locked =
-                        isChapterLockedWithoutPurchase(row.chapterId) &&
-                        !disc101FullUnlocked;
+                      const locked = isChapterLockedWithoutPurchase(
+                        code,
+                        row.chapterId,
+                        purchaseState,
+                      );
                       return (
                         <Pressable
                           key={row.chapterId}

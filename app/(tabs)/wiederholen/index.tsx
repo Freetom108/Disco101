@@ -19,7 +19,7 @@ import {
 } from '../../../constants/theme';
 import {
   filterPhraseIdsForRepeatAccess,
-  hasDisc101FullAccess,
+  loadModulePurchaseState,
 } from '../../../constants/chapterUnlock';
 import { loadPinnedIdsForModule } from '../../../constants/learningResume';
 import { MODULE_PRODUCTS, type ModuleCode } from '../../../constants/products';
@@ -89,14 +89,15 @@ export default function RepeatOverviewScreen() {
       let cancelled = false;
       (async () => {
         try {
-          const full101 = await hasDisc101FullAccess();
+          const purchaseState = await loadModulePurchaseState();
           const overviewPromises = MODULE_PRODUCTS.map(async (product) => {
             const pack = getSentencesForModule(product.code);
             if (pack.length === 0) return null;
             const pins = await loadPinnedIdsForModule(product.code);
             const allowed = filterPhraseIdsForRepeatAccess(
               pins,
-              full101,
+              purchaseState,
+              product.code,
               pack,
             );
             if (allowed.length === 0) return null;

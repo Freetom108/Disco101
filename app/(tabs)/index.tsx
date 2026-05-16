@@ -42,7 +42,7 @@ import {
   SCREEN_BG,
 } from '../../constants/theme';
 import { audioAssets } from '../../utils/audioAssets';
-import { phraseAudioAssetKey } from '../../utils/phraseAudioKey';
+import { buildQuizOptions, phraseAudioSource, shufflePhrases } from '../../utils/phraseUtils';
 import {
   safePlayerPause,
   safePlayerPlay,
@@ -62,8 +62,10 @@ import {
   type SentenceRecord,
 } from '../../constants/sentencePacks';
 import {
-  hasDisc101FullAccess,
+  INITIAL_MODULE_PURCHASE_STATE,
   isChapterLockedWithoutPurchase,
+  loadModulePurchaseState,
+  type ModulePurchaseState,
 } from '../../constants/chapterUnlock';
 import type { ModuleCode } from '../../constants/products';
 
@@ -72,33 +74,6 @@ const ANN_AVATAR = require('../../assets/ann.png');
 
 type Phrase = SentenceRecord;
 
-function shufflePhrases(phrases: Phrase[]): Phrase[] {
-  const a = [...phrases];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = a[i]!;
-    a[i] = a[j]!;
-    a[j] = t;
-  }
-  return a;
-}
-
-/** Zwei Distraktoren + korrekte Phrase, gemischt als A/B/C. */
-function buildTestOptions(correct: Phrase, pool: Phrase[]): Phrase[] {
-  const others = shufflePhrases(pool.filter((p) => p.id !== correct.id));
-  const w1 = others[0] ?? correct;
-  const w2 = others[1] ?? others[0] ?? correct;
-  return shufflePhrases([correct, w1, w2]);
-}
-
-function testPhraseAudioSource(
-  phraseId: number,
-  gender: 'm' | 'f',
-  moduleCode: ModuleCode,
-) {
-  const key = phraseAudioAssetKey(moduleCode, phraseId, gender);
-  return audioAssets[key] ?? null;
-}
 
 function TestChrisAnnButtons({
   player,
@@ -128,7 +103,7 @@ function TestChrisAnnButtons({
 
   const playVoice = useCallback(
     async (gender: 'm' | 'f') => {
-      const src = testPhraseAudioSource(phraseId, gender, moduleCode);
+      const src = phraseAudioSource(phraseId, gender, moduleCode);
       if (!src) return;
       if (!showOptionsRef.current) {
         onOpenOptionsAfterFirstVoice();
@@ -239,14 +214,15 @@ export default function HomeScreen() {
   const [activeTestKind, setActiveTestKind] = useState<1 | 2 | null>(null);
   const [showTestDone, setShowTestDone] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
-  const [disc101FullUnlocked, setDisc101FullUnlocked] = useState(false);
+  const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
+    INITIAL_MODULE_PURCHASE_STATE,
+  );
   const [learningModule, setLearningModule] = useState<ModuleCode>('101');
   const [bootReady, setBootReady] = useState(false);
   const [homeHeaderSubtitle, setHomeHeaderSubtitle] = useState(() =>
     titleForModule('101'),
   );
   const [showTestSelection, setShowTestSelection] = useState(false);
-  const activeTestKindRef = useRef<1 | 2 | null>(null);
 
   const sentences = useMemo(
     () => getSentencesForModule(learningModule),
@@ -432,9 +408,7 @@ export default function HomeScreen() {
           const pack = getSentencesForModule(module);
           setLearningModule(module);
           setPinnedIds(await loadPinnedIdsForModule(module));
-          void hasDisc101FullAccess().then((full) =>
-            setDisc101FullUnlocked(full),
-          );
+          void loadModulePurchaseState().then(setPurchaseState);
           setHomeHeaderSubtitle(titleForModule(module));
           const maxInCh = pack.filter((p) => p.chapterId === chapterId).length;
           const clampedIdx =
@@ -474,14 +448,17 @@ export default function HomeScreen() {
   const mergeWrongIntoPinned = useCallback(
     async (wrongIds: number[]) => {
       try {
-        const toAdd = disc101FullUnlocked
-          ? wrongIds
-          : wrongIds.filter((wid) => {
-              const m = sentences.find((p) => p.id === wid);
-              return (
-                m != null && !isChapterLockedWithoutPurchase(m.chapterId)
-              );
-            });
+        const toAdd = wrongIds.filter((wid) => {
+          const m = sentences.find((p) => p.id === wid);
+          return (
+            m != null &&
+            !isChapterLockedWithoutPurchase(
+              learningModule,
+              m.chapterId,
+              purchaseState,
+            )
+          );
+        });
         const existing = await loadPinnedIdsForModule(learningModule);
         const merged = Array.from(new Set([...existing, ...toAdd]));
         setPinnedIds(merged);
@@ -490,7 +467,7 @@ export default function HomeScreen() {
         /* ignore */
       }
     },
-    [disc101FullUnlocked, learningModule, sentences],
+    [purchaseState, learningModule, sentences],
   );
 
   useEffect(() => {
@@ -504,7 +481,7 @@ export default function HomeScreen() {
       clearTimeout(showOptionsTimerRef.current);
       showOptionsTimerRef.current = null;
     }
-    setCurrentOptions(buildTestOptions(correct, chPhrases));
+    setCurrentOptions(buildQuizOptions(correct, chPhrases));
     setSelectedOptionId(null);
     setShowOptions(false);
     setAnswerLocked(false);
@@ -596,7 +573,6 @@ export default function HomeScreen() {
       showOptionsTimerRef.current = null;
     }
     setShowTestSelection(false);
-    activeTestKindRef.current = testNumber;
     setActiveTestKind(testNumber);
     const shuffled = shufflePhrases(chPhrases);
     const limited = shuffled.slice(0, 8);
@@ -619,7 +595,6 @@ export default function HomeScreen() {
     }
     safePlayerPause(testPlaybackPlayer);
     setIsTestMode(false);
-    activeTestKindRef.current = null;
     setActiveTestKind(null);
     setTestIndex(0);
     setWrongAnswers([]);
@@ -1108,7 +1083,8 @@ export default function HomeScreen() {
             isChapterComplete={isChapterComplete}
             isAllPhrasesComplete={isAllPhrasesComplete}
             inChapterN={inChapterN}
-            ch1Count={chCount}
+            currentChapterCount={chCount}
+            totalPhraseCount={totalPhrases}
             globalProgressText={globalProgressText}
             globalBarPct={globalBarPct}
             english={phrase?.english ?? ''}
@@ -1124,8 +1100,11 @@ export default function HomeScreen() {
               const meta = sentences.find((p) => p.id === id);
               if (
                 meta &&
-                isChapterLockedWithoutPurchase(meta.chapterId) &&
-                !disc101FullUnlocked
+                isChapterLockedWithoutPurchase(
+                  learningModule,
+                  meta.chapterId,
+                  purchaseState,
+                )
               ) {
                 return;
               }

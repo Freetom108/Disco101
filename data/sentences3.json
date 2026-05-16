@@ -1,1 +1,709 @@
-[]
+[
+  {
+    "id": 1,
+    "chapterId": 1,
+    "english": "I would like to apply for the position advertised on your website.",
+    "german": "Ich möchte mich für die auf Ihrer Website ausgeschriebene Stelle bewerben.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 2,
+    "chapterId": 1,
+    "english": "Could you tell me a little more about the role and the team?",
+    "german": "Könnten Sie mir etwas mehr über die Stelle und das Team erzählen?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 3,
+    "chapterId": 1,
+    "english": "I have three years of experience in this field.",
+    "german": "Ich habe drei Jahre Erfahrung in diesem Bereich.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 4,
+    "chapterId": 1,
+    "english": "What would a typical working day look like in this position?",
+    "german": "Wie würde ein typischer Arbeitstag in dieser Position aussehen?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 5,
+    "chapterId": 1,
+    "english": "I am available to start as soon as possible.",
+    "german": "Ich bin bereit, so bald wie möglich anzufangen.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 6,
+    "chapterId": 1,
+    "english": "Could you tell me more about the company culture?",
+    "german": "Könnten Sie mir mehr über die Unternehmenskultur erzählen?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 7,
+    "chapterId": 1,
+    "english": "I am very motivated to learn and grow in this role.",
+    "german": "Ich bin sehr motiviert, in dieser Rolle zu lernen und zu wachsen.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 8,
+    "chapterId": 1,
+    "english": "What are the main responsibilities of this position?",
+    "german": "Was sind die Hauptaufgaben dieser Stelle?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 9,
+    "chapterId": 1,
+    "english": "I work very well in a team as well as independently.",
+    "german": "Ich arbeite sowohl im Team als auch selbstständig sehr gut.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 10,
+    "chapterId": 1,
+    "english": "Could you tell me about the next steps in the application process?",
+    "german": "Könnten Sie mir die nächsten Schritte im Bewerbungsprozess erklären?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 11,
+    "chapterId": 1,
+    "english": "I am particularly interested in this role because of the international focus.",
+    "german": "Ich interessiere mich besonders für diese Stelle aufgrund des internationalen Schwerpunkts.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 12,
+    "chapterId": 1,
+    "english": "When can I expect to hear back from you?",
+    "german": "Wann kann ich mit einer Rückmeldung von Ihnen rechnen?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 13,
+    "chapterId": 1,
+    "english": "I am happy to provide references from my previous employer.",
+    "german": "Ich stelle Ihnen gerne Referenzen meines vorherigen Arbeitgebers zur Verfügung.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 14,
+    "chapterId": 1,
+    "english": "What opportunities are there for professional development?",
+    "german": "Welche Möglichkeiten gibt es zur beruflichen Weiterentwicklung?",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 15,
+    "chapterId": 1,
+    "english": "Thank you very much for this opportunity – I look forward to hearing from you.",
+    "german": "Vielen Dank für diese Gelegenheit – ich freue mich auf Ihre Rückmeldung.",
+    "category": "Bewerbung & Vorstellungsgespräch"
+  },
+  {
+    "id": 16,
+    "chapterId": 2,
+    "english": "Could we schedule a meeting for next week?",
+    "german": "Könnten wir ein Meeting für nächste Woche ansetzen?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 17,
+    "chapterId": 2,
+    "english": "I would like to add one more point to the agenda.",
+    "german": "Ich möchte noch einen Punkt zur Tagesordnung hinzufügen.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 18,
+    "chapterId": 2,
+    "english": "Could you send me the minutes of the meeting afterwards?",
+    "german": "Könnten Sie mir das Protokoll des Meetings danach zuschicken?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 19,
+    "chapterId": 2,
+    "english": "I am afraid I will not be able to attend the meeting on Friday.",
+    "german": "Leider werde ich nicht am Meeting am Freitag teilnehmen können.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 20,
+    "chapterId": 2,
+    "english": "Could we move the meeting to Thursday instead?",
+    "german": "Könnten wir das Meeting stattdessen auf Donnerstag verschieben?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 21,
+    "chapterId": 2,
+    "english": "I would like to follow up on what we discussed last week.",
+    "german": "Ich möchte auf das eingehen, was wir letzte Woche besprochen haben.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 22,
+    "chapterId": 2,
+    "english": "Could you please share your screen so we can all see the document?",
+    "german": "Könnten Sie bitte Ihren Bildschirm teilen, damit wir alle das Dokument sehen können?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 23,
+    "chapterId": 2,
+    "english": "I think we should table this topic for the next meeting.",
+    "german": "Ich denke, wir sollten dieses Thema auf das nächste Meeting vertagen.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 24,
+    "chapterId": 2,
+    "english": "Could everyone please mute their microphone when not speaking?",
+    "german": "Könnten bitte alle ihr Mikrofon stummschalten, wenn sie nicht sprechen?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 25,
+    "chapterId": 2,
+    "english": "I would like to briefly summarise what we have agreed on today.",
+    "german": "Ich möchte kurz zusammenfassen, worauf wir uns heute geeinigt haben.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 26,
+    "chapterId": 2,
+    "english": "Could we set a deadline for this by the end of the week?",
+    "german": "Könnten wir dafür eine Deadline bis Ende der Woche festlegen?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 27,
+    "chapterId": 2,
+    "english": "I will send you a follow-up email with all the details.",
+    "german": "Ich schicke Ihnen eine Follow-up-E-Mail mit allen Details.",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 28,
+    "chapterId": 2,
+    "english": "Who is responsible for this task going forward?",
+    "german": "Wer ist für diese Aufgabe künftig zuständig?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 29,
+    "chapterId": 2,
+    "english": "Could we keep this meeting to thirty minutes please?",
+    "german": "Könnten wir dieses Meeting bitte auf dreißig Minuten begrenzen?",
+    "category": "Im Büro & Meetings"
+  },
+  {
+    "id": 30,
+    "chapterId": 3,
+    "english": "Today I would like to present our results for the last quarter.",
+    "german": "Heute möchte ich unsere Ergebnisse des letzten Quartals vorstellen.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 31,
+    "chapterId": 3,
+    "english": "Let me take you through the main points of this report.",
+    "german": "Lassen Sie mich Sie durch die Hauptpunkte dieses Berichts führen.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 32,
+    "chapterId": 3,
+    "english": "As you can see on this slide, the numbers have improved significantly.",
+    "german": "Wie Sie auf dieser Folie sehen können, haben sich die Zahlen deutlich verbessert.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 33,
+    "chapterId": 3,
+    "english": "I will now hand over to my colleague for the next section.",
+    "german": "Ich übergebe nun an meinen Kollegen für den nächsten Abschnitt.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 34,
+    "chapterId": 3,
+    "english": "Are there any questions before I move on to the next point?",
+    "german": "Gibt es Fragen, bevor ich zum nächsten Punkt übergehe?",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 35,
+    "chapterId": 3,
+    "english": "To summarise, our main findings are the following.",
+    "german": "Zusammenfassend sind unsere wichtigsten Erkenntnisse die folgenden.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 36,
+    "chapterId": 3,
+    "english": "I would be happy to go into more detail on this if needed.",
+    "german": "Ich würde das gerne näher ausführen, wenn nötig.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 37,
+    "chapterId": 3,
+    "english": "Could you please save your questions for the end of the presentation?",
+    "german": "Könnten Sie Ihre Fragen bitte bis zum Ende der Präsentation aufheben?",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 38,
+    "chapterId": 3,
+    "english": "The deadline for submitting the final report is next Friday.",
+    "german": "Die Frist für die Einreichung des Abschlussberichts ist nächsten Freitag.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 39,
+    "chapterId": 3,
+    "english": "I would like to highlight three key points from this data.",
+    "german": "Ich möchte drei wichtige Punkte aus diesen Daten hervorheben.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 40,
+    "chapterId": 3,
+    "english": "This chart clearly shows the growth we have achieved this year.",
+    "german": "Dieses Diagramm zeigt deutlich das Wachstum, das wir dieses Jahr erzielt haben.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 41,
+    "chapterId": 3,
+    "english": "I apologise for the technical difficulties – let me try again.",
+    "german": "Ich entschuldige mich für die technischen Schwierigkeiten – lassen Sie mich es nochmals versuchen.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 42,
+    "chapterId": 3,
+    "english": "Thank you for your attention – I am now happy to take any questions.",
+    "german": "Vielen Dank für Ihre Aufmerksamkeit – ich beantworte jetzt gerne Ihre Fragen.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 43,
+    "chapterId": 3,
+    "english": "I will circulate the presentation slides to everyone after the meeting.",
+    "german": "Ich werde die Präsentationsfolien nach dem Meeting an alle verteilen.",
+    "category": "Präsentationen & Berichte"
+  },
+  {
+    "id": 44,
+    "chapterId": 4,
+    "english": "Could I speak to someone in the sales department please?",
+    "german": "Könnte ich bitte mit jemandem aus der Vertriebsabteilung sprechen?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 45,
+    "chapterId": 4,
+    "english": "I am afraid the line is quite bad – could you speak up a little?",
+    "german": "Leider ist die Verbindung sehr schlecht – könnten Sie etwas lauter sprechen?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 46,
+    "chapterId": 4,
+    "english": "Could I leave a message for her please?",
+    "german": "Könnte ich bitte eine Nachricht für sie hinterlassen?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 47,
+    "chapterId": 4,
+    "english": "I will ask him to call you back as soon as possible.",
+    "german": "Ich werde ihn bitten, Sie so bald wie möglich zurückzurufen.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 48,
+    "chapterId": 4,
+    "english": "Could you spell your name for me please?",
+    "german": "Könnten Sie mir Ihren Namen buchstabieren?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 49,
+    "chapterId": 4,
+    "english": "I am calling to follow up on the email I sent last week.",
+    "german": "Ich rufe an, um auf die E-Mail zu folgen, die ich letzte Woche gesendet habe.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 50,
+    "chapterId": 4,
+    "english": "I would like to confirm our appointment for tomorrow morning.",
+    "german": "Ich möchte unseren Termin für morgen früh bestätigen.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 51,
+    "chapterId": 4,
+    "english": "Please find attached the document we discussed in our meeting.",
+    "german": "Im Anhang finden Sie das Dokument, das wir in unserem Meeting besprochen haben.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 52,
+    "chapterId": 4,
+    "english": "Could you copy my colleague into this email thread please?",
+    "german": "Könnten Sie bitte meinen Kollegen in diesen E-Mail-Thread aufnehmen?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 53,
+    "chapterId": 4,
+    "english": "I will get back to you by the end of the day with an answer.",
+    "german": "Ich melde mich bis Ende des Tages mit einer Antwort bei Ihnen.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 54,
+    "chapterId": 4,
+    "english": "Thank you for your prompt reply – I really appreciate it.",
+    "german": "Vielen Dank für Ihre schnelle Antwort – ich schätze das sehr.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 55,
+    "chapterId": 4,
+    "english": "I apologise for the delayed response – I was travelling last week.",
+    "german": "Ich entschuldige mich für die verspätete Antwort – ich war letzte Woche auf Reisen.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 56,
+    "chapterId": 4,
+    "english": "Could you confirm receipt of this email when you get a chance?",
+    "german": "Könnten Sie den Erhalt dieser E-Mail bestätigen, wenn Sie Gelegenheit haben?",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 57,
+    "chapterId": 4,
+    "english": "I look forward to hearing from you at your earliest convenience.",
+    "german": "Ich freue mich auf Ihre baldige Rückmeldung.",
+    "category": "Telefon & E-Mail"
+  },
+  {
+    "id": 58,
+    "chapterId": 5,
+    "english": "Could you book a taxi to the airport for seven o'clock please?",
+    "german": "Könnten Sie bitte ein Taxi für sieben Uhr zum Flughafen buchen?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 59,
+    "chapterId": 5,
+    "english": "I would like to check in for my flight to London please.",
+    "german": "Ich möchte bitte für meinen Flug nach London einchecken.",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 60,
+    "chapterId": 5,
+    "english": "Could I have a window seat if one is available please?",
+    "german": "Könnte ich bitte einen Fensterplatz haben, wenn einer verfügbar ist?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 61,
+    "chapterId": 5,
+    "english": "I need to be at my meeting by nine o'clock – is that possible?",
+    "german": "Ich muss bis neun Uhr bei meinem Meeting sein – ist das möglich?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 62,
+    "chapterId": 5,
+    "english": "Could you recommend a good restaurant near the conference centre?",
+    "german": "Könnten Sie ein gutes Restaurant in der Nähe des Konferenzzentrums empfehlen?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 63,
+    "chapterId": 5,
+    "english": "I would like to extend my hotel stay by one more night please.",
+    "german": "Ich möchte meinen Hotelaufenthalt bitte um eine weitere Nacht verlängern.",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 64,
+    "chapterId": 5,
+    "english": "Could I have a receipt for my expenses please?",
+    "german": "Könnte ich bitte eine Quittung für meine Ausgaben haben?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 65,
+    "chapterId": 5,
+    "english": "I need to find a quiet place to make an important phone call.",
+    "german": "Ich muss einen ruhigen Ort finden, um einen wichtigen Anruf zu tätigen.",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 66,
+    "chapterId": 5,
+    "english": "Could you tell me where the nearest pharmacy is please?",
+    "german": "Könnten Sie mir bitte sagen, wo die nächste Apotheke ist?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 67,
+    "chapterId": 5,
+    "english": "I would like to arrange a car rental for the duration of my stay.",
+    "german": "Ich möchte für die Dauer meines Aufenthalts einen Mietwagen arrangieren.",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 68,
+    "chapterId": 5,
+    "english": "My luggage has not arrived – could you help me report it please?",
+    "german": "Mein Gepäck ist nicht angekommen – könnten Sie mir helfen, es zu melden?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 69,
+    "chapterId": 5,
+    "english": "Could you wake me up at six tomorrow morning please?",
+    "german": "Könnten Sie mich bitte morgen früh um sechs Uhr wecken?",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 70,
+    "chapterId": 5,
+    "english": "I would like to settle my bill and check out this morning please.",
+    "german": "Ich möchte bitte heute Morgen meine Rechnung begleichen und auschecken.",
+    "category": "Geschäftsreisen"
+  },
+  {
+    "id": 71,
+    "chapterId": 6,
+    "english": "We are very interested in working with your company.",
+    "german": "Wir sind sehr daran interessiert, mit Ihrem Unternehmen zusammenzuarbeiten.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 72,
+    "chapterId": 6,
+    "english": "Could you give us a rough idea of the budget you have in mind?",
+    "german": "Könnten Sie uns eine grobe Vorstellung des Budgets geben, das Sie sich vorstellen?",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 73,
+    "chapterId": 6,
+    "english": "We would be prepared to offer a discount for a larger order.",
+    "german": "Wir wären bereit, einen Rabatt für eine größere Bestellung anzubieten.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 74,
+    "chapterId": 6,
+    "english": "Could we have a little more time to consider your proposal?",
+    "german": "Könnten wir etwas mehr Zeit haben, um Ihren Vorschlag zu überdenken?",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 75,
+    "chapterId": 6,
+    "english": "I think we are very close to reaching an agreement.",
+    "german": "Ich denke, wir sind einer Einigung sehr nahe.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 76,
+    "chapterId": 6,
+    "english": "We would need to discuss this internally before giving you a final answer.",
+    "german": "Wir müssten das intern besprechen, bevor wir Ihnen eine endgültige Antwort geben.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 77,
+    "chapterId": 6,
+    "english": "Could you put that offer in writing for us please?",
+    "german": "Könnten Sie uns dieses Angebot bitte schriftlich geben?",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 78,
+    "chapterId": 6,
+    "english": "We are happy to proceed on that basis if you are.",
+    "german": "Wir sind bereit, auf dieser Grundlage fortzufahren, wenn Sie es auch sind.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 79,
+    "chapterId": 6,
+    "english": "I am afraid that price is slightly above our budget.",
+    "german": "Leider liegt dieser Preis etwas über unserem Budget.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 80,
+    "chapterId": 6,
+    "english": "Could we arrange a follow-up call to finalise the details?",
+    "german": "Könnten wir einen Follow-up-Anruf vereinbaren, um die Details abzuschließen?",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 81,
+    "chapterId": 6,
+    "english": "We would be happy to sign the contract as soon as the terms are agreed.",
+    "german": "Wir würden den Vertrag gerne unterzeichnen, sobald die Bedingungen vereinbart sind.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 82,
+    "chapterId": 6,
+    "english": "I think this is a deal that works well for both sides.",
+    "german": "Ich denke, das ist ein Deal, der für beide Seiten gut funktioniert.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 83,
+    "chapterId": 6,
+    "english": "Could you send us a revised proposal based on our feedback?",
+    "german": "Könnten Sie uns einen überarbeiteten Vorschlag basierend auf unserem Feedback schicken?",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 84,
+    "chapterId": 6,
+    "english": "We look forward to a long and successful partnership with your company.",
+    "german": "Wir freuen uns auf eine lange und erfolgreiche Partnerschaft mit Ihrem Unternehmen.",
+    "category": "Verhandlungen & Deals"
+  },
+  {
+    "id": 85,
+    "chapterId": 7,
+    "english": "How was your weekend – did you do anything nice?",
+    "german": "Wie war Ihr Wochenende – haben Sie etwas Schönes unternommen?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 86,
+    "chapterId": 7,
+    "english": "Have you been with the company for long?",
+    "german": "Sind Sie schon lange bei dem Unternehmen?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 87,
+    "chapterId": 7,
+    "english": "What a busy week it has been – I am glad it is Friday!",
+    "german": "Was für eine arbeitsreiche Woche – ich bin froh, dass es Freitag ist!",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 88,
+    "chapterId": 7,
+    "english": "Did you manage to catch the game last night?",
+    "german": "Haben Sie es geschafft, das Spiel gestern Abend zu sehen?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 89,
+    "chapterId": 7,
+    "english": "I really enjoyed the team event last week – it was great fun.",
+    "german": "Ich habe das Teamevent letzte Woche sehr genossen – es hat wirklich Spaß gemacht.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 90,
+    "chapterId": 7,
+    "english": "Have you tried the new coffee place around the corner yet?",
+    "german": "Haben Sie das neue Café um die Ecke schon ausprobiert?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 91,
+    "chapterId": 7,
+    "english": "Are you heading to the conference in Berlin next month?",
+    "german": "Fahren Sie nächsten Monat zur Konferenz in Berlin?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 92,
+    "chapterId": 7,
+    "english": "I cannot believe how quickly this year has gone by.",
+    "german": "Ich kann nicht glauben, wie schnell dieses Jahr vergangen ist.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 93,
+    "chapterId": 7,
+    "english": "Do you have any plans for the summer holidays yet?",
+    "german": "Haben Sie schon Pläne für die Sommerferien?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 94,
+    "chapterId": 7,
+    "english": "It was really nice to finally put a face to the name.",
+    "german": "Es war wirklich schön, endlich ein Gesicht zum Namen zu sehen.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 95,
+    "chapterId": 7,
+    "english": "How are you finding the new office – are you settling in well?",
+    "german": "Wie gefällt Ihnen das neue Büro – haben Sie sich gut eingelebt?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 96,
+    "chapterId": 7,
+    "english": "I heard you recently got back from a trip – how was it?",
+    "german": "Ich habe gehört, Sie sind kürzlich von einer Reise zurückgekommen – wie war es?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 97,
+    "chapterId": 7,
+    "english": "We should grab a coffee sometime and catch up properly.",
+    "german": "Wir sollten uns irgendwann einen Kaffee holen und richtig austauschen.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 98,
+    "chapterId": 7,
+    "english": "Is this your first time at this kind of industry event?",
+    "german": "Ist das Ihr erstes Mal bei einer solchen Branchenveranstaltung?",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 99,
+    "chapterId": 7,
+    "english": "I really like what you did with that presentation – very impressive.",
+    "german": "Ich finde wirklich toll, was Sie mit dieser Präsentation gemacht haben – sehr beeindruckend.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 100,
+    "chapterId": 7,
+    "english": "It has been a pleasure working with you on this project.",
+    "german": "Es war eine Freude, mit Ihnen an diesem Projekt zu arbeiten.",
+    "category": "Small Talk im Berufsalltag"
+  },
+  {
+    "id": 101,
+    "chapterId": 7,
+    "english": "I hope we will have the chance to work together again in the future.",
+    "german": "Ich hoffe, wir werden in Zukunft wieder die Möglichkeit haben, zusammenzuarbeiten.",
+    "category": "Small Talk im Berufsalltag"
+  }
+]

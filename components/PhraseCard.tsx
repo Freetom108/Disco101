@@ -306,7 +306,13 @@ export default function PhraseCard({
                   {german}
                 </Text>
                 <View style={styles.categoryPill}>
-                  <Text style={styles.categoryPillText}>{category}</Text>
+                  <Text
+                    style={styles.categoryPillText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {category}
+                  </Text>
                 </View>
               </>
             )}
@@ -524,7 +530,9 @@ const styles = StyleSheet.create({
   },
   categoryPill: {
     alignSelf: 'flex-start',
+    maxWidth: '100%',
     marginTop: 14,
+    marginBottom: 16,
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 100,
@@ -532,7 +540,7 @@ const styles = StyleSheet.create({
   },
   categoryPillText: {
     color: '#1A1A1A',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
   },
   cardMFRow: {

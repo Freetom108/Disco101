@@ -21,15 +21,12 @@ import {
 import type { ModuleCode } from '../constants/products';
 import { MODULE_PRODUCTS } from '../constants/products';
 import type { AppPalette } from '../constants/themePalettes';
+import { STRINGS } from '../constants/strings';
 import { FONT_DM_SERIF } from '../constants/theme';
 import { useAppTheme } from '../context/AppThemeContext';
 
-const COMING_SOON_TITLE = 'Hinweis';
-const COMING_SOON_BODY =
-  'Kommt bald – Zahlfunktion wird aktiviert sobald alle Module fertig sind.';
-
 function showPurchasePlaceholder() {
-  Alert.alert(COMING_SOON_TITLE, COMING_SOON_BODY);
+  Alert.alert(STRINGS.paywallComingSoonTitle, STRINGS.paywallComingSoonBody);
 }
 
 function parseFocusModule(raw: unknown): ModuleCode | undefined {
@@ -80,7 +77,7 @@ export default function PaywallScreen() {
             onPress={close}
             hitSlop={12}
             accessibilityRole="button"
-            accessibilityLabel="Schließen"
+            accessibilityLabel={STRINGS.paywallCloseA11y}
             style={({ pressed }) => [
               styles.closeBtn,
               pressed && { opacity: 0.75 },
@@ -103,15 +100,13 @@ export default function PaywallScreen() {
         >
           <View style={styles.hero}>
             <Text style={[styles.title, { fontFamily: FONT_DM_SERIF }]}>
-              Alles auf einen Blick
+              {STRINGS.paywallHeroTitle}
             </Text>
           </View>
 
           <View style={styles.infoBox}>
             <Text style={styles.infoBoxParagraph}>
-              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
-              englischen Redewendungen – egal ob Alltag, Urlaub, Beruf oder Leben
-              im Ausland.
+              {STRINGS.paywallInfoParagraph}
             </Text>
           </View>
 
@@ -133,26 +128,26 @@ export default function PaywallScreen() {
                     pressed && { opacity: 0.92 },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`${m.title} kaufen`}
+                  accessibilityLabel={`${m.title} ${STRINGS.paywallBuyVerb}`}
                 >
                   <View>
                     <Text style={styles.moduleTileBold} numberOfLines={1}>
                       {m.title}
                     </Text>
                     <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGap]}>
-                      101 Phrasen
+                      {STRINGS.paywallTilePhrasesCount}
                     </Text>
                     <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGapTight]}>
-                      7 Kapitel
+                      {STRINGS.paywallTileChaptersCount}
                     </Text>
                     <Text style={[styles.moduleTileMuted, styles.moduleTileMutedGapTight]}>
-                      Kapitel 1 gratis
+                      {STRINGS.paywallTileChapterOneFree}
                     </Text>
                     <Text style={[styles.moduleTileBold, styles.moduleTilePriceGap]}>
                       {m.priceLabel}
                     </Text>
                     <Text style={[styles.moduleTileMuted, styles.moduleTileEinmalGap]}>
-                      Einmalzahlung
+                      {STRINGS.paywallTileOneTimePayment}
                     </Text>
                   </View>
                 </Pressable>
@@ -168,12 +163,12 @@ export default function PaywallScreen() {
                 pressed && { opacity: 0.9 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Nur diese Unit kaufen"
+              accessibilityLabel={STRINGS.paywallSingleUnitA11y}
             >
-              <Text style={styles.singleBtnText}>Nur diese Unit – 5,99 €</Text>
+              <Text style={styles.singleBtnText}>{STRINGS.paywallSingleUnitCta}</Text>
             </Pressable>
             <Text style={styles.ctaSubcaption}>
-              Einmalige Zahlung – kein Abo
+              {STRINGS.paywallSingleUnitSubcaption}
             </Text>
           </View>
 
@@ -185,12 +180,12 @@ export default function PaywallScreen() {
                 pressed && { opacity: 0.92 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Alle vier Units kaufen"
+              accessibilityLabel={STRINGS.paywallBundleA11y}
             >
-              <Text style={styles.bundleBtnText}>Alle vier Units – 19,99 €</Text>
+              <Text style={styles.bundleBtnText}>{STRINGS.paywallBundleCta}</Text>
             </Pressable>
             <Text style={styles.ctaSubcaption}>
-              Einmalzahlung · Spare über 15%
+              {STRINGS.paywallBundleSubcaption}
             </Text>
           </View>
 
@@ -199,9 +194,9 @@ export default function PaywallScreen() {
             activeOpacity={0.75}
             onPress={showPurchasePlaceholder}
             accessibilityRole="button"
-            accessibilityLabel="Käufe wiederherstellen"
+            accessibilityLabel={STRINGS.restorePurchases}
           >
-            <Text style={styles.footerRestoreText}>Käufe wiederherstellen</Text>
+            <Text style={styles.footerRestoreText}>{STRINGS.restorePurchases}</Text>
           </TouchableOpacity>
 
           <View style={styles.footerLinksRow}>
@@ -209,26 +204,24 @@ export default function PaywallScreen() {
               style={styles.footerLink}
               activeOpacity={0.75}
               accessibilityRole="link"
-              accessibilityLabel="Datenschutz"
+              accessibilityLabel={STRINGS.privacyPolicy}
               onPress={() =>
-                void Linking.openURL(
-                  'https://freetom108.github.io/Disco101/datenschutz/',
-                )
+                void Linking.openURL(STRINGS.urlPrivacy)
               }
             >
-              <Text style={styles.footerLinkText}>Datenschutz</Text>
+              <Text style={styles.footerLinkText}>{STRINGS.privacyPolicy}</Text>
             </TouchableOpacity>
-            <Text style={styles.footerDot}> · </Text>
+            <Text style={styles.footerDot}>{STRINGS.footerDotSeparator}</Text>
             <TouchableOpacity
               style={styles.footerLink}
               activeOpacity={0.75}
               accessibilityRole="link"
-              accessibilityLabel="AGB"
+              accessibilityLabel={STRINGS.termsShort}
               onPress={() =>
-                void Linking.openURL('https://freetom108.github.io/Disco101/agb/')
+                void Linking.openURL(STRINGS.urlTerms)
               }
             >
-              <Text style={styles.footerLinkText}>AGB</Text>
+              <Text style={styles.footerLinkText}>{STRINGS.termsShort}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

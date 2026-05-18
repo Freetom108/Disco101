@@ -19,6 +19,7 @@ import {
 } from '../../../constants/chapterUnlock';
 import { loadPinnedIdsForModule } from '../../../constants/learningResume';
 import { MODULE_PRODUCTS, type ModuleCode } from '../../../constants/products';
+import { STRINGS } from '../../../constants/strings';
 import {
   getSentencesForModule,
   type SentenceRecord,
@@ -57,7 +58,7 @@ function buildChapterGroups(
       const first = sentences.find((x) => x.chapterId === chapterId);
       return {
         chapterId,
-        title: first?.category ?? `Kapitel ${chapterId}`,
+        title: first?.category ?? `${STRINGS.chapterWord} ${chapterId}`,
         count: phraseIds.length,
         phraseIds,
       };
@@ -65,7 +66,9 @@ function buildChapterGroups(
 }
 
 function kartenZuUbenLabel(n: number): string {
-  return n === 1 ? '1 Karte zu üben' : `${n} Karten zu üben`;
+  return n === 1
+    ? STRINGS.repeatStackOneCard
+    : `${n} ${STRINGS.repeatStackManyCardsSuffix}`;
 }
 
 export default function RepeatOverviewScreen() {
@@ -167,8 +170,8 @@ export default function RepeatOverviewScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerLine1}>Repeat</Text>
-            <Text style={styles.headerLine2}>Dein Übungsstapel</Text>
+            <Text style={styles.headerLine1}>{STRINGS.repeatOverviewTitle}</Text>
+            <Text style={styles.headerLine2}>{STRINGS.repeatOverviewSubtitle}</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -195,12 +198,10 @@ export default function RepeatOverviewScreen() {
             <View style={styles.pinnedEmptyWrap}>
               <Ionicons name="pin" size={40} color={colors.iconMuted} />
               <Text style={styles.pinnedEmptyTitle}>
-                Noch keine Karten aus dem Stapel
+                {STRINGS.repeatEmptyTitle}
               </Text>
               <Text style={styles.pinnedEmptySubtext}>
-                Tippe die Stecknadel auf einer Karte im Home-Tab – gespeicherte
-                Phrasen erscheinen hier nach Unit gruppiert. (Weitere Kapitel:
-                nach Freischaltung.)
+                {STRINGS.repeatEmptySubtext}
               </Text>
             </View>
           ) : (
@@ -217,7 +218,7 @@ export default function RepeatOverviewScreen() {
                     ]}
                     accessibilityRole="button"
                     accessibilityState={{ expanded: open }}
-                    accessibilityLabel={`${overview.unitTitle}, ${kartenZuUbenLabel(n)}, ${open ? 'einklappen' : 'aufklappen'}`}
+                    accessibilityLabel={`${overview.unitTitle}, ${kartenZuUbenLabel(n)}, ${open ? STRINGS.repeatAccordionCollapseLabel : STRINGS.repeatAccordionExpandLabel}`}
                   >
                     <View style={styles.accordionHeaderTextCol}>
                       <Text
@@ -246,11 +247,13 @@ export default function RepeatOverviewScreen() {
                           pressed && { opacity: 0.88 },
                         ]}
                         accessibilityRole="button"
-                        accessibilityLabel={`Alle Karten aus ${overview.unitTitle} wiederholen`}
+                        accessibilityLabel={`${STRINGS.a11yRepeatAllFromUnitPrefix}${overview.unitTitle}${STRINGS.a11yRepeatAllFromUnitSuffix}`}
                       >
                         <Text style={styles.repeatAllOutlineBtnText}>
-                          Alle Karten wiederholen · {n}{' '}
-                          {n === 1 ? 'Karte' : 'Karten'}
+                          {STRINGS.repeatAllCardsBtnIntro}
+                          {n}
+                          {' '}
+                          {n === 1 ? STRINGS.repeatCardSingular : STRINGS.repeatCardsPlural}
                         </Text>
                       </Pressable>
 
@@ -265,10 +268,10 @@ export default function RepeatOverviewScreen() {
                             pressed && { opacity: 0.88 },
                           ]}
                           accessibilityRole="button"
-                          accessibilityLabel={`Kapitel ${g.chapterId} ${g.title}, ${g.count} Karten`}
+                          accessibilityLabel={`${STRINGS.chapterWord} ${g.chapterId} ${g.title}, ${g.count}${STRINGS.sessionCardsProgressSuffix}`}
                         >
                           <Text style={styles.chapterTileLine1}>
-                            Kapitel {g.chapterId}
+                            {STRINGS.chapterWord} {g.chapterId}
                           </Text>
                           <Text style={styles.chapterTileLine2} numberOfLines={2}>
                             {g.title}

@@ -15,6 +15,7 @@ import {
 } from '../constants/audioSettingsStorage';
 import { useAppTheme } from '../context/AppThemeContext';
 import type { ModuleCode } from '../constants/products';
+import { STRINGS } from '../constants/strings';
 import { getPreloadedSource } from '../utils/audioPreloader';
 import {
   safePlayerPause,
@@ -179,7 +180,8 @@ export default function SpeakerButton({
     }
   }, [clearStatusSubscription, phraseId, player, source]);
 
-  const speakerName = letter.trim().toUpperCase() === 'M' ? 'Chris' : 'Ann';
+  const speakerName =
+    letter.trim().toUpperCase() === 'M' ? STRINGS.voiceChris : STRINGS.voiceAnn;
 
   return (
     <Pressable

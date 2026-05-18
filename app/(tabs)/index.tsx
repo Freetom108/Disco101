@@ -33,6 +33,7 @@ import {
 } from '../../utils/audioPreloader';
 import type { AppPalette } from '../../constants/themePalettes';
 import { FONT_DM_SERIF } from '../../constants/theme';
+import { STRINGS } from '../../constants/strings';
 import { useAppTheme } from '../../context/AppThemeContext';
 import { audioAssets } from '../../utils/audioAssets';
 import { buildQuizOptions, phraseAudioSource, shufflePhrases } from '../../utils/phraseUtils';
@@ -149,7 +150,7 @@ function TestChrisAnnButtons({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Chris (männliche Stimme)"
+        accessibilityLabel={STRINGS.a11yChrisMaleVoice}
         onPress={() => void playVoice('m')}
         style={({ pressed }) => [
           btnStyle,
@@ -164,12 +165,12 @@ function TestChrisAnnButtons({
               resizeMode="cover"
             />
           </View>
-          <Text style={homeStyles.testVoiceBtnText}>Chris</Text>
+          <Text style={homeStyles.testVoiceBtnText}>{STRINGS.voiceChris}</Text>
         </View>
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Ann (weibliche Stimme)"
+        accessibilityLabel={STRINGS.a11yAnnFemaleVoice}
         onPress={() => void playVoice('f')}
         style={({ pressed }) => [
           btnStyle,
@@ -184,7 +185,7 @@ function TestChrisAnnButtons({
               resizeMode="cover"
             />
           </View>
-          <Text style={homeStyles.testVoiceBtnText}>Ann</Text>
+          <Text style={homeStyles.testVoiceBtnText}>{STRINGS.voiceAnn}</Text>
         </View>
       </Pressable>
     </View>
@@ -438,7 +439,7 @@ export default function HomeScreen() {
     [chPhrases],
   );
   const chCount = chPhrases.length;
-  const categoryTitle = chPhrases[0]?.category ?? `Kapitel ${currentChapter}`;
+  const categoryTitle = chPhrases[0]?.category ?? `${STRINGS.chapterWord} ${currentChapter}`;
 
   const phrasesBefore = useMemo(
     () => sentences.filter((p) => p.chapterId < currentChapter).length,
@@ -691,7 +692,7 @@ export default function HomeScreen() {
         <Header subtitle={homeHeaderSubtitle} />
         <View style={[styles.homeBody, styles.homeEmptyPack]}>
           <Text style={styles.homeEmptyPackText}>
-            Die Phrasen für diese Unit werden bald ergänzt.
+            {STRINGS.homeEmptyPack}
           </Text>
         </View>
       </View>
@@ -718,18 +719,17 @@ export default function HomeScreen() {
                       { fontFamily: FONT_DM_SERIF },
                     ]}
                   >
-                    Wähle deinen Test
+                    {STRINGS.testChooseTitle}
                   </Text>
 
                   <View style={styles.testBlock}>
-                    <Text style={styles.testBlockLabel}>Test 1</Text>
+                    <Text style={styles.testBlockLabel}>{STRINGS.test1Label}</Text>
                     <Text style={styles.testBlockBody}>
-                      Chris oder Ann lesen dir einen Satz vor. Deine Aufgabe:
-                      Erkenne den gehörten Satz unter drei englischen Optionen.
+                      {STRINGS.test1Body}
                     </Text>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Test 1 starten"
+                      accessibilityLabel={STRINGS.test1StartA11y}
                       onPress={() => startTest(1)}
                       style={({ pressed }) => [
                         styles.testBlockBtn,
@@ -738,20 +738,19 @@ export default function HomeScreen() {
                       ]}
                     >
                       <Text style={styles.testBlockBtnText}>
-                        Test 1 starten →
+                        {STRINGS.test1Start}
                       </Text>
                     </Pressable>
                   </View>
 
                   <View style={styles.testBlock}>
-                    <Text style={styles.testBlockLabel}>Test 2</Text>
+                    <Text style={styles.testBlockLabel}>{STRINGS.test2Label}</Text>
                     <Text style={styles.testBlockBody}>
-                      Chris oder Ann lesen dir einen Satz vor. Deine Aufgabe:
-                      Finde die richtige deutsche Bedeutung unter drei Optionen.
+                      {STRINGS.test2Body}
                     </Text>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Test 2 starten"
+                      accessibilityLabel={STRINGS.test2StartA11y}
                       onPress={() => startTest(2)}
                       style={({ pressed }) => [
                         styles.testBlockBtn,
@@ -760,21 +759,21 @@ export default function HomeScreen() {
                       ]}
                     >
                       <Text style={styles.testBlockBtnText}>
-                        Test 2 starten →
+                        {STRINGS.test2Start}
                       </Text>
                     </Pressable>
                   </View>
 
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Zurück"
+                    accessibilityLabel={STRINGS.back}
                     onPress={() => setShowTestSelection(false)}
                     style={({ pressed }) => [
                       styles.testSelectionBack,
                       pressed && { opacity: 0.7 },
                     ]}
                   >
-                    <Text style={styles.testSelectionBackText}>Zurück</Text>
+                    <Text style={styles.testSelectionBackText}>{STRINGS.back}</Text>
                   </Pressable>
                 </ScrollView>
               </View>
@@ -818,20 +817,20 @@ export default function HomeScreen() {
                       { fontFamily: FONT_DM_SERIF },
                     ]}
                   >
-                    Test abgeschlossen! 🎉
+                    {STRINGS.testCompletedTitle}
                   </Text>
                   <Text style={styles.testResultScoreBig}>
                     {testPhrases.length - wrongAnswers.length} /{' '}
                     {testPhrases.length}
                   </Text>
                   <Text style={styles.testResultScoreLabel}>
-                    Richtige Antworten
+                    {STRINGS.correctAnswersLabel}
                   </Text>
                   {wrongAnswers.length > 0 ? (
                     <Text style={styles.testResultRepeatNote}>
                       {wrongAnswers.length === 1
-                        ? '1 Karte wurde in deinem Repeat-Stapel gespeichert 📌'
-                        : `${wrongAnswers.length} Karten wurden in deinem Repeat-Stapel gespeichert 📌`}
+                        ? STRINGS.repeatNoteOneCard
+                        : `${wrongAnswers.length}${STRINGS.repeatNoteManyCards}`}
                     </Text>
                   ) : null}
                   {testShowDiscoBall ? (
@@ -851,11 +850,11 @@ export default function HomeScreen() {
                             : undefined,
                           { transform: [{ rotate: spin }] },
                         ]}
-                        accessibilityLabel="Test-Ergebnis"
+                        accessibilityLabel={STRINGS.testResultDiscoA11y}
                       />
                       {testIsPerfect ? (
                         <Text style={styles.testResultPerfectCaption}>
-                          Perfekt! Alle Karten richtig! 🎉
+                          {STRINGS.testPerfectCaption}
                         </Text>
                       ) : null}
                     </View>
@@ -865,8 +864,8 @@ export default function HomeScreen() {
                       accessibilityRole="button"
                       accessibilityLabel={
                         activeTestKind === 1
-                          ? 'Test 2 starten'
-                          : 'Test 1 starten'
+                          ? STRINGS.testSwitchToTest2A11y
+                          : STRINGS.testSwitchToTest1A11y
                       }
                       onPress={() =>
                         startTest(activeTestKind === 1 ? 2 : 1)
@@ -882,14 +881,14 @@ export default function HomeScreen() {
                     >
                       <Text style={styles.testResultBtnPrimaryText}>
                         {activeTestKind === 1
-                          ? 'Test 2 starten →'
-                          : 'Test 1 starten →'}
+                          ? STRINGS.test2StartArrow
+                          : STRINGS.test1StartArrow}
                       </Text>
                     </Pressable>
                   ) : null}
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Zurück zur Übersicht"
+                    accessibilityLabel={STRINGS.backToOverviewA11y}
                     onPress={exitTest}
                     style={({ pressed }) => [
                       styles.testResultBtnSecondary,
@@ -898,13 +897,13 @@ export default function HomeScreen() {
                     ]}
                   >
                     <Text style={styles.testResultBtnSecondaryText}>
-                      Zurück zur Übersicht
+                      {STRINGS.backToOverview}
                     </Text>
                   </Pressable>
                   {currentChapter < 7 ? (
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Nächstes Kapitel"
+                      accessibilityLabel={STRINGS.nextChapterA11y}
                       onPress={() => {
                         advanceToNextChapter();
                         exitTest();
@@ -916,7 +915,7 @@ export default function HomeScreen() {
                       ]}
                     >
                       <Text style={styles.testResultBtnPrimaryText}>
-                        Nächstes Kapitel →
+                        {STRINGS.nextChapter}
                       </Text>
                     </Pressable>
                   ) : null}
@@ -930,7 +929,10 @@ export default function HomeScreen() {
           testIndex < testPhrases.length ? (
           <View style={styles.testRunColumn}>
             <Text style={styles.testRunHeaderOutside}>
-              Frage {testIndex + 1} / {testPhrases.length}
+              {STRINGS.testQuestionProgressPrefix}
+              {testIndex + 1}
+              {STRINGS.progressSlash}
+              {testPhrases.length}
             </Text>
             <View style={styles.testRunProgressTrackOutside}>
               <View
@@ -972,7 +974,7 @@ export default function HomeScreen() {
                             homeStyles={styles}
                           />
                           <Text style={styles.testPlayHintPhase1}>
-                            Wähle Chris oder Ann, um den Satz zu hören
+                            {STRINGS.testListenHint}
                           </Text>
                         </View>
                       ) : (
@@ -1033,7 +1035,7 @@ export default function HomeScreen() {
                               <Pressable
                                 key={`${opt.id}-${i}`}
                                 accessibilityRole="button"
-                                accessibilityLabel={`Antwort ${letter}`}
+                                accessibilityLabel={`${STRINGS.a11yAnswerPrefix}${letter}`}
                                 disabled={answerLocked}
                                 onPress={() => onPickTestOption(opt.id)}
                                 style={({ pressed }) => [

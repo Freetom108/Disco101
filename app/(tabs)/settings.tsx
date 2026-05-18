@@ -28,26 +28,21 @@ import {
 } from '../../constants/audioSettingsStorage';
 import type { AppPalette } from '../../constants/themePalettes';
 import { restorePurchases } from '../../constants/chapterUnlock';
+import { STRINGS } from '../../constants/strings';
 import { useAppTheme } from '../../context/AppThemeContext';
 
-const URL_CONTACT =
-  'https://freetom108.github.io/Disco101/kontakt/';
-const URL_PRIVACY =
-  'https://freetom108.github.io/Disco101/datenschutz/';
-const URL_TERMS = 'https://freetom108.github.io/Disco101/agb/';
-
 const DISPLAY_OPTIONS = [
-  { value: 'light' as const, label: 'Hell' },
-  { value: 'auto' as const, label: 'Auto' },
-  { value: 'dark' as const, label: 'Dunkel' },
+  { value: 'light' as const, label: STRINGS.displayLight },
+  { value: 'auto' as const, label: STRINGS.displayAuto },
+  { value: 'dark' as const, label: STRINGS.displayDark },
 ];
 
 const SPEED_OPTIONS: AudioSpeedStored[] = ['0.7', '0.8', '0.9'];
 /** Nur UI-Text; gespeicherte Werte / audioSpeedToRate bleiben 0.7 / 0.8 / 0.9 */
 const SPEED_DISPLAY_LABELS: Record<AudioSpeedStored, string> = {
-  '0.7': '0.9x',
-  '0.8': '1.0x',
-  '0.9': '1.1x',
+  '0.7': STRINGS.speedDisplay070,
+  '0.8': STRINGS.speedDisplay080,
+  '0.9': STRINGS.speedDisplay090,
 };
 const REPEAT_OPTIONS: AudioRepeatStored[] = ['1', '2'];
 
@@ -61,45 +56,38 @@ type FaqAccordionItem = {
 const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
   {
     id: 'offline',
-    question: 'Funktioniert die App offline?',
-    answer:
-      'Ja, die App ist extra so konzipiert dass sie vollständig offline funktioniert – damit du zum Beispiel auch im Auto, in der U-Bahn oder im Flugzeug üben kannst. Keine Internetverbindung notwendig.',
+    question: STRINGS.faqOfflineQuestion,
+    answer: STRINGS.faqOfflineAnswer,
   },
   {
     id: 'unit101',
-    question: 'Unit 1 Basics',
-    answer:
-      '101 Redewendungen in 7 Kapiteln – die wichtigsten englischen Phrasen für deinen Alltag. Von der Begrüßung bis zum Small Talk.',
+    question: STRINGS.faqUnit101Question,
+    answer: STRINGS.faqUnit101Answer,
   },
   {
     id: 'unit102',
-    question: 'Unit 2 Urlaub',
-    answer:
-      '101 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
+    question: STRINGS.faqUnit102Question,
+    answer: STRINGS.faqUnit102Answer,
   },
   {
     id: 'unit103',
-    question: 'Unit 3 Job',
-    answer:
-      '101 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
+    question: STRINGS.faqUnit103Question,
+    answer: STRINGS.faqUnit103Answer,
   },
   {
     id: 'unit104',
-    question: 'Unit 4 Expat',
-    answer:
-      '101 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
+    question: STRINGS.faqUnit104Question,
+    answer: STRINGS.faqUnit104Answer,
   },
   {
     id: 'restore',
-    question: 'Käufe wiederherstellen',
-    answer:
-      "Falls du die App neu installiert hast und deine bereits gekauften Inhalte nicht mehr verfügbar sind, tippe einfach auf 'Käufe wiederherstellen' unter App Info – deine Käufe werden kostenlos wiederhergestellt. Du kannst Käufe auch direkt auf dem Upgrade-Screen wiederherstellen.",
+    question: STRINGS.faqRestoreQuestion,
+    answer: STRINGS.faqRestoreAnswer,
   },
   {
     id: 'upgrade_options',
-    question: 'Wo finde ich die Upgrade Optionen?',
-    answer:
-      'Die Upgrade-Ansicht mit allen Modulen und Bundle-Preisen erreichst du über die Schaltfläche unten oder indem du im Learn-Tab ein gesperrtes Kapitel auswählst.',
+    question: STRINGS.faqUpgradeQuestion,
+    answer: STRINGS.faqUpgradeAnswer,
     upgradeCta: true,
   },
 ];
@@ -172,20 +160,20 @@ export default function SettingsScreen() {
       router.replace('/onboarding');
     } catch {
       Alert.alert(
-        'Fehler',
-        'Die Daten konnten nicht gelöscht werden. Bitte versuche es erneut.',
+        STRINGS.alertErrorTitle,
+        STRINGS.alertWipeFailed,
       );
     }
   }, [router]);
 
   const confirmWipeAllData = useCallback(() => {
     Alert.alert(
-      'Bist du sicher?',
-      'Deine Lernfortschritte, gepinnten Karten und Einstellungen werden gelöscht. Die 404 Phrasen und Audioinhalte bleiben vollständig erhalten.',
+      STRINGS.alertWipeConfirmTitle,
+      STRINGS.alertWipeConfirmBody,
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: STRINGS.alertCancel, style: 'cancel' },
         {
-          text: 'Löschen',
+          text: STRINGS.alertDelete,
           style: 'destructive',
           onPress: () => void wipeAllAppData(),
         },
@@ -198,8 +186,8 @@ export default function SettingsScreen() {
       const result = await restorePurchases();
       Alert.alert(
         result === 'restored'
-          ? 'Käufe wurden wiederhergestellt'
-          : 'Keine Käufe gefunden',
+          ? STRINGS.restoreSuccessTitle
+          : STRINGS.restoreNoneTitle,
       );
     })();
   }, []);
@@ -209,8 +197,8 @@ export default function SettingsScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerLine1}>Settings</Text>
-            <Text style={styles.headerLine2}>Disco 101 · Deutsch-Englisch</Text>
+            <Text style={styles.headerLine1}>{STRINGS.settingsTitle}</Text>
+            <Text style={styles.headerLine2}>{STRINGS.settingsSubtitle}</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -230,21 +218,19 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionLabelFirst}>Über die App</Text>
+        <Text style={styles.sectionLabelFirst}>{STRINGS.settingsSectionAbout}</Text>
         <View style={styles.group}>
           <View style={styles.aboutRow}>
             <Text style={styles.aboutText}>
-              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
-              englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben
-              im Ausland.
+              {STRINGS.settingsAboutParagraph}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>Display</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionDisplay}</Text>
         <View style={styles.group}>
           <View style={styles.playbackBlock}>
-            <Text style={styles.playbackLabel}>Erscheinungsbild</Text>
+            <Text style={styles.playbackLabel}>{STRINGS.settingsAppearanceLabel}</Text>
             <View style={styles.segmentRow}>
               {DISPLAY_OPTIONS.map(({ value, label }) => {
                 const active = preference === value;
@@ -278,10 +264,10 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>Wiedergabe</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionPlayback}</Text>
         <View style={styles.group}>
           <View style={styles.playbackBlock}>
-            <Text style={styles.playbackLabel}>Wiedergabegeschwindigkeit</Text>
+            <Text style={styles.playbackLabel}>{STRINGS.settingsSpeedLabel}</Text>
             <View style={styles.segmentRow}>
               {SPEED_OPTIONS.map((v) => {
                 const active = audioSpeed === v;
@@ -291,7 +277,7 @@ export default function SettingsScreen() {
                     key={v}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
-                    accessibilityLabel={`Geschwindigkeit ${label}`}
+                    accessibilityLabel={`${STRINGS.a11ySpeedPrefix}${label}`}
                     onPress={() => void persistSpeed(v)}
                     style={({ pressed }) => [
                       styles.segmentBtn,
@@ -318,17 +304,17 @@ export default function SettingsScreen() {
           <View style={styles.playbackDivider} />
 
           <View style={styles.playbackBlock}>
-            <Text style={styles.playbackLabel}>Phrase wiederholen</Text>
+            <Text style={styles.playbackLabel}>{STRINGS.settingsRepeatPhraseLabel}</Text>
             <View style={styles.segmentRow}>
               {REPEAT_OPTIONS.map((v) => {
                 const active = audioRepeat === v;
-                const label = v === '1' ? '1x' : '2x';
+                const label = v === '1' ? STRINGS.repeatCount1x : STRINGS.repeatCount2x;
                 return (
                   <Pressable
                     key={v}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
-                    accessibilityLabel={`Wiederholung ${label}`}
+                    accessibilityLabel={`${STRINGS.a11yRepeatCountPrefix}${label}`}
                     onPress={() => void persistRepeat(v)}
                     style={({ pressed }) => [
                       styles.segmentBtn,
@@ -353,7 +339,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>FAQ</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionFaq}</Text>
         <View style={styles.group}>
           <Pressable
             onPress={() =>
@@ -364,11 +350,11 @@ export default function SettingsScreen() {
             }
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="App Intro wiederholen"
+            accessibilityLabel={STRINGS.appIntroRepeatA11y}
           >
             <View style={[styles.row, styles.rowBorder]}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                App Intro wiederholen
+                {STRINGS.appIntroRepeat}
               </Text>
               <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
             </View>
@@ -420,10 +406,10 @@ export default function SettingsScreen() {
                           pressed && { opacity: 0.92 },
                         ]}
                         accessibilityRole="button"
-                        accessibilityLabel="Upgrade ansehen"
+                        accessibilityLabel={STRINGS.upgradeViewCtaA11y}
                       >
                         <Text style={styles.faqUpgradeBtnText}>
-                          Upgrade ansehen →
+                          {STRINGS.upgradeViewCta}
                         </Text>
                       </Pressable>
                     ) : null}
@@ -434,17 +420,17 @@ export default function SettingsScreen() {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>Support & Feedback</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionSupport}</Text>
         <View style={styles.group}>
           <Pressable
-            onPress={() => openExternalUrl(URL_CONTACT)}
+            onPress={() => openExternalUrl(STRINGS.urlContact)}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="Kontakt und Feedback"
+            accessibilityLabel={STRINGS.contactFeedbackA11y}
           >
             <View style={[styles.row, styles.rowBorder]}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                Kontakt & Feedback
+                {STRINGS.contactFeedback}
               </Text>
               <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
             </View>
@@ -452,73 +438,73 @@ export default function SettingsScreen() {
           <Pressable
             onPress={() =>
               Alert.alert(
-                'App bewerten',
-                'Kommt bald nach Store-Launch',
+                STRINGS.rateAppTitle,
+                STRINGS.rateAppMessage,
               )
             }
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="App bewerten"
+            accessibilityLabel={STRINGS.rateAppA11y}
           >
             <View style={styles.row}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                App bewerten
+                {STRINGS.rateApp}
               </Text>
               <Ionicons name="star-outline" size={22} color={colors.iconMuted} />
             </View>
           </Pressable>
         </View>
 
-        <Text style={styles.sectionLabel}>Legal</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionLegal}</Text>
         <View style={styles.group}>
           <Pressable
-            onPress={() => openExternalUrl(URL_PRIVACY)}
+            onPress={() => openExternalUrl(STRINGS.urlPrivacy)}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="Datenschutz"
+            accessibilityLabel={STRINGS.legalPrivacyA11y}
           >
             <View style={[styles.row, styles.rowBorder]}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                Datenschutz
+                {STRINGS.privacyPolicy}
               </Text>
               <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
             </View>
           </Pressable>
           <Pressable
-            onPress={() => openExternalUrl(URL_TERMS)}
+            onPress={() => openExternalUrl(STRINGS.urlTerms)}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="AGB"
+            accessibilityLabel={STRINGS.legalTermsA11y}
           >
             <View style={styles.row}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                AGB
+                {STRINGS.termsShort}
               </Text>
               <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
             </View>
           </Pressable>
         </View>
 
-        <Text style={styles.sectionLabel}>App Info</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionAppInfo}</Text>
         <View style={styles.group}>
-          <Row sx={styles} label="Version" value={version} />
-          <Row sx={styles} label="Sprache" value="Deutsch 🇩🇪 – Englisch 🇬🇧" />
+          <Row sx={styles} label={STRINGS.appInfoVersion} value={version} />
+          <Row sx={styles} label={STRINGS.appInfoLanguage} value={STRINGS.appInfoLanguageValue} />
           <Pressable
             onPress={handleRestorePurchases}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
-            accessibilityLabel="Käufe wiederherstellen"
+            accessibilityLabel={STRINGS.restorePurchases}
           >
             <View style={styles.row}>
               <Text style={styles.rowLabel} numberOfLines={2}>
-                Käufe wiederherstellen
+                {STRINGS.restorePurchases}
               </Text>
               <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
             </View>
           </Pressable>
         </View>
 
-        <Text style={styles.sectionLabel}>Danger Zone</Text>
+        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionDanger}</Text>
         <View style={styles.group}>
           <Pressable
             onPress={confirmWipeAllData}
@@ -527,10 +513,10 @@ export default function SettingsScreen() {
               pressed && { opacity: 0.92 },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Alle App-Daten löschen"
+            accessibilityLabel={STRINGS.wipeAllDataA11y}
           >
             <Text style={styles.dangerZoneBtnText}>
-              Alle App-Daten löschen
+              {STRINGS.wipeAllData}
             </Text>
           </Pressable>
         </View>

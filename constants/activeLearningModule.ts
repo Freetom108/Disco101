@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ModuleCode } from './products';
 import { MODULE_PRODUCTS } from './products';
+import { STRINGS } from './strings';
 
 export const ACTIVE_LEARNING_MODULE_KEY = 'active_learning_module';
 
@@ -16,7 +17,7 @@ export function parseActiveLearningModule(raw: string | null): ModuleCode {
 }
 
 export function titleForModule(code: ModuleCode): string {
-  return MODULE_PRODUCTS.find((m) => m.code === code)?.title ?? 'Unit 1 Basics';
+  return MODULE_PRODUCTS.find((m) => m.code === code)?.title ?? STRINGS.moduleTitle101;
 }
 
 export async function getActiveLearningModule(): Promise<ModuleCode> {

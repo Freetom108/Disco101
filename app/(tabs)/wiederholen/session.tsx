@@ -60,6 +60,7 @@ import {
 } from '../../../utils/safeAudioPlayer';
 
 import { FONT_DM_SERIF } from '../../../constants/theme';
+import { STRINGS } from '../../../constants/strings';
 import type { AppPalette } from '../../../constants/themePalettes';
 import { useAppTheme } from '../../../context/AppThemeContext';
 
@@ -173,7 +174,7 @@ function SessionChrisAnnButtons({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Chris (männliche Stimme)"
+        accessibilityLabel={STRINGS.a11yChrisMaleVoice}
         onPress={() => void playVoice('m')}
         style={({ pressed }) => [
           btnStyle,
@@ -188,12 +189,12 @@ function SessionChrisAnnButtons({
               resizeMode="cover"
             />
           </View>
-          <Text style={sessionStyles.sessionTestVoiceBtnText}>Chris</Text>
+          <Text style={sessionStyles.sessionTestVoiceBtnText}>{STRINGS.voiceChris}</Text>
         </View>
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Ann (weibliche Stimme)"
+        accessibilityLabel={STRINGS.a11yAnnFemaleVoice}
         onPress={() => void playVoice('f')}
         style={({ pressed }) => [
           btnStyle,
@@ -208,7 +209,7 @@ function SessionChrisAnnButtons({
               resizeMode="cover"
             />
           </View>
-          <Text style={sessionStyles.sessionTestVoiceBtnText}>Ann</Text>
+          <Text style={sessionStyles.sessionTestVoiceBtnText}>{STRINGS.voiceAnn}</Text>
         </View>
       </Pressable>
     </View>
@@ -621,7 +622,9 @@ export default function RepeatSessionScreen() {
 
   const y = sessionPhrases.length;
   const progressLabel =
-    sessionDone || y === 0 ? '' : `${sessionIndex + 1} / ${y} Karten`;
+    sessionDone || y === 0
+      ? ''
+      : `${sessionIndex + 1}${STRINGS.progressSlash}${y}${STRINGS.sessionCardsProgressSuffix}`;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
@@ -637,9 +640,9 @@ export default function RepeatSessionScreen() {
             hitSlop={12}
             style={({ pressed }) => [pressed && { opacity: 0.7 }]}
             accessibilityRole="button"
-            accessibilityLabel="Zurück"
+            accessibilityLabel={STRINGS.back}
           >
-            <Text style={styles.sessionBackText}>← Zurück</Text>
+            <Text style={styles.sessionBackText}>{STRINGS.sessionBack}</Text>
           </Pressable>
         </View>
         <Text style={styles.sessionProgressText} numberOfLines={1}>
@@ -653,9 +656,9 @@ export default function RepeatSessionScreen() {
           <View style={styles.sessionCard}>
             {sessionDone ? (
               <View style={styles.sessionCompleteInner}>
-                <Text style={styles.sessionCompleteTitle}>Gut gemacht! 🎉</Text>
+                <Text style={styles.sessionCompleteTitle}>{STRINGS.sessionCompleteTitle}</Text>
                 <Text style={styles.sessionCompleteSub}>
-                  Du hast alle Karten in diesem Stapel wiederholt.
+                  {STRINGS.sessionCompleteSub}
                 </Text>
                 <Pressable
                   onPress={goBack}
@@ -664,10 +667,10 @@ export default function RepeatSessionScreen() {
                     pressed && { opacity: 0.92 },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel="Zurück zur Übersicht"
+                  accessibilityLabel={STRINGS.backToOverviewA11y}
                 >
                   <Text style={styles.sessionCompleteBtnText}>
-                    Zurück zur Übersicht
+                    {STRINGS.backToOverview}
                   </Text>
                 </Pressable>
               </View>
@@ -675,7 +678,7 @@ export default function RepeatSessionScreen() {
               <>
                 <View style={styles.sessionCardTop}>
                   <Text style={styles.sessionChapterLabel} numberOfLines={2}>
-                    {`KAPITEL ${currentPhrase.chapterId} · ${currentPhrase.category.toUpperCase()}`}
+                    {`${STRINGS.cardChapterUpperPrefix}${currentPhrase.chapterId}${STRINGS.cardChapterUpperSeparator}${currentPhrase.category.toUpperCase()}`}
                   </Text>
                   <Pressable
                     onPress={onSessionPinTap}
@@ -683,8 +686,8 @@ export default function RepeatSessionScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={
                       pinnedIds.includes(currentPhrase.id)
-                        ? 'Markierung entfernen'
-                        : 'Markieren'
+                        ? STRINGS.pinRemoveA11y
+                        : STRINGS.pinMarkA11y
                     }
                   >
                     <Ionicons
@@ -706,7 +709,9 @@ export default function RepeatSessionScreen() {
                         {sessionIndex + 1}
                       </Text>
                       <Text style={styles.sessionNumHint}>
-                        / {sessionPhrases.length} Karten
+                        {STRINGS.sessionSlashPrefix}
+                        {sessionPhrases.length}
+                        {STRINGS.sessionCardsProgressSuffix}
                       </Text>
                     </View>
                     <Text
@@ -722,7 +727,7 @@ export default function RepeatSessionScreen() {
                     </Text>
                     {showStackCompleteNote ? (
                       <Text style={styles.stackCompleteBanner}>
-                        Geschafft! Dein Stapel ist leer.
+                        {STRINGS.stackCompleteBanner}
                       </Text>
                     ) : null}
                     <View style={styles.categoryPill}>
@@ -747,7 +752,7 @@ export default function RepeatSessionScreen() {
                         sessionStyles={styles}
                       />
                       <Text style={styles.sessionPhase1Hint}>
-                        Hör den Satz an – welche deutsche Bedeutung passt?
+                        {STRINGS.sessionQuizHint}
                       </Text>
                     </View>
                   ) : (
@@ -793,7 +798,7 @@ export default function RepeatSessionScreen() {
                             <Pressable
                               key={`${opt.id}-${i}`}
                               accessibilityRole="button"
-                              accessibilityLabel={`Antwort ${letter}`}
+                              accessibilityLabel={`${STRINGS.a11yAnswerPrefix}${letter}`}
                               disabled={answerLocked}
                               onPress={() => onPickQuizOption(opt.id)}
                               style={({ pressed }) => [
@@ -852,7 +857,7 @@ export default function RepeatSessionScreen() {
                                     },
                                 ]}
                                 accessibilityRole="button"
-                                accessibilityLabel="Sitzt"
+                                accessibilityLabel={STRINGS.sitztA11y}
                               >
                                 <Text
                                   style={[
@@ -862,8 +867,8 @@ export default function RepeatSessionScreen() {
                                   ]}
                                 >
                                   {sitztDoneForCurrent
-                                    ? '✓ Sitzt! ✓'
-                                    : '✓ Sitzt!'}
+                                    ? STRINGS.sitztDoneLabel
+                                    : STRINGS.sitztLabel}
                                 </Text>
                               </Pressable>
                               <Pressable
@@ -873,10 +878,10 @@ export default function RepeatSessionScreen() {
                                   pressed && { opacity: 0.92 },
                                 ]}
                                 accessibilityRole="button"
-                                accessibilityLabel="Nächste Karte"
+                                accessibilityLabel={STRINGS.nextCardA11y}
                               >
                                 <Text style={styles.naechsteBtnText}>
-                                  Nächste →
+                                  {STRINGS.nextArrow}
                                 </Text>
                               </Pressable>
                             </>
@@ -889,10 +894,10 @@ export default function RepeatSessionScreen() {
                                 pressed && { opacity: 0.92 },
                               ]}
                               accessibilityRole="button"
-                              accessibilityLabel="Nächste Karte"
+                              accessibilityLabel={STRINGS.nextCardA11y}
                             >
                               <Text style={styles.naechsteBtnText}>
-                                Nächste →
+                                {STRINGS.nextArrow}
                               </Text>
                             </Pressable>
                           )}

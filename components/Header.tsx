@@ -1,3 +1,4 @@
+import { STRINGS } from '../constants/strings';
 import type { AppPalette } from '../constants/themePalettes';
 import { useAppTheme } from '../context/AppThemeContext';
 import { useMemo } from 'react';
@@ -16,7 +17,7 @@ export default function Header({ subtitle }: HeaderProps) {
     <View style={styles.header}>
       <View style={styles.headerRow}>
         <View style={styles.headerTextCol}>
-          <Text style={styles.headerLine1}>{"Hello, let's learn!"}</Text>
+          <Text style={styles.headerLine1}>{STRINGS.headerHelloLetsLearn}</Text>
           <Text style={styles.headerLine2}>{subtitle}</Text>
         </View>
         <View style={styles.headerLogoMask}>

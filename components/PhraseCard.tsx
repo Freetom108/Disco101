@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import type { AppPalette } from '../constants/themePalettes';
+import { STRINGS } from '../constants/strings';
 import { FONT_DM_SERIF } from '../constants/theme';
 import { useAppTheme } from '../context/AppThemeContext';
 import type { ModuleCode } from '../constants/products';
@@ -193,7 +194,9 @@ export default function PhraseCard({
             <Pressable
               style={styles.pinFloating}
               accessibilityRole="button"
-              accessibilityLabel={isPinned ? 'Markierung entfernen' : 'Markieren'}
+              accessibilityLabel={
+                isPinned ? STRINGS.pinRemoveA11y : STRINGS.pinMarkA11y
+              }
               hitSlop={12}
               onPress={() => {
                 if (phraseId) onTogglePin(phraseId);
@@ -216,11 +219,11 @@ export default function PhraseCard({
                   style={[styles.cardChapter, styles.cardChapterFlex]}
                   numberOfLines={2}
                 >
-                  {`KAPITEL ${chapterNumber} · ${categoryTitle.toUpperCase()}`}
+                  {`${STRINGS.cardChapterUpperPrefix}${chapterNumber}${STRINGS.cardChapterUpperSeparator}${categoryTitle.toUpperCase()}`}
                 </Text>
               </View>
               <View style={styles.cardGlobalRow}>
-                <Text style={styles.cardGlobalLabel}>Fortschritt gesamt</Text>
+                <Text style={styles.cardGlobalLabel}>{STRINGS.progressOverallLabel}</Text>
                 <Text style={styles.cardGlobalValue}>{globalProgressText}</Text>
               </View>
               <View style={styles.cardProgressTrack}>
@@ -243,8 +246,8 @@ export default function PhraseCard({
                   ]}
                 >
                   {isAllPhrasesComplete
-                    ? `Alle ${totalPhraseCount} Phrasen gelernt! 🎉`
-                    : 'Kapitel abgeschlossen! 🎉'}
+                    ? `${STRINGS.allPhrasesLearnedPrefix}${totalPhraseCount}${STRINGS.allPhrasesLearnedSuffix}`
+                    : STRINGS.chapterCompleteCelebration}
                 </Text>
                 <Text style={styles.chapterMenuSubtitle}>
                   {completedChapterName}
@@ -252,7 +255,7 @@ export default function PhraseCard({
                 <View style={styles.chapterMenuButtons}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Tests starten"
+                    accessibilityLabel={STRINGS.testsStartA11y}
                     style={({ pressed }) => [
                       styles.chapterMenuBtnPrimary,
                       pressed && { opacity: 0.92 },
@@ -260,13 +263,13 @@ export default function PhraseCard({
                     onPress={onStartTest}
                   >
                     <Text style={styles.chapterMenuBtnPrimaryText}>
-                      📝 Tests starten
+                      {STRINGS.testsStart}
                     </Text>
                   </Pressable>
                   {chapterNumber < 7 ? (
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Nächstes Kapitel"
+                      accessibilityLabel={STRINGS.nextChapterA11y}
                       style={({ pressed }) => [
                         styles.chapterMenuBtnGhost,
                         pressed && { opacity: 0.85 },
@@ -274,7 +277,7 @@ export default function PhraseCard({
                       onPress={onNextChapter}
                     >
                       <Text style={styles.chapterMenuBtnGhostText}>
-                        Nächstes Kapitel →
+                        {STRINGS.nextChapter}
                       </Text>
                     </Pressable>
                   ) : null}
@@ -285,7 +288,9 @@ export default function PhraseCard({
                 <View style={styles.cardNumberRow}>
                   <Text style={styles.cardBigNum}>{inChapterN}</Text>
                   <Text style={styles.cardNumHint}>
-                    / {currentChapterCount}  Phrase im Kapitel
+                    {STRINGS.phraseInChapterSlash}
+                    {currentChapterCount}
+                    {STRINGS.phraseInChapterSuffix}
                   </Text>
                 </View>
                 <Text
@@ -320,14 +325,14 @@ export default function PhraseCard({
             {!isChapterComplete ? (
               <View style={styles.cardMFRow}>
                 <SpeakerButton
-                  accessibilityLabel="Male speaker"
+                  accessibilityLabel={STRINGS.a11yMaleSpeaker}
                   letter="M"
                   phraseId={phraseId}
                   moduleCode={moduleCode}
                   avatarSource={CHRIS_AVATAR}
                 />
                 <SpeakerButton
-                  accessibilityLabel="Female speaker"
+                  accessibilityLabel={STRINGS.a11yFemaleSpeaker}
                   letter="F"
                   phraseId={phraseId}
                   moduleCode={moduleCode}
@@ -346,7 +351,7 @@ export default function PhraseCard({
                   pressed && !isAllPhrasesComplete && { opacity: 0.92 },
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Nächste Phrase"
+                accessibilityLabel={STRINGS.nextPhraseA11y}
                 onPress={runAnimatedNext}
                 disabled={isAllPhrasesComplete || isSlideAnimating}
               >
@@ -357,7 +362,7 @@ export default function PhraseCard({
                       isAllPhrasesComplete && styles.cardNextTextDisabled,
                     ]}
                   >
-                    Nächste Phrase
+                    {STRINGS.nextPhrase}
                   </Text>
                   <Ionicons
                     name="arrow-up"
@@ -369,7 +374,7 @@ export default function PhraseCard({
             ) : null}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Zurück"
+              accessibilityLabel={STRINGS.back}
               onPress={runAnimatedBack}
               disabled={isBackDisabled || isSlideAnimating}
               style={({ pressed }) => [
@@ -386,7 +391,7 @@ export default function PhraseCard({
                   isBackDisabled && styles.cardBackDisabled,
                 ]}
               >
-                Zurück
+                {STRINGS.back}
               </Text>
             </Pressable>
           </View>

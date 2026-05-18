@@ -34,6 +34,7 @@ import {
   MODULE_PRODUCTS,
   type ModuleCode,
 } from '../../constants/products';
+import { STRINGS } from '../../constants/strings';
 import { getSentencesForModule } from '../../constants/sentencePacks';
 
 type ChapterRowMeta = {
@@ -55,7 +56,7 @@ function buildChapterRows(
       .filter((p) => p.chapterId === chapterId)
       .sort((a, b) => a.id - b.id);
     const y = phrases.length;
-    const title = phrases[0]?.category ?? `Kapitel ${chapterId}`;
+    const title = phrases[0]?.category ?? `${STRINGS.chapterWord} ${chapterId}`;
     const raw = chapterProgress[String(chapterId)] ?? 0;
     const x = Math.max(0, raw);
     const completed = y > 0 && x >= y;
@@ -172,8 +173,8 @@ export default function LernenScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerLine1}>Learn</Text>
-            <Text style={styles.headerLine2}>Wähle dein Kapitel</Text>
+            <Text style={styles.headerLine1}>{STRINGS.learnTitle}</Text>
+            <Text style={styles.headerLine2}>{STRINGS.learnSubtitle}</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -212,7 +213,7 @@ export default function LernenScreen() {
                 ]}
                 accessibilityRole="button"
                 accessibilityState={{ expanded: isOpen }}
-                accessibilityLabel={`${product.title}${isOpen ? ' einklappen' : ' aufklappen'}`}
+                accessibilityLabel={`${product.title}${isOpen ? STRINGS.learnAccordionCollapseSuffix : STRINGS.learnAccordionExpandSuffix}`}
               >
                 <Text style={styles.accordionTitle}>{product.title}</Text>
                 <Ionicons
@@ -242,13 +243,15 @@ export default function LernenScreen() {
                           ]}
                           accessibilityRole="button"
                           accessibilityLabel={
-                            locked ? `${row.title} gesperrt` : `${row.title} öffnen`
+                            locked
+                              ? `${row.title}${STRINGS.learnChapterLockedSuffix}`
+                              : `${row.title}${STRINGS.learnChapterOpenSuffix}`
                           }
                         >
                           <View style={styles.chapterCardTop}>
                             <View style={styles.chapterTitleBlock}>
                               <Text style={styles.chapterLabel}>
-                                Kapitel {row.chapterId}
+                                {STRINGS.chapterWord} {row.chapterId}
                               </Text>
                               <Text
                                 style={styles.chapterName}
@@ -271,7 +274,7 @@ export default function LernenScreen() {
                           </View>
                           {locked ? (
                             <Text style={styles.chapterLockedHint}>
-                              Tippe zum Freischalten
+                              {STRINGS.learnChapterLockedHint}
                             </Text>
                           ) : row.completed ? (
                             <Text style={styles.chapterCheck}>✓</Text>
@@ -291,7 +294,7 @@ export default function LernenScreen() {
                   </View>
                 ) : (
                   <View style={styles.accordionPlaceholderWrap}>
-                    <Text style={styles.accordionPlaceholder}>Kommt bald</Text>
+                    <Text style={styles.accordionPlaceholder}>{STRINGS.learnComingSoon}</Text>
                   </View>
                 )
               ) : null}

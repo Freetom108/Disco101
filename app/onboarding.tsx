@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import type { AppPalette } from '../constants/themePalettes';
 import { FONT_DM_SERIF } from '../constants/theme';
+import { STRINGS } from '../constants/strings';
 import { useAppTheme } from '../context/AppThemeContext';
 import { audioAssets } from '../utils/audioAssets';
 import {
@@ -182,15 +183,15 @@ export default function OnboardingScreen() {
                   numberOfLines={4}
                   minimumFontScale={0.85}
                 >
-                  Welcome to Disco 101! Let us show you how it works.
+                  {STRINGS.onboardingWelcomeEnglish}
                 </Text>
                 <Text style={styles.slide1German}>
-                  Willkommen bei Disco 101! Lass dir zeigen wie es funktioniert.
+                  {STRINGS.onboardingWelcomeGerman}
                 </Text>
                 <View style={styles.slide1AvatarRow}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Chris (männliche Stimme)"
+                    accessibilityLabel={STRINGS.a11yChrisMaleVoice}
                     onPress={() => void playWelcomeVoice('m')}
                     style={({ pressed }) => [
                       styles.slide1SpeakerBtn,
@@ -205,12 +206,12 @@ export default function OnboardingScreen() {
                           resizeMode="cover"
                         />
                       </View>
-                      <Text style={styles.slide1VoiceLabel}>Chris</Text>
+                      <Text style={styles.slide1VoiceLabel}>{STRINGS.voiceChris}</Text>
                     </View>
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Ann (weibliche Stimme)"
+                    accessibilityLabel={STRINGS.a11yAnnFemaleVoice}
                     onPress={() => void playWelcomeVoice('f')}
                     style={({ pressed }) => [
                       styles.slide1SpeakerBtn,
@@ -225,7 +226,7 @@ export default function OnboardingScreen() {
                           resizeMode="cover"
                         />
                       </View>
-                      <Text style={styles.slide1VoiceLabel}>Ann</Text>
+                      <Text style={styles.slide1VoiceLabel}>{STRINGS.voiceAnn}</Text>
                     </View>
                   </Pressable>
                 </View>
@@ -249,22 +250,17 @@ export default function OnboardingScreen() {
                   { fontFamily: FONT_DM_SERIF },
                 ]}
               >
-                So lernst du
+                {STRINGS.onboardingSlide2Title}
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
-                  · 🃏 Auf der Übungskarte erscheint eine englische Redewendung
-                  mit der deutschen Übersetzung darunter
+                  {STRINGS.onboardingSlide2Item1}
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🔊 Hör dir bei Chris und Ann die richtige Aussprache an und
-                  wiederhole den Satz laut so oft du möchtest – mit der großen
-                  roten Taste kommst du zur nächsten Phrase
+                  {STRINGS.onboardingSlide2Item2}
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
-                  · 📌 Übungskarten bei denen du noch nicht sicher bist markierst
-                  du mit der blauen Stecknadel – sie wandern in den Repeat-Stapel
-                  wo du sie üben kannst bis sie sicher sitzen
+                  {STRINGS.onboardingSlide2Item3}
                 </Text>
               </View>
               </View>
@@ -287,24 +283,20 @@ export default function OnboardingScreen() {
                   { fontFamily: FONT_DM_SERIF },
                 ]}
               >
-                Testen & Wiederholen
+                {STRINGS.onboardingSlide3Title}
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
-                  · 🎧 Test 1: Chris oder Ann lesen dir einen Satz vor – erkenne
-                  ihn unter drei englischen Optionen
+                  {STRINGS.onboardingSlide3Item1}
                 </Text>
                 <Text style={styles.listItem}>
-                  · 🇩🇪 Test 2: Chris oder Ann lesen dir einen Satz vor – finde
-                  die richtige deutsche Bedeutung unter drei Optionen
+                  {STRINGS.onboardingSlide3Item2}
                 </Text>
                 <Text style={styles.listItem}>
-                  · ⚡ Jeder Test stellt dir 8 zufällige Aufgaben aus dem
-                  Kapitel – bei Wiederholung bekommst du andere Fragen
+                  {STRINGS.onboardingSlide3Item3}
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
-                  · 🔄 Falsch beantwortete Karten landen automatisch im
-                  Repeat-Stapel damit du sie jederzeit üben kannst bis sie sitzen
+                  {STRINGS.onboardingSlide3Item4}
                 </Text>
               </View>
             </View>
@@ -327,19 +319,17 @@ export default function OnboardingScreen() {
                   { fontFamily: FONT_DM_SERIF },
                 ]}
               >
-                Dein Lernplan
+                {STRINGS.onboardingSlide4Title}
               </Text>
               <View style={styles.list}>
                 <Text style={styles.listItem}>
-                  · 📚 Im Learn Tab siehst du deinen Fortschritt und kannst
-                  jederzeit in jedes Kapitel einsteigen
+                  {STRINGS.onboardingSlide4Item1}
                 </Text>
                 <Text style={styles.listItem}>
-                  · ⚙️ In Settings kannst du Geschwindigkeit und Anzahl der
-                  Wiederholungen der Stimmen anpassen
+                  {STRINGS.onboardingSlide4Item2}
                 </Text>
                 <Text style={[styles.listItem, styles.listItemLast]}>
-                  · 💡 Alles jederzeit in Settings nachlesen
+                  {STRINGS.onboardingSlide4Item3}
                 </Text>
               </View>
             </View>
@@ -366,9 +356,9 @@ export default function OnboardingScreen() {
                 pressed && { opacity: 0.85 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Weiter"
+              accessibilityLabel={STRINGS.onboardingWeiterA11y}
             >
-              <Text style={styles.btnGhostText}>Weiter ↑</Text>
+              <Text style={styles.btnGhostText}>{STRINGS.onboardingWeiter}</Text>
             </Pressable>
           ) : (
             <Pressable
@@ -378,9 +368,9 @@ export default function OnboardingScreen() {
                 pressed && { opacity: 0.92 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Los geht's"
+              accessibilityLabel={STRINGS.onboardingLosA11y}
             >
-              <Text style={styles.btnPrimaryText}>Los geht's ↑</Text>
+              <Text style={styles.btnPrimaryText}>{STRINGS.onboardingLos}</Text>
             </Pressable>
           )}
         </View>

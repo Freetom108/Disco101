@@ -1,3 +1,5 @@
+import { STRINGS } from './strings';
+
 export type ModuleCode = '101' | '102' | '103' | '104';
 
 export type ModuleProduct = {
@@ -10,22 +12,22 @@ export type ModuleProduct = {
 export const MODULE_PRODUCTS: ModuleProduct[] = [
   {
     code: '101',
-    title: 'Unit 1 Basics',
-    priceLabel: '5,99 €',
+    title: STRINGS.moduleTitle101,
+    priceLabel: STRINGS.price599,
   },
   {
     code: '102',
-    title: 'Unit 2 Urlaub',
-    priceLabel: '5,99 €',
+    title: STRINGS.moduleTitle102,
+    priceLabel: STRINGS.price599,
   },
   {
     code: '103',
-    title: 'Unit 3 Job',
-    priceLabel: '5,99 €',
+    title: STRINGS.moduleTitle103,
+    priceLabel: STRINGS.price599,
   },
   {
     code: '104',
-    title: 'Unit 4 Expat',
-    priceLabel: '5,99 €',
+    title: STRINGS.moduleTitle104,
+    priceLabel: STRINGS.price599,
   },
 ];

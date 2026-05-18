@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ModuleCode } from '../../constants/products';
+import { STRINGS } from '../../constants/strings';
 import { setActiveLearningModule } from '../../constants/activeLearningModule';
 import type { AppPalette } from '../../constants/themePalettes';
 import { useAppTheme } from '../../context/AppThemeContext';
@@ -17,31 +18,27 @@ type ModuleTileConfig = {
 const MODULE_TILES: ModuleTileConfig[] = [
   {
     code: '101',
-    title: '🔓 Unit 1 Basics',
-    body:
-      '101 Redewendungen in 7 Kapiteln – die wichtigsten englischen Phrasen für deinen Alltag. Von der Begrüßung bis zum Small Talk.',
-    buttonLabel: 'Freischalten – 5,99 €',
+    title: STRINGS.moreUnit101Title,
+    body: STRINGS.moreUnit101Body,
+    buttonLabel: STRINGS.moreUnlockBtn101,
   },
   {
     code: '102',
-    title: '🔒 Unit 2 Urlaub',
-    body:
-      '101 Redewendungen in 7 Kapiteln – erweiterter Wortschatz für deinen Urlaub. Strand, Hotel, Restaurant und mehr.',
-    buttonLabel: '🔓 Freischalten – 5,99 €',
+    title: STRINGS.moreUnit102Title,
+    body: STRINGS.moreUnit102Body,
+    buttonLabel: STRINGS.moreUnlockBtnLocked,
   },
   {
     code: '103',
-    title: '🔒 Unit 3 Job',
-    body:
-      '101 Redewendungen in 7 Kapiteln – alles was du für den englischen Berufsalltag brauchst. Meetings, Präsentationen und Geschäftsreisen.',
-    buttonLabel: '🔓 Freischalten – 5,99 €',
+    title: STRINGS.moreUnit103Title,
+    body: STRINGS.moreUnit103Body,
+    buttonLabel: STRINGS.moreUnlockBtnLocked,
   },
   {
     code: '104',
-    title: '🔒 Unit 4 Expat',
-    body:
-      '101 Redewendungen in 7 Kapiteln – für alle die im englischsprachigen Ausland leben. Behörden, Arzt, Versicherungen und Alltagsleben.',
-    buttonLabel: '🔓 Freischalten – 5,99 €',
+    title: STRINGS.moreUnit104Title,
+    body: STRINGS.moreUnit104Body,
+    buttonLabel: STRINGS.moreUnlockBtnLocked,
   },
 ];
 
@@ -56,8 +53,8 @@ export default function MoreScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerLine1}>More</Text>
-            <Text style={styles.headerLine2}>Erweitere deinen Wortschatz</Text>
+            <Text style={styles.headerLine1}>{STRINGS.moreTitle}</Text>
+            <Text style={styles.headerLine2}>{STRINGS.moreSubtitle}</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -94,7 +91,7 @@ export default function MoreScreen() {
                 pressed && { opacity: 0.92 },
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`Freischalten ${m.title}`}
+              accessibilityLabel={`${STRINGS.unlockVerb} ${m.title}`}
             >
               <Text style={styles.unlockBtnText}>{m.buttonLabel}</Text>
             </Pressable>

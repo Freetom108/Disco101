@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
+import { STRINGS } from '../../constants/strings';
 import { useAppTheme } from '../../context/AppThemeContext';
 
 export default function TabLayout() {
@@ -44,8 +45,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarLabel: 'Home',
+          title: STRINGS.tabHome,
+          tabBarLabel: STRINGS.tabHome,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -54,8 +55,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="lernen"
         options={{
-          title: 'Learn',
-          tabBarLabel: 'Learn',
+          title: STRINGS.tabLearn,
+          tabBarLabel: STRINGS.tabLearn,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="book" size={size} color={color} />
           ),
@@ -64,8 +65,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="wiederholen"
         options={{
-          title: 'Repeat',
-          tabBarLabel: 'Repeat',
+          title: STRINGS.tabRepeat,
+          tabBarLabel: STRINGS.tabRepeat,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="repeat" size={size} color={color} />
           ),
@@ -74,8 +75,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="more"
         options={{
-          title: 'More',
-          tabBarLabel: 'More',
+          title: STRINGS.tabMore,
+          tabBarLabel: STRINGS.tabMore,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="lock-closed-outline" size={size} color={color} />
           ),
@@ -84,8 +85,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarLabel: 'Settings',
+          title: STRINGS.tabSettings,
+          tabBarLabel: STRINGS.tabSettings,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-sharp" size={size} color={color} />
           ),

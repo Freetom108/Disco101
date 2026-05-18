@@ -3,8 +3,9 @@ import {
   setAudioModeAsync,
   useAudioPlayer,
 } from 'expo-audio';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { AppPalette } from '../constants/themePalettes';
 import {
   AUDIO_REPEAT_KEY,
   AUDIO_SPEED_KEY,
@@ -12,7 +13,7 @@ import {
   parseAudioRepeat,
   parseAudioSpeed,
 } from '../constants/audioSettingsStorage';
-import { ACTIVE, BUTTON_TEXT, INACTIVE } from '../constants/theme';
+import { useAppTheme } from '../context/AppThemeContext';
 import type { ModuleCode } from '../constants/products';
 import { getPreloadedSource } from '../utils/audioPreloader';
 import {
@@ -42,6 +43,9 @@ export default function SpeakerButton({
   moduleCode = '101',
   avatarSource,
 }: SpeakerButtonProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createSpeakerStyles(colors), [colors]);
+
   const voice = letter.trim().toUpperCase() === 'M' ? 'm' : 'f';
   const source = getPreloadedSource(phraseId, voice, moduleCode);
 
@@ -204,48 +208,50 @@ export default function SpeakerButton({
   );
 }
 
-const styles = StyleSheet.create({
-  speakerRect: {
-    flex: 1,
-    minWidth: 0,
-    minHeight: 80,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  speakerCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: ACTIVE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  speakerLetter: {
-    color: BUTTON_TEXT,
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  avatarColumn: {
-    alignItems: 'center',
-  },
-  avatarRound: {
-    width: 72,
-    height: 72,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: 72,
-    height: 72,
-  },
-  avatarName: {
-    fontSize: 13,
-    color: INACTIVE,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-});
+function createSpeakerStyles(c: AppPalette) {
+  return StyleSheet.create({
+    speakerRect: {
+      flex: 1,
+      minWidth: 0,
+      minHeight: 80,
+      borderRadius: 14,
+      backgroundColor: c.speakerBg,
+      borderWidth: 1,
+      borderColor: c.speakerBorder,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    speakerCircle: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: c.accentBlue,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    speakerLetter: {
+      color: c.buttonOnAccent,
+      fontSize: 22,
+      fontWeight: '700',
+    },
+    avatarColumn: {
+      alignItems: 'center',
+    },
+    avatarRound: {
+      width: 72,
+      height: 72,
+      borderRadius: 999,
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 72,
+      height: 72,
+    },
+    avatarName: {
+      fontSize: 13,
+      color: c.textMuted,
+      textAlign: 'center',
+      marginTop: 4,
+    },
+  });
+}

@@ -92,6 +92,28 @@ export async function loadModulePurchaseState(): Promise<ModulePurchaseState> {
   }
 }
 
+export type RestorePurchasesResult = 'restored' | 'none';
+
+function hasAnyUnlockedPurchase(state: ModulePurchaseState): boolean {
+  return (
+    state.allUnitsUnlocked || Object.values(state.units).some(Boolean)
+  );
+}
+
+/**
+ * Store-Käufe wiederherstellen (nach Anbindung IAP hier native Restore aufrufen),
+ * anschließend lokalen Status neu laden.
+ */
+export async function restorePurchases(): Promise<RestorePurchasesResult> {
+  try {
+    // TODO: Sobald IAP aktiv ist: hier z. B. getAvailablePurchases / restoreCompletedTransactions aufrufen und Keys in AsyncStorage spiegeln.
+    const state = await loadModulePurchaseState();
+    return hasAnyUnlockedPurchase(state) ? 'restored' : 'none';
+  } catch {
+    return 'none';
+  }
+}
+
 export function hasUnitAccess(
   moduleCode: ModuleCode,
   state: ModulePurchaseState,

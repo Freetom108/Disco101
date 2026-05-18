@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
+  Alert,
   Image,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -23,16 +26,21 @@ import {
   parseAudioRepeat,
   parseAudioSpeed,
 } from '../../constants/audioSettingsStorage';
-import {
-  ACTIVE,
-  BUTTON_TEXT,
-  HEADER_DARK,
-  HEADER_TEXT_SUB,
-  INACTIVE,
-  SCREEN_BG,
-} from '../../constants/theme';
+import type { AppPalette } from '../../constants/themePalettes';
+import { restorePurchases } from '../../constants/chapterUnlock';
+import { useAppTheme } from '../../context/AppThemeContext';
 
-const SECTION_LABEL = '#888';
+const URL_CONTACT =
+  'https://freetom108.github.io/Disco101/kontakt/';
+const URL_PRIVACY =
+  'https://freetom108.github.io/Disco101/datenschutz/';
+const URL_TERMS = 'https://freetom108.github.io/Disco101/agb/';
+
+const DISPLAY_OPTIONS = [
+  { value: 'light' as const, label: 'Hell' },
+  { value: 'auto' as const, label: 'Auto' },
+  { value: 'dark' as const, label: 'Dunkel' },
+];
 
 const SPEED_OPTIONS: AudioSpeedStored[] = ['0.7', '0.8', '0.9'];
 /** Nur UI-Text; gespeicherte Werte / audioSpeedToRate bleiben 0.7 / 0.8 / 0.9 */
@@ -83,9 +91,9 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
   },
   {
     id: 'restore',
-    question: 'Was ist Restore Purchase?',
+    question: 'Käufe wiederherstellen',
     answer:
-      'Falls du die App neu installiert hast und deine bereits gekauften Inhalte nicht mehr verfügbar sind, kannst du sie mit Restore Purchase kostenlos wiederherstellen. Tippe einfach auf den Restore Purchase Button weiter unten in den Settings.',
+      "Falls du die App neu installiert hast und deine bereits gekauften Inhalte nicht mehr verfügbar sind, tippe einfach auf 'Käufe wiederherstellen' unter App Info – deine Käufe werden kostenlos wiederhergestellt. Du kannst Käufe auch direkt auf dem Upgrade-Screen wiederherstellen.",
   },
   {
     id: 'upgrade_options',
@@ -99,6 +107,9 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { colors, preference, setPreference } = useAppTheme();
+  const styles = useMemo(() => createSettingsStyles(colors), [colors]);
+  const version = Constants.expoConfig?.version ?? '1.0.0';
   const [audioSpeed, setAudioSpeed] = useState<AudioSpeedStored>(
     DEFAULT_AUDIO_SPEED,
   );
@@ -149,13 +160,57 @@ export default function SettingsScreen() {
     }
   };
 
+  const openExternalUrl = useCallback((url: string) => {
+    void Linking.openURL(url).catch(() => {
+      /* ignore */
+    });
+  }, []);
+
+  const wipeAllAppData = useCallback(async () => {
+    try {
+      await AsyncStorage.clear();
+      router.replace('/onboarding');
+    } catch {
+      Alert.alert(
+        'Fehler',
+        'Die Daten konnten nicht gelöscht werden. Bitte versuche es erneut.',
+      );
+    }
+  }, [router]);
+
+  const confirmWipeAllData = useCallback(() => {
+    Alert.alert(
+      'Bist du sicher?',
+      'Deine Lernfortschritte, gepinnten Karten und Einstellungen werden gelöscht. Die 404 Phrasen und Audioinhalte bleiben vollständig erhalten.',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Löschen',
+          style: 'destructive',
+          onPress: () => void wipeAllAppData(),
+        },
+      ],
+    );
+  }, [wipeAllAppData]);
+
+  const handleRestorePurchases = useCallback(() => {
+    void (async () => {
+      const result = await restorePurchases();
+      Alert.alert(
+        result === 'restored'
+          ? 'Käufe wurden wiederhergestellt'
+          : 'Keine Käufe gefunden',
+      );
+    })();
+  }, []);
+
   return (
-    <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
+    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
             <Text style={styles.headerLine1}>Settings</Text>
-            <Text style={styles.headerLine2}>Disco 101 · English Edition</Text>
+            <Text style={styles.headerLine2}>Disco 101 · Deutsch-Englisch</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -175,10 +230,52 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionLabelFirst}>App Info</Text>
+        <Text style={styles.sectionLabelFirst}>Über die App</Text>
         <View style={styles.group}>
-          <Row label="Version" value="1.0.0" />
-          <Row label="Sprache" value="Deutsch 🇩🇪 – Englisch 🇬🇧" last />
+          <View style={styles.aboutRow}>
+            <Text style={styles.aboutText}>
+              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
+              englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben
+              im Ausland.
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>Display</Text>
+        <View style={styles.group}>
+          <View style={styles.playbackBlock}>
+            <Text style={styles.playbackLabel}>Erscheinungsbild</Text>
+            <View style={styles.segmentRow}>
+              {DISPLAY_OPTIONS.map(({ value, label }) => {
+                const active = preference === value;
+                return (
+                  <Pressable
+                    key={value}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={label}
+                    onPress={() => setPreference(value)}
+                    style={({ pressed }) => [
+                      styles.segmentBtn,
+                      active ? styles.segmentBtnActive : styles.segmentBtnInactive,
+                      pressed && { opacity: 0.88 },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.segmentBtnText,
+                        active
+                          ? styles.segmentBtnTextActive
+                          : styles.segmentBtnTextInactive,
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </View>
 
         <Text style={styles.sectionLabel}>Wiedergabe</Text>
@@ -273,7 +370,7 @@ export default function SettingsScreen() {
               <Text style={styles.rowLabel} numberOfLines={2}>
                 App Intro wiederholen
               </Text>
-              <Ionicons name="arrow-forward" size={20} color="#8E8E93" />
+              <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
             </View>
           </Pressable>
           {FAQ_ACCORDION_ITEMS.map((item, index) => {
@@ -300,7 +397,7 @@ export default function SettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={22}
-                      color="#8E8E93"
+                      color={colors.iconMuted}
                       style={{
                         transform: [{ rotate: open ? '90deg' : '0deg' }],
                       }}
@@ -337,15 +434,105 @@ export default function SettingsScreen() {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>Über die App</Text>
+        <Text style={styles.sectionLabel}>Support & Feedback</Text>
         <View style={styles.group}>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutText}>
-              Disco 101 ist dein idealer Sprachtrainer für die wichtigsten
-              englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben
-              im Ausland.
+          <Pressable
+            onPress={() => openExternalUrl(URL_CONTACT)}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Kontakt und Feedback"
+          >
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                Kontakt & Feedback
+              </Text>
+              <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={() =>
+              Alert.alert(
+                'App bewerten',
+                'Kommt bald nach Store-Launch',
+              )
+            }
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="App bewerten"
+          >
+            <View style={styles.row}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                App bewerten
+              </Text>
+              <Ionicons name="star-outline" size={22} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+        </View>
+
+        <Text style={styles.sectionLabel}>Legal</Text>
+        <View style={styles.group}>
+          <Pressable
+            onPress={() => openExternalUrl(URL_PRIVACY)}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Datenschutz"
+          >
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                Datenschutz
+              </Text>
+              <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={() => openExternalUrl(URL_TERMS)}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="AGB"
+          >
+            <View style={styles.row}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                AGB
+              </Text>
+              <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+        </View>
+
+        <Text style={styles.sectionLabel}>App Info</Text>
+        <View style={styles.group}>
+          <Row sx={styles} label="Version" value={version} />
+          <Row sx={styles} label="Sprache" value="Deutsch 🇩🇪 – Englisch 🇬🇧" />
+          <Pressable
+            onPress={handleRestorePurchases}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Käufe wiederherstellen"
+          >
+            <View style={styles.row}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                Käufe wiederherstellen
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+        </View>
+
+        <Text style={styles.sectionLabel}>Danger Zone</Text>
+        <View style={styles.group}>
+          <Pressable
+            onPress={confirmWipeAllData}
+            style={({ pressed }) => [
+              styles.dangerZoneBtn,
+              pressed && { opacity: 0.92 },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Alle App-Daten löschen"
+          >
+            <Text style={styles.dangerZoneBtnText}>
+              Alle App-Daten löschen
             </Text>
-          </View>
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -353,10 +540,12 @@ export default function SettingsScreen() {
 }
 
 function Row({
+  sx,
   label,
   value,
   last,
 }: {
+  sx: ReturnType<typeof createSettingsStyles>;
   label: string;
   value: string;
   last?: boolean;
@@ -364,24 +553,25 @@ function Row({
   return (
     <View
       style={[
-        styles.row,
-        !last && styles.rowBorder,
+        sx.row,
+        !last && sx.rowBorder,
       ]}
     >
-      <Text style={styles.rowLabel} numberOfLines={1}>
+      <Text style={sx.rowLabel} numberOfLines={1}>
         {label}
       </Text>
-      <Text style={styles.rowValue}>{value}</Text>
+      <Text style={sx.rowValue}>{value}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+function createSettingsStyles(c: AppPalette) {
+  return StyleSheet.create({
   screen: {
     flex: 1,
   },
   header: {
-    backgroundColor: HEADER_DARK,
+    backgroundColor: c.headerBg,
     marginTop: 12,
     marginHorizontal: '3%',
     borderRadius: 16,
@@ -400,13 +590,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headerLine1: {
-    color: INACTIVE,
+    color: c.headerPrimaryText,
     fontSize: 26,
     fontWeight: '600',
     lineHeight: 32,
   },
   headerLine2: {
-    color: HEADER_TEXT_SUB,
+    color: c.headerSecondaryText,
     fontSize: 14,
     marginTop: 4,
     lineHeight: 20,
@@ -432,19 +622,19 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 12,
     textTransform: 'uppercase',
-    color: SECTION_LABEL,
+    color: c.textMuted,
     marginBottom: 4,
     marginTop: 20,
   },
   sectionLabelFirst: {
     fontSize: 12,
     textTransform: 'uppercase',
-    color: SECTION_LABEL,
+    color: c.textMuted,
     marginBottom: 4,
     marginTop: 0,
   },
   group: {
-    backgroundColor: INACTIVE,
+    backgroundColor: c.groupBg,
     borderRadius: 12,
     overflow: 'hidden',
     ...Platform.select({
@@ -462,7 +652,7 @@ const styles = StyleSheet.create({
   },
   playbackLabel: {
     fontSize: 16,
-    color: BUTTON_TEXT,
+    color: c.textPrimary,
     fontWeight: '600',
     marginBottom: 12,
   },
@@ -480,27 +670,27 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   segmentBtnActive: {
-    backgroundColor: ACTIVE,
+    backgroundColor: c.accentBlue,
     borderWidth: 0,
   },
   segmentBtnInactive: {
-    backgroundColor: 'transparent',
+    backgroundColor: c.segmentInactiveBg,
     borderWidth: 1.5,
-    borderColor: 'rgba(0, 0, 0, 0.22)',
+    borderColor: c.segmentInactiveBorder,
   },
   segmentBtnText: {
     fontSize: 15,
     fontWeight: '600',
   },
   segmentBtnTextActive: {
-    color: BUTTON_TEXT,
+    color: c.segmentActiveText,
   },
   segmentBtnTextInactive: {
-    color: '#1A1A1A',
+    color: c.segmentInactiveText,
   },
   playbackDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#C6C6C8',
+    backgroundColor: c.borderHairline,
     marginHorizontal: 16,
   },
   row: {
@@ -511,17 +701,17 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#C6C6C8',
+    borderBottomColor: c.borderHairline,
   },
   rowLabel: {
     flex: 1,
     fontSize: 16,
-    color: BUTTON_TEXT,
+    color: c.textPrimary,
     marginRight: 12,
   },
   rowValue: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: c.iconMuted,
   },
   aboutRow: {
     padding: 16,
@@ -529,7 +719,7 @@ const styles = StyleSheet.create({
   aboutText: {
     fontSize: 15,
     lineHeight: 22,
-    color: BUTTON_TEXT,
+    color: c.textPrimary,
   },
   faqAnswer: {
     paddingHorizontal: 16,
@@ -538,12 +728,12 @@ const styles = StyleSheet.create({
   },
   faqAnswerBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#C6C6C8',
+    borderBottomColor: c.borderHairline,
   },
   faqUpgradeBtn: {
     marginTop: 14,
     alignSelf: 'stretch',
-    backgroundColor: ACTIVE,
+    backgroundColor: c.accentBlue,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
@@ -552,6 +742,20 @@ const styles = StyleSheet.create({
   faqUpgradeBtnText: {
     fontSize: 15,
     fontWeight: '600',
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
   },
-});
+  dangerZoneBtn: {
+    margin: 16,
+    paddingVertical: 14,
+    borderRadius: 10,
+    backgroundColor: c.dangerBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dangerZoneBtnText: {
+    color: c.buttonOnAccent,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  });
+}

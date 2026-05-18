@@ -31,16 +31,9 @@ import PhraseCard from '../../components/PhraseCard';
 import {
   preloadPhraseAudio,
 } from '../../utils/audioPreloader';
-import {
-  ACTIVE,
-  BRAND,
-  BUTTON_TEXT,
-  CARD_BG,
-  CARD_DE,
-  FONT_DM_SERIF,
-  INACTIVE,
-  SCREEN_BG,
-} from '../../constants/theme';
+import type { AppPalette } from '../../constants/themePalettes';
+import { FONT_DM_SERIF } from '../../constants/theme';
+import { useAppTheme } from '../../context/AppThemeContext';
 import { audioAssets } from '../../utils/audioAssets';
 import { buildQuizOptions, phraseAudioSource, shufflePhrases } from '../../utils/phraseUtils';
 import {
@@ -82,6 +75,7 @@ function TestChrisAnnButtons({
   showOptions,
   onOpenOptionsAfterFirstVoice,
   compact,
+  homeStyles,
 }: {
   player: AudioPlayer;
   phraseId: number;
@@ -89,6 +83,7 @@ function TestChrisAnnButtons({
   showOptions: boolean;
   onOpenOptionsAfterFirstVoice: () => void;
   compact: boolean;
+  homeStyles: ReturnType<typeof createHomeStyles>;
 }) {
   const showOptionsRef = useRef(showOptions);
   useEffect(() => {
@@ -141,13 +136,15 @@ function TestChrisAnnButtons({
     [moduleCode, onOpenOptionsAfterFirstVoice, player, phraseId],
   );
 
-  const btnStyle = compact ? styles.testVoiceBtnCompact : styles.testVoiceBtn;
+  const btnStyle = compact
+    ? homeStyles.testVoiceBtnCompact
+    : homeStyles.testVoiceBtn;
 
   return (
     <View
       style={[
-        styles.testVoiceRow,
-        compact && styles.testVoiceRowCompact,
+        homeStyles.testVoiceRow,
+        compact && homeStyles.testVoiceRowCompact,
       ]}
     >
       <Pressable
@@ -159,15 +156,15 @@ function TestChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <View style={styles.testVoiceBtnInner}>
-          <View style={styles.testVoiceAvatarWrap}>
+        <View style={homeStyles.testVoiceBtnInner}>
+          <View style={homeStyles.testVoiceAvatarWrap}>
             <Image
               source={CHRIS_AVATAR}
-              style={styles.testVoiceAvatarImg}
+              style={homeStyles.testVoiceAvatarImg}
               resizeMode="cover"
             />
           </View>
-          <Text style={styles.testVoiceBtnText}>Chris</Text>
+          <Text style={homeStyles.testVoiceBtnText}>Chris</Text>
         </View>
       </Pressable>
       <Pressable
@@ -179,15 +176,15 @@ function TestChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <View style={styles.testVoiceBtnInner}>
-          <View style={styles.testVoiceAvatarWrap}>
+        <View style={homeStyles.testVoiceBtnInner}>
+          <View style={homeStyles.testVoiceAvatarWrap}>
             <Image
               source={ANN_AVATAR}
-              style={styles.testVoiceAvatarImg}
+              style={homeStyles.testVoiceAvatarImg}
               resizeMode="cover"
             />
           </View>
-          <Text style={styles.testVoiceBtnText}>Ann</Text>
+          <Text style={homeStyles.testVoiceBtnText}>Ann</Text>
         </View>
       </Pressable>
     </View>
@@ -199,6 +196,9 @@ export default function HomeScreen() {
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
+
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createHomeStyles(colors), [colors]);
 
   const [currentChapter, setCurrentChapter] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -680,14 +680,14 @@ export default function HomeScreen() {
   if (!fontsLoaded || !bootReady) {
     return (
       <View style={[styles.home, styles.homeLoading, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={BRAND} />
+        <ActivityIndicator size="large" color={colors.accentBlue} />
       </View>
     );
   }
 
   if (sentences.length === 0) {
     return (
-      <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
+      <View style={[styles.home, { backgroundColor: colors.screenBg }]}>
         <Header subtitle={homeHeaderSubtitle} />
         <View style={[styles.homeBody, styles.homeEmptyPack]}>
           <Text style={styles.homeEmptyPackText}>
@@ -699,7 +699,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.home, { backgroundColor: SCREEN_BG }]}>
+    <View style={[styles.home, { backgroundColor: colors.screenBg }]}>
       <Header subtitle={homeHeaderSubtitle} />
       <View style={styles.homeBody}>
         {showTestSelection ? (
@@ -875,7 +875,7 @@ export default function HomeScreen() {
                         styles.testResultBtnOtherTest,
                         {
                           backgroundColor:
-                            activeTestKind === 1 ? '#C8102E' : ACTIVE,
+                            activeTestKind === 1 ? colors.accentRed : colors.tabActive,
                         },
                         pressed && { opacity: 0.92 },
                       ]}
@@ -949,7 +949,7 @@ export default function HomeScreen() {
                 <View style={styles.testSelectionCard}>
                   {currentOptions.length < 3 || !testPhrases[testIndex] ? (
                     <View style={styles.testLoadingInner}>
-                      <ActivityIndicator size="large" color={ACTIVE} />
+                      <ActivityIndicator size="large" color={colors.tabActive} />
                     </View>
                   ) : (
                     <ScrollView
@@ -969,6 +969,7 @@ export default function HomeScreen() {
                               onOpenOptionsAfterFirstVoice
                             }
                             compact={false}
+                            homeStyles={styles}
                           />
                           <Text style={styles.testPlayHintPhase1}>
                             Wähle Chris oder Ann, um den Satz zu hören
@@ -986,6 +987,7 @@ export default function HomeScreen() {
                                 onOpenOptionsAfterFirstVoice
                               }
                               compact
+                              homeStyles={styles}
                             />
                             <Ionicons
                               name="pin"
@@ -995,8 +997,8 @@ export default function HomeScreen() {
                                 selectedOptionId !== null &&
                                 selectedOptionId !==
                                   testPhrases[testIndex]!.id
-                                  ? '#C8102E'
-                                  : '#888888'
+                                  ? colors.accentRed
+                                  : colors.textMuted
                               }
                             />
                           </View>
@@ -1007,7 +1009,7 @@ export default function HomeScreen() {
                               activeTestKind === 1
                                 ? opt.english
                                 : opt.german;
-                            let rowBg = SCREEN_BG;
+                            let rowBg = colors.screenBg;
                             if (answerLocked) {
                               if (opt.id === correctId) {
                                 rowBg = '#2E7D32';
@@ -1020,11 +1022,11 @@ export default function HomeScreen() {
                               (opt.id === correctId ||
                                 opt.id === selectedOptionId);
                             const textCol = onColored
-                              ? BUTTON_TEXT
-                              : '#1A1A1A';
+                              ? colors.buttonOnAccent
+                              : colors.textPrimary;
                             const letterCol = onColored
-                              ? BUTTON_TEXT
-                              : ACTIVE;
+                              ? colors.buttonOnAccent
+                              : colors.tabActive;
                             const showCheckBefore =
                               answerLocked && opt.id === correctId;
                             return (
@@ -1125,13 +1127,14 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createHomeStyles(c: AppPalette) {
+  return StyleSheet.create({
   home: {
     flex: 1,
     flexDirection: 'column',
   },
   homeLoading: {
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1151,7 +1154,7 @@ const styles = StyleSheet.create({
   homeEmptyPackText: {
     fontSize: 16,
     lineHeight: 24,
-    color: CARD_DE,
+    color: c.textSecondary,
     textAlign: 'center',
   },
   testSelectionOuter: {
@@ -1162,14 +1165,14 @@ const styles = StyleSheet.create({
   testSelectionShadow: {
     flex: 1,
     minHeight: 0,
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
     borderRadius: 28,
     marginHorizontal: '3%',
     marginVertical: 8,
     ...Platform.select({
       android: { elevation: 12 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
         shadowRadius: 20,
@@ -1181,7 +1184,7 @@ const styles = StyleSheet.create({
     minHeight: 0,
     borderRadius: 28,
     overflow: 'hidden',
-    backgroundColor: CARD_BG,
+    backgroundColor: c.cardBg,
   },
   testSelectionScroll: {
     flex: 1,
@@ -1195,14 +1198,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   testSelectionTitle: {
-    color: ACTIVE,
+    color: c.tabActive,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: '600',
     textAlign: 'center',
   },
   testSelectionSubtitle: {
-    color: CARD_DE,
+    color: c.textSecondary,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -1210,14 +1213,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   testBlock: {
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     ...Platform.select({
       android: { elevation: 3 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -1225,7 +1228,7 @@ const styles = StyleSheet.create({
     }),
   },
   testBlockLabel: {
-    color: INACTIVE,
+    color: c.tabInactive,
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 0.6,
@@ -1233,7 +1236,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   testBlockBody: {
-    color: CARD_DE,
+    color: c.textSecondary,
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 16,
@@ -1244,13 +1247,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   testBlockBtnPrimary: {
-    backgroundColor: ACTIVE,
+    backgroundColor: c.tabActive,
   },
   testBlockBtnAccent: {
-    backgroundColor: '#C8102E',
+    backgroundColor: c.accentRed,
   },
   testBlockBtnText: {
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -1261,7 +1264,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   testSelectionBackText: {
-    color: INACTIVE,
+    color: c.tabInactive,
     fontSize: 15,
     fontWeight: '500',
   },
@@ -1282,21 +1285,21 @@ const styles = StyleSheet.create({
   testRunHeaderOutside: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: c.textPrimary,
     textAlign: 'center',
     marginBottom: 8,
   },
   testRunProgressTrackOutside: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(0, 36, 125, 0.15)',
+    backgroundColor: c.testProgressTint,
     overflow: 'hidden',
     marginBottom: 12,
   },
   testRunProgressFillOutside: {
     height: '100%',
     borderRadius: 3,
-    backgroundColor: ACTIVE,
+    backgroundColor: c.tabActive,
   },
   testPhase1Wrap: {
     alignItems: 'center',
@@ -1307,7 +1310,7 @@ const styles = StyleSheet.create({
   testPlayHintPhase1: {
     marginTop: 16,
     fontSize: 14,
-    color: CARD_DE,
+    color: c.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 12,
   },
@@ -1362,7 +1365,7 @@ const styles = StyleSheet.create({
   },
   testVoiceBtnText: {
     fontSize: 13,
-    color: INACTIVE,
+    color: c.tabInactive,
     textAlign: 'center',
     marginTop: 4,
   },
@@ -1373,7 +1376,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       android: { elevation: 3 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -1427,7 +1430,7 @@ const styles = StyleSheet.create({
   },
   testResultScreenTitle: {
     fontSize: 30,
-    color: ACTIVE,
+    color: c.tabActive,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 8,
@@ -1435,19 +1438,19 @@ const styles = StyleSheet.create({
   testResultScoreBig: {
     fontSize: 48,
     fontWeight: '700',
-    color: ACTIVE,
+    color: c.tabActive,
     textAlign: 'center',
   },
   testResultScoreLabel: {
     marginTop: 6,
     fontSize: 14,
-    color: INACTIVE,
+    color: c.tabInactive,
     textAlign: 'center',
   },
   testResultRepeatNote: {
     marginTop: 20,
     fontSize: 14,
-    color: INACTIVE,
+    color: c.tabInactive,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -1463,7 +1466,7 @@ const styles = StyleSheet.create({
   testResultPerfectCaption: {
     marginTop: 12,
     fontSize: 18,
-    color: ACTIVE,
+    color: c.tabActive,
     textAlign: 'center',
   },
   testResultBtnOtherTest: {
@@ -1485,14 +1488,14 @@ const styles = StyleSheet.create({
     marginTop: 28,
     width: '100%',
     maxWidth: 320,
-    backgroundColor: ACTIVE,
+    backgroundColor: c.tabActive,
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
   },
   testResultBtnPrimaryText: {
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -1501,15 +1504,16 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: ACTIVE,
+    borderColor: c.tabActive,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
     alignItems: 'center',
   },
   testResultBtnSecondaryText: {
-    color: ACTIVE,
+    color: c.tabActive,
     fontSize: 16,
     fontWeight: '600',
   },
 });
+}

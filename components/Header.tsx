@@ -1,5 +1,7 @@
+import type { AppPalette } from '../constants/themePalettes';
+import { useAppTheme } from '../context/AppThemeContext';
+import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { HEADER_DARK, HEADER_TEXT_SUB, INACTIVE } from '../constants/theme';
 
 type HeaderProps = {
   /** z. B. „Unit 1 Basics“ – aus aktiver Lern-Unit */
@@ -7,6 +9,9 @@ type HeaderProps = {
 };
 
 export default function Header({ subtitle }: HeaderProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.header}>
       <View style={styles.headerRow}>
@@ -26,45 +31,47 @@ export default function Header({ subtitle }: HeaderProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    backgroundColor: HEADER_DARK,
-    marginTop: 12,
-    marginHorizontal: '3%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    paddingTop: 50,
-    paddingBottom: 14,
-    paddingHorizontal: 20,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headerTextCol: {
-    flex: 1,
-    marginRight: 10,
-  },
-  headerLine1: {
-    color: INACTIVE,
-    fontSize: 26,
-    fontWeight: '600',
-    lineHeight: 32,
-  },
-  headerLine2: {
-    color: HEADER_TEXT_SUB,
-    fontSize: 14,
-    marginTop: 4,
-    lineHeight: 20,
-  },
-  headerLogoMask: {
-    width: 88,
-    height: 88,
-    flexShrink: 0,
-  },
-  headerLogo: {
-    width: '100%',
-    height: '100%',
-  },
-});
+function createStyles(c: AppPalette) {
+  return StyleSheet.create({
+    header: {
+      backgroundColor: c.headerBg,
+      marginTop: 12,
+      marginHorizontal: '3%',
+      borderRadius: 16,
+      overflow: 'hidden',
+      paddingTop: 50,
+      paddingBottom: 14,
+      paddingHorizontal: 20,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
+    headerTextCol: {
+      flex: 1,
+      marginRight: 10,
+    },
+    headerLine1: {
+      color: c.headerPrimaryText,
+      fontSize: 26,
+      fontWeight: '600',
+      lineHeight: 32,
+    },
+    headerLine2: {
+      color: c.headerSecondaryText,
+      fontSize: 14,
+      marginTop: 4,
+      lineHeight: 20,
+    },
+    headerLogoMask: {
+      width: 88,
+      height: 88,
+      flexShrink: 0,
+    },
+    headerLogo: {
+      width: '100%',
+      height: '100%',
+    },
+  });
+}

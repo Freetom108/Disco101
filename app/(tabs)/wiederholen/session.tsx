@@ -59,21 +59,16 @@ import {
   safePlayerSetPlaybackRate,
 } from '../../../utils/safeAudioPlayer';
 
-const CHRIS_AVATAR = require('../../../assets/chris.png');
-const ANN_AVATAR = require('../../../assets/ann.png');
-import {
-  ACTIVE,
-  BRAND,
-  BUTTON_TEXT,
-  CARD_BG,
-  CARD_DE,
-  FONT_DM_SERIF,
-  INACTIVE,
-  SCREEN_BG,
-} from '../../../constants/theme';
+import { FONT_DM_SERIF } from '../../../constants/theme';
+import type { AppPalette } from '../../../constants/themePalettes';
+import { useAppTheme } from '../../../context/AppThemeContext';
+
 type Phrase = SentenceRecord;
 
 type RepeatSession = { phrases: Phrase[]; index: number };
+
+const CHRIS_AVATAR = require('../../../assets/chris.png');
+const ANN_AVATAR = require('../../../assets/ann.png');
 
 
 function SessionChrisAnnButtons({
@@ -84,6 +79,7 @@ function SessionChrisAnnButtons({
   onOpenOptionsAfterFirstVoice,
   compact,
   isReleasedRef,
+  sessionStyles,
 }: {
   player: AudioPlayer;
   phraseId: number;
@@ -92,6 +88,7 @@ function SessionChrisAnnButtons({
   onOpenOptionsAfterFirstVoice: () => void;
   compact: boolean;
   isReleasedRef: MutableRefObject<boolean>;
+  sessionStyles: ReturnType<typeof createRepeatSessionStyles>;
 }) {
   const showOptionsRef = useRef(showOptions);
   useEffect(() => {
@@ -163,13 +160,15 @@ function SessionChrisAnnButtons({
     [isReleasedRef, moduleCode, onOpenOptionsAfterFirstVoice, player, phraseId],
   );
 
-  const btnStyle = compact ? styles.sessionTestVoiceBtnCompact : styles.sessionTestVoiceBtn;
+  const btnStyle = compact
+    ? sessionStyles.sessionTestVoiceBtnCompact
+    : sessionStyles.sessionTestVoiceBtn;
 
   return (
     <View
       style={[
-        styles.sessionTestVoiceRow,
-        compact && styles.sessionTestVoiceRowCompact,
+        sessionStyles.sessionTestVoiceRow,
+        compact && sessionStyles.sessionTestVoiceRowCompact,
       ]}
     >
       <Pressable
@@ -181,15 +180,15 @@ function SessionChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <View style={styles.sessionTestVoiceBtnInner}>
-          <View style={styles.sessionTestVoiceAvatarWrap}>
+        <View style={sessionStyles.sessionTestVoiceBtnInner}>
+          <View style={sessionStyles.sessionTestVoiceAvatarWrap}>
             <Image
               source={CHRIS_AVATAR}
-              style={styles.sessionTestVoiceAvatarImg}
+              style={sessionStyles.sessionTestVoiceAvatarImg}
               resizeMode="cover"
             />
           </View>
-          <Text style={styles.sessionTestVoiceBtnText}>Chris</Text>
+          <Text style={sessionStyles.sessionTestVoiceBtnText}>Chris</Text>
         </View>
       </Pressable>
       <Pressable
@@ -201,15 +200,15 @@ function SessionChrisAnnButtons({
           pressed && { opacity: 0.9 },
         ]}
       >
-        <View style={styles.sessionTestVoiceBtnInner}>
-          <View style={styles.sessionTestVoiceAvatarWrap}>
+        <View style={sessionStyles.sessionTestVoiceBtnInner}>
+          <View style={sessionStyles.sessionTestVoiceAvatarWrap}>
             <Image
               source={ANN_AVATAR}
-              style={styles.sessionTestVoiceAvatarImg}
+              style={sessionStyles.sessionTestVoiceAvatarImg}
               resizeMode="cover"
             />
           </View>
-          <Text style={styles.sessionTestVoiceBtnText}>Ann</Text>
+          <Text style={sessionStyles.sessionTestVoiceBtnText}>Ann</Text>
         </View>
       </Pressable>
     </View>
@@ -239,6 +238,9 @@ export default function RepeatSessionScreen() {
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../../../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
+
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createRepeatSessionStyles(colors), [colors]);
 
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [repeatSession, setRepeatSession] = useState<RepeatSession | null>(null);
@@ -609,9 +611,9 @@ export default function RepeatSessionScreen() {
 
   if (initFailed || !repeatSession) {
     return (
-      <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
+      <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
         <View style={styles.sessionFontWait}>
-          <ActivityIndicator size="large" color={BRAND} />
+          <ActivityIndicator size="large" color={colors.accentBlue} />
         </View>
       </View>
     );
@@ -622,7 +624,7 @@ export default function RepeatSessionScreen() {
     sessionDone || y === 0 ? '' : `${sessionIndex + 1} / ${y} Karten`;
 
   return (
-    <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
+    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View
         style={[
           styles.sessionHeaderBar,
@@ -690,8 +692,8 @@ export default function RepeatSessionScreen() {
                       size={20}
                       color={
                         pinnedIds.includes(currentPhrase.id)
-                          ? '#C8102E'
-                          : BRAND
+                          ? colors.accentRed
+                          : colors.accentBlue
                       }
                     />
                   </Pressable>
@@ -742,6 +744,7 @@ export default function RepeatSessionScreen() {
                         onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
                         compact={false}
                         isReleasedRef={isReleasedRef}
+                        sessionStyles={styles}
                       />
                       <Text style={styles.sessionPhase1Hint}>
                         Hör den Satz an – welche deutsche Bedeutung passt?
@@ -758,6 +761,7 @@ export default function RepeatSessionScreen() {
                           onOpenOptionsAfterFirstVoice={onOpenQuizOptions}
                           compact
                           isReleasedRef={isReleasedRef}
+                          sessionStyles={styles}
                         />
                       </View>
                       <View style={styles.sessionQuizOptionsBlock}>
@@ -765,7 +769,7 @@ export default function RepeatSessionScreen() {
                           const letter = ['A', 'B', 'C'][i] ?? '?';
                           const correctId = currentPhrase.id;
                           const label = opt.german;
-                          let rowBg = SCREEN_BG;
+                          let rowBg = colors.screenBg;
                           if (answerLocked) {
                             if (opt.id === correctId) {
                               rowBg = '#2E7D32';
@@ -778,11 +782,11 @@ export default function RepeatSessionScreen() {
                             (opt.id === correctId ||
                               opt.id === selectedOptionId);
                           const textCol = onColored
-                            ? BUTTON_TEXT
-                            : '#1A1A1A';
+                            ? colors.buttonOnAccent
+                            : colors.textPrimary;
                           const letterCol = onColored
-                            ? BUTTON_TEXT
-                            : ACTIVE;
+                            ? colors.buttonOnAccent
+                            : colors.tabActive;
                           const showCheckBefore =
                             answerLocked && opt.id === correctId;
                           return (
@@ -900,7 +904,7 @@ export default function RepeatSessionScreen() {
               </>
             ) : (
               <View style={styles.sessionFontWait}>
-                <ActivityIndicator size="large" color={BRAND} />
+                <ActivityIndicator size="large" color={colors.accentBlue} />
               </View>
             )}
           </View>
@@ -924,7 +928,8 @@ export default function RepeatSessionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createRepeatSessionStyles(c: AppPalette) {
+  return StyleSheet.create({
   screen: {
     flex: 1,
     position: 'relative',
@@ -938,7 +943,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingBottom: 12,
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
   },
   sessionHeaderSide: {
     width: 100,
@@ -946,14 +951,14 @@ const styles = StyleSheet.create({
   sessionBackText: {
     fontSize: 17,
     fontWeight: '600',
-    color: BRAND,
+    color: c.accentBlue,
   },
   sessionProgressText: {
     flex: 1,
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: c.textPrimary,
   },
   sessionBody: {
     flex: 1,
@@ -964,13 +969,13 @@ const styles = StyleSheet.create({
   sessionCardShadow: {
     flex: 1,
     minHeight: 0,
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
     borderRadius: 28,
     marginVertical: 8,
     ...Platform.select({
       android: { elevation: 12 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
         shadowRadius: 20,
@@ -981,7 +986,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 26,
     overflow: 'hidden',
-    backgroundColor: CARD_BG,
+    backgroundColor: c.cardBg,
     padding: 20,
     justifyContent: 'space-between',
   },
@@ -992,7 +997,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sessionChapterLabel: {
-    color: INACTIVE,
+    color: c.tabInactive,
     fontSize: 11,
     letterSpacing: 0.4,
     flex: 1,
@@ -1010,18 +1015,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sessionBigNum: {
-    color: ACTIVE,
+    color: c.tabActive,
     fontSize: 56,
     fontWeight: '700',
     lineHeight: 60,
   },
   sessionNumHint: {
-    color: CARD_DE,
+    color: c.textSecondary,
     fontSize: 15,
     marginBottom: 8,
   },
   sessionEnglish: {
-    color: '#1A1A1A',
+    color: c.textPrimary,
     fontSize: 26,
     lineHeight: 34,
     marginTop: 12,
@@ -1030,7 +1035,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 17,
     fontWeight: '700',
-    color: ACTIVE,
+    color: c.tabActive,
     textAlign: 'center',
   },
   categoryPill: {
@@ -1039,10 +1044,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 100,
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: c.categoryPillBg,
   },
   categoryPillText: {
-    color: '#1A1A1A',
+    color: c.textPrimary,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -1061,7 +1066,7 @@ const styles = StyleSheet.create({
   sessionPhase1Hint: {
     marginTop: 16,
     fontSize: 14,
-    color: CARD_DE,
+    color: c.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 12,
   },
@@ -1091,7 +1096,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       android: { elevation: 3 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -1156,7 +1161,7 @@ const styles = StyleSheet.create({
   },
   sessionTestVoiceBtnText: {
     fontSize: 13,
-    color: INACTIVE,
+    color: c.tabInactive,
     textAlign: 'center',
     marginTop: 4,
   },
@@ -1192,7 +1197,7 @@ const styles = StyleSheet.create({
   },
   naechsteBtn: {
     flex: 1,
-    backgroundColor: '#C8102E',
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -1203,7 +1208,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   naechsteBtnText: {
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -1216,25 +1221,25 @@ const styles = StyleSheet.create({
   sessionCompleteTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: ACTIVE,
+    color: c.tabActive,
     textAlign: 'center',
   },
   sessionCompleteSub: {
     marginTop: 12,
     fontSize: 16,
     lineHeight: 24,
-    color: CARD_DE,
+    color: c.textSecondary,
     textAlign: 'center',
   },
   sessionCompleteBtn: {
     marginTop: 28,
-    backgroundColor: '#C8102E',
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
   },
   sessionCompleteBtnText: {
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     fontSize: 17,
     fontWeight: '600',
   },
@@ -1244,4 +1249,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+  });
+}

@@ -1,6 +1,6 @@
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useFonts } from 'expo-font';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   NativeScrollEvent,
@@ -19,7 +19,9 @@ import {
 } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { FONT_DM_SERIF, CARD_BG, INACTIVE } from '../constants/theme';
+import type { AppPalette } from '../constants/themePalettes';
+import { FONT_DM_SERIF } from '../constants/theme';
+import { useAppTheme } from '../context/AppThemeContext';
 import { audioAssets } from '../utils/audioAssets';
 import {
   safePlayerPause,
@@ -31,17 +33,15 @@ import {
 
 const CHRIS_AVATAR = require('../assets/chris.png');
 const ANN_AVATAR = require('../assets/ann.png');
-const ONBOARDING_BG = '#EDE9E3';
 const ONBOARDING_KEY = 'onboarding_done';
-const TITLE_DARK = '#1A1A1A';
-const BODY_GRAY = '#444444';
-const DOT_INACTIVE = '#AAAAAA';
 
 /** Space reserved for dots + primary/ghost button + padding (fixed bottom bar). */
 const FOOTER_ZONE = 140;
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createOnboardingStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const width = windowWidth > 0 ? windowWidth : 400;
@@ -389,13 +389,16 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createOnboardingStyles(c: AppPalette) {
+  const rootBg = c.scheme === 'dark' ? c.screenBg : c.headerBg;
+
+  return StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: ONBOARDING_BG,
+    backgroundColor: rootBg,
   },
   loadingOnly: {
-    backgroundColor: ONBOARDING_BG,
+    backgroundColor: rootBg,
   },
   safe: {
     flex: 1,
@@ -431,7 +434,7 @@ const styles = StyleSheet.create({
   },
   practiceCard: {
     alignSelf: 'stretch',
-    backgroundColor: CARD_BG,
+    backgroundColor: c.cardBg,
     borderRadius: 28,
     padding: 20,
     overflow: 'hidden',
@@ -440,7 +443,7 @@ const styles = StyleSheet.create({
         elevation: 12,
       },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
         shadowRadius: 20,
@@ -448,7 +451,7 @@ const styles = StyleSheet.create({
     }),
   },
   slide1English: {
-    color: TITLE_DARK,
+    color: c.textPrimary,
     fontSize: 26,
     lineHeight: 34,
     fontWeight: '600',
@@ -456,7 +459,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   slide1German: {
-    color: BODY_GRAY,
+    color: c.textSecondary,
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',
@@ -473,9 +476,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
     minHeight: 80,
     borderRadius: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: c.speakerBg,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderColor: c.speakerBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -495,7 +498,7 @@ const styles = StyleSheet.create({
   },
   slide1VoiceLabel: {
     fontSize: 13,
-    color: INACTIVE,
+    color: c.textMuted,
     textAlign: 'center',
     marginTop: 4,
   },
@@ -512,7 +515,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   titleSection: {
-    color: TITLE_DARK,
+    color: c.textPrimary,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: '600',
@@ -525,7 +528,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   listItem: {
-    color: BODY_GRAY,
+    color: c.textSecondary,
     fontSize: 18,
     lineHeight: 26,
     marginBottom: 32,
@@ -539,7 +542,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingTop: 8,
-    backgroundColor: ONBOARDING_BG,
+    backgroundColor: rootBg,
     zIndex: 50,
     ...Platform.select({
       android: { elevation: 24 },
@@ -556,10 +559,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: DOT_INACTIVE,
+    backgroundColor: c.iconMuted,
   },
   dotActive: {
-    backgroundColor: TITLE_DARK,
+    backgroundColor: c.accentBlue,
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -571,12 +574,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnGhostText: {
-    color: TITLE_DARK,
+    color: c.textPrimary,
     fontSize: 18,
     fontWeight: '600',
   },
   btnPrimary: {
-    backgroundColor: '#CF142B',
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 16,
     marginHorizontal: 24,
@@ -584,8 +587,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnPrimaryText: {
-    color: '#FFFFFF',
+    color: c.buttonOnAccent,
     fontSize: 18,
     fontWeight: '600',
   },
 });
+}

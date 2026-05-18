@@ -13,13 +13,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  BRAND,
-  HEADER_DARK,
-  HEADER_TEXT_SUB,
-  INACTIVE,
-  SCREEN_BG,
-} from '../../constants/theme';
+import type { AppPalette } from '../../constants/themePalettes';
+import { useAppTheme } from '../../context/AppThemeContext';
 import {
   getActiveLearningModule,
   setActiveLearningModule,
@@ -40,10 +35,6 @@ import {
   type ModuleCode,
 } from '../../constants/products';
 import { getSentencesForModule } from '../../constants/sentencePacks';
-
-/** App accent red for Learn tab unit accordion headers */
-const UNIT_HEADER_RED = '#CF142B';
-const UNIT_HEADER_ON_RED = '#FFFFFF';
 
 type ChapterRowMeta = {
   chapterId: number;
@@ -97,6 +88,8 @@ const EMPTY_PROGRESS: Record<ModuleCode, Record<string, number>> = {
 export default function LernenScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createLernenStyles(colors), [colors]);
   const [expandedUnit, setExpandedUnit] = useState<ModuleCode | null>('101');
   const [progressByModule, setProgressByModule] =
     useState<Record<ModuleCode, Record<string, number>>>(EMPTY_PROGRESS);
@@ -175,7 +168,7 @@ export default function LernenScreen() {
   );
 
   return (
-    <View style={[styles.screen, { backgroundColor: SCREEN_BG }]}>
+    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
@@ -225,7 +218,7 @@ export default function LernenScreen() {
                 <Ionicons
                   name={isOpen ? 'chevron-up' : 'chevron-down'}
                   size={22}
-                  color={UNIT_HEADER_ON_RED}
+                  color={colors.buttonOnAccent}
                 />
               </Pressable>
 
@@ -268,7 +261,7 @@ export default function LernenScreen() {
                               <Ionicons
                                 name="lock-closed"
                                 size={18}
-                                color="#8E8E93"
+                                color={colors.iconMuted}
                               />
                             ) : (
                               <Text style={styles.chapterFrac}>
@@ -310,12 +303,13 @@ export default function LernenScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createLernenStyles(c: AppPalette) {
+  return StyleSheet.create({
   screen: {
     flex: 1,
   },
   header: {
-    backgroundColor: HEADER_DARK,
+    backgroundColor: c.headerBg,
     marginTop: 12,
     marginHorizontal: '3%',
     borderRadius: 16,
@@ -334,13 +328,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headerLine1: {
-    color: INACTIVE,
+    color: c.headerPrimaryText,
     fontSize: 26,
     fontWeight: '600',
     lineHeight: 32,
   },
   headerLine2: {
-    color: HEADER_TEXT_SUB,
+    color: c.headerSecondaryText,
     fontSize: 14,
     marginTop: 4,
     lineHeight: 20,
@@ -370,16 +364,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: UNIT_HEADER_RED,
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 18,
     paddingHorizontal: 20,
     ...Platform.select({
       android: { elevation: 2 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
+        shadowOpacity: c.scheme === 'dark' ? 0.3 : 0.08,
         shadowRadius: 3,
       },
     }),
@@ -388,7 +382,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '700',
-    color: UNIT_HEADER_ON_RED,
+    color: c.buttonOnAccent,
     marginRight: 12,
   },
   accordionBody: {
@@ -399,32 +393,32 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingVertical: 20,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    backgroundColor: c.categoryPillBg,
     borderRadius: 12,
   },
   accordionPlaceholder: {
     fontSize: 15,
-    color: HEADER_TEXT_SUB,
+    color: c.headerSecondaryText,
     textAlign: 'center',
   },
   chapterCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.scheme === 'dark' ? c.cardBg : '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     ...Platform.select({
       android: { elevation: 2 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
+        shadowOpacity: c.scheme === 'dark' ? 0.35 : 0.08,
         shadowRadius: 3,
       },
     }),
   },
   chapterCardLocked: {
     opacity: 0.92,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: c.elevatedSurface,
   },
   chapterCardTop: {
     flexDirection: 'row',
@@ -439,35 +433,35 @@ const styles = StyleSheet.create({
   chapterLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: c.iconMuted,
     marginBottom: 4,
     letterSpacing: 0.2,
   },
   chapterName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: c.textPrimary,
   },
   chapterFrac: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: c.iconMuted,
   },
   chapterLockedHint: {
     marginTop: 10,
     fontSize: 13,
-    color: '#8E8E93',
+    color: c.iconMuted,
     fontWeight: '500',
   },
   progressTrack: {
     height: 3,
     marginTop: 12,
     borderRadius: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: c.progressTrack,
     overflow: 'hidden',
   },
   progressFill: {
     height: 3,
-    backgroundColor: BRAND,
+    backgroundColor: c.accentBlue,
     borderRadius: 2,
   },
   chapterCheck: {
@@ -476,4 +470,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#2E7D32',
   },
-});
+  });
+}
+

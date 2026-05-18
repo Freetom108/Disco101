@@ -1,11 +1,5 @@
-export const HEADER_DARK = '#EDE9E3';
-export const CARD_BG = '#F5F0E8';
-export const ACTIVE = '#012169';
-export const INACTIVE = 'rgba(0,0,0,0.28)';
-export const SCREEN_BG = '#FFFFFF';
-export const BUTTON_TEXT = '#FFFFFF';
-export const BRAND = '#012169';
-export const HEADER_TEXT_SUB = 'rgba(0,0,0,0.38)';
-export const CARD_DE = 'rgba(0,0,0,0.45)';
-
+/** Nur noch Schriftart aus diesem Modul; Farben über `useAppTheme().colors`. */
 export const FONT_DM_SERIF = 'DMSerifDisplay';
+
+export type { AppPalette, ThemePreference } from './themePalettes';
+export { darkPalette, lightPalette } from './themePalettes';

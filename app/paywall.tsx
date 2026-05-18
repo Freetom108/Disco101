@@ -1,13 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
+import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Alert,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -17,15 +20,9 @@ import {
 } from 'react-native-safe-area-context';
 import type { ModuleCode } from '../constants/products';
 import { MODULE_PRODUCTS } from '../constants/products';
-import {
-  ACTIVE,
-  BUTTON_TEXT,
-  CARD_BG,
-  FONT_DM_SERIF,
-  SCREEN_BG,
-} from '../constants/theme';
-
-const PAYWALL_PRIMARY_RED = '#CF142B';
+import type { AppPalette } from '../constants/themePalettes';
+import { FONT_DM_SERIF } from '../constants/theme';
+import { useAppTheme } from '../context/AppThemeContext';
 
 const COMING_SOON_TITLE = 'Hinweis';
 const COMING_SOON_BODY =
@@ -44,6 +41,8 @@ function parseFocusModule(raw: unknown): ModuleCode | undefined {
 
 export default function PaywallScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createPaywallStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const params = useLocalSearchParams<{ focusModule?: string }>();
@@ -64,11 +63,11 @@ export default function PaywallScreen() {
   };
 
   if (!fontsLoaded) {
-    return <View style={[styles.root, { backgroundColor: SCREEN_BG }]} />;
+    return <View style={styles.root} />;
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: SCREEN_BG }]}>
+    <View style={styles.root}>
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <View
           style={[
@@ -87,7 +86,7 @@ export default function PaywallScreen() {
               pressed && { opacity: 0.75 },
             ]}
           >
-            <Ionicons name="close" size={28} color="#1A1A1A" />
+            <Ionicons name="close" size={28} color={colors.textPrimary} />
           </Pressable>
         </View>
 
@@ -195,28 +194,54 @@ export default function PaywallScreen() {
             </Text>
           </View>
 
-          <Pressable
+          <TouchableOpacity
+            style={styles.footerRestore}
+            activeOpacity={0.75}
             onPress={showPurchasePlaceholder}
-            style={({ pressed }) => [
-              styles.restoreLink,
-              pressed && { opacity: 0.75 },
-            ]}
             accessibilityRole="button"
             accessibilityLabel="Käufe wiederherstellen"
           >
-            <Text style={styles.restoreLinkText}>Käufe wiederherstellen</Text>
-          </Pressable>
+            <Text style={styles.footerRestoreText}>Käufe wiederherstellen</Text>
+          </TouchableOpacity>
 
-          <Text style={styles.footerLegal}>Datenschutz · AGB</Text>
+          <View style={styles.footerLinksRow}>
+            <TouchableOpacity
+              style={styles.footerLink}
+              activeOpacity={0.75}
+              accessibilityRole="link"
+              accessibilityLabel="Datenschutz"
+              onPress={() =>
+                void Linking.openURL(
+                  'https://freetom108.github.io/Disco101/datenschutz/',
+                )
+              }
+            >
+              <Text style={styles.footerLinkText}>Datenschutz</Text>
+            </TouchableOpacity>
+            <Text style={styles.footerDot}> · </Text>
+            <TouchableOpacity
+              style={styles.footerLink}
+              activeOpacity={0.75}
+              accessibilityRole="link"
+              accessibilityLabel="AGB"
+              onPress={() =>
+                void Linking.openURL('https://freetom108.github.io/Disco101/agb/')
+              }
+            >
+              <Text style={styles.footerLinkText}>AGB</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+function createPaywallStyles(c: AppPalette) {
+  return StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: c.screenBg,
   },
   safe: {
     flex: 1,
@@ -247,7 +272,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 34,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: c.textPrimary,
     textAlign: 'center',
   },
   infoBox: {
@@ -256,15 +281,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.055)',
+    backgroundColor: c.categoryPillBg,
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderColor: c.borderHairline,
   },
   infoBoxParagraph: {
     fontSize: 14,
     lineHeight: 21,
-    color: '#555555',
+    color: c.textSecondary,
     textAlign: 'left',
   },
   moduleGrid: {
@@ -274,17 +299,17 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   moduleTile: {
-    backgroundColor: CARD_BG,
+    backgroundColor: c.cardBg,
     borderRadius: 12,
     padding: 14,
     minHeight: 188,
     justifyContent: 'flex-start',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderColor: c.borderHairline,
     ...Platform.select({
       android: { elevation: 2 },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.06,
         shadowRadius: 3,
@@ -292,20 +317,20 @@ const styles = StyleSheet.create({
     }),
   },
   moduleTileHighlight: {
-    borderColor: ACTIVE,
+    borderColor: c.accentBlue,
     borderWidth: 2,
   },
   moduleTileBold: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: c.textPrimary,
     lineHeight: 19,
   },
   moduleTileMuted: {
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '500',
-    color: '#A0A0A0',
+    color: c.textMuted,
   },
   moduleTileMutedGap: {
     marginTop: 5,
@@ -330,12 +355,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 12,
     lineHeight: 16,
-    color: '#A0A0A0',
+    color: c.textMuted,
     textAlign: 'center',
   },
   bundleBtn: {
     alignSelf: 'stretch',
-    backgroundColor: PAYWALL_PRIMARY_RED,
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 18,
     paddingHorizontal: 16,
@@ -346,41 +371,57 @@ const styles = StyleSheet.create({
   bundleBtnText: {
     fontSize: 17,
     fontWeight: '700',
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     textAlign: 'center',
   },
   singleBtn: {
     alignSelf: 'stretch',
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: c.outlineButtonBg,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
+    borderColor: c.outlineButtonBorder,
   },
   singleBtnText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: c.textPrimary,
   },
-  restoreLink: {
+  footerRestore: {
     alignSelf: 'center',
     marginTop: 16,
     paddingVertical: 8,
   },
-  restoreLinkText: {
+  footerRestoreText: {
     fontSize: 15,
     fontWeight: '600',
-    color: ACTIVE,
+    color: c.accentBlue,
     textDecorationLine: 'underline',
-  },
-  footerLegal: {
-    marginTop: 12,
-    fontSize: 12,
-    lineHeight: 17,
-    color: '#A0A0A0',
     textAlign: 'center',
   },
+  footerLinksRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 12,
+    marginBottom: 32,
+  },
+  footerLink: {
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  footerLinkText: {
+    fontSize: 12,
+    color: c.accentBlue,
+    textDecorationLine: 'underline',
+  },
+  footerDot: {
+    fontSize: 12,
+    color: c.textMuted,
+  },
 });
+}

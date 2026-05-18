@@ -11,15 +11,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
-  ACTIVE,
-  BUTTON_TEXT,
-  CARD_BG,
-  CARD_DE,
-  FONT_DM_SERIF,
-  INACTIVE,
-  SCREEN_BG,
-} from '../constants/theme';
+import type { AppPalette } from '../constants/themePalettes';
+import { FONT_DM_SERIF } from '../constants/theme';
+import { useAppTheme } from '../context/AppThemeContext';
 import type { ModuleCode } from '../constants/products';
 import SpeakerButton from './SpeakerButton';
 import { preloadPhraseAudio } from '../utils/audioPreloader';
@@ -83,6 +77,9 @@ export default function PhraseCard({
   onBack,
   onNext,
 }: PhraseCardProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createPhraseCardStyles(colors), [colors]);
+
   const showChapterMenu = isChapterComplete;
   const isBackDisabled = false;
 
@@ -205,7 +202,7 @@ export default function PhraseCard({
               <Ionicons
                 name="pin"
                 size={20}
-                color={isPinned ? '#C8102E' : '#00247D'}
+                color={isPinned ? colors.accentRed : colors.phrasePinInactive}
               />
             </Pressable>
           ) : null}
@@ -365,7 +362,7 @@ export default function PhraseCard({
                   <Ionicons
                     name="arrow-up"
                     size={20}
-                    color="#FFFFFF"
+                    color={colors.buttonOnAccent}
                   />
                 </View>
               </Pressable>
@@ -399,7 +396,8 @@ export default function PhraseCard({
   );
 }
 
-const styles = StyleSheet.create({
+function createPhraseCardStyles(c: AppPalette) {
+  return StyleSheet.create({
   phraseCardOuter: {
     flex: 1,
     minHeight: 0,
@@ -408,7 +406,7 @@ const styles = StyleSheet.create({
   phraseCardShadow: {
     flex: 1,
     minHeight: 0,
-    backgroundColor: SCREEN_BG,
+    backgroundColor: c.screenBg,
     borderRadius: 28,
     marginHorizontal: '3%',
     marginVertical: 8,
@@ -417,7 +415,7 @@ const styles = StyleSheet.create({
         elevation: 12,
       },
       ios: {
-        shadowColor: '#000',
+        shadowColor: c.shadowColor,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
         shadowRadius: 20,
@@ -428,7 +426,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 28,
     overflow: 'hidden',
-    backgroundColor: CARD_BG,
+    backgroundColor: c.cardBg,
     padding: 20,
     justifyContent: 'space-between',
     position: 'relative',
@@ -447,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardChapter: {
-    color: INACTIVE,
+    color: c.textMeta,
     fontSize: 11,
     letterSpacing: 0.4,
   },
@@ -461,12 +459,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   cardGlobalLabel: {
-    color: 'rgba(0, 0, 0, 0.55)',
+    color: c.textSecondary,
     fontSize: 12,
     fontWeight: '500',
   },
   cardGlobalValue: {
-    color: ACTIVE,
+    color: c.accentBlue,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -474,12 +472,12 @@ const styles = StyleSheet.create({
     height: 4,
     marginTop: 8,
     borderRadius: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.12)',
+    backgroundColor: c.progressTrack,
     overflow: 'hidden',
   },
   cardProgressFill: {
     height: 4,
-    backgroundColor: ACTIVE,
+    backgroundColor: c.accentBlue,
     borderRadius: 2,
   },
   cardMid: {
@@ -508,24 +506,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardBigNum: {
-    color: ACTIVE,
+    color: c.accentBlue,
     fontSize: 56,
     fontWeight: '700',
     lineHeight: 60,
   },
   cardNumHint: {
-    color: CARD_DE,
+    color: c.textSecondary,
     fontSize: 15,
     marginBottom: 8,
   },
   cardEnglish: {
-    color: '#1A1A1A',
+    color: c.textPrimary,
     fontSize: 26,
     lineHeight: 34,
     marginTop: 12,
   },
   cardGerman: {
-    color: '#999999',
+    color: c.textSecondary,
     fontSize: 16,
     lineHeight: 24,
     marginTop: 8,
@@ -538,10 +536,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 100,
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: c.categoryPillBg,
   },
   categoryPillText: {
-    color: '#1A1A1A',
+    color: c.textPrimary,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -569,7 +567,7 @@ const styles = StyleSheet.create({
   },
   cardBackBelowText: {
     fontSize: 13,
-    color: '#888888',
+    color: c.textMuted,
     fontWeight: '500',
     textAlign: 'center',
   },
@@ -579,14 +577,14 @@ const styles = StyleSheet.create({
   cardNext: {
     alignSelf: 'stretch',
     width: '100%',
-    backgroundColor: '#C8102E',
+    backgroundColor: c.accentRed,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   cardNextText: {
-    color: '#FFFFFF',
+    color: c.buttonOnAccent,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -595,14 +593,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chapterMenuTitle: {
-    color: ACTIVE,
+    color: c.accentBlue,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: '600',
     textAlign: 'center',
   },
   chapterMenuSubtitle: {
-    color: INACTIVE,
+    color: c.textMeta,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -614,28 +612,28 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   chapterMenuBtnPrimary: {
-    backgroundColor: ACTIVE,
+    backgroundColor: c.accentBlue,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   chapterMenuBtnPrimaryText: {
-    color: BUTTON_TEXT,
+    color: c.buttonOnAccent,
     fontSize: 16,
     fontWeight: '600',
   },
   chapterMenuBtnOutline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: INACTIVE,
+    borderColor: c.borderHairline,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   chapterMenuBtnOutlineText: {
-    color: INACTIVE,
+    color: c.textMeta,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -647,9 +645,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chapterMenuBtnGhostText: {
-    color: INACTIVE,
+    color: c.textMeta,
     fontSize: 16,
     fontWeight: '500',
     opacity: 0.7,
   },
-});
+  });
+}
+

@@ -4,7 +4,7 @@ import {
   useAudioPlayer,
 } from 'expo-audio';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { AppPalette } from '../constants/themePalettes';
 import {
   AUDIO_REPEAT_KEY,
@@ -34,7 +34,7 @@ type SpeakerButtonProps = {
   phraseId: number;
   /** Defaults to Unit 1 — pass active learning module for bundled phrase assets. */
   moduleCode?: ModuleCode;
-  avatarSource?: any;
+  avatarSource?: ImageSourcePropType;
 };
 
 export default function SpeakerButton({

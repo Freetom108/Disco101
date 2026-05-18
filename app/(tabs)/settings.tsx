@@ -34,7 +34,13 @@ import {
 
 const SECTION_LABEL = '#888';
 
-const SPEED_OPTIONS: AudioSpeedStored[] = ['0.9', '1.0', '1.1'];
+const SPEED_OPTIONS: AudioSpeedStored[] = ['0.7', '0.8', '0.9'];
+/** Nur UI-Text; gespeicherte Werte / audioSpeedToRate bleiben 0.7 / 0.8 / 0.9 */
+const SPEED_DISPLAY_LABELS: Record<AudioSpeedStored, string> = {
+  '0.7': '0.9x',
+  '0.8': '1.0x',
+  '0.9': '1.1x',
+};
 const REPEAT_OPTIONS: AudioRepeatStored[] = ['1', '2'];
 
 type FaqAccordionItem = {
@@ -182,7 +188,7 @@ export default function SettingsScreen() {
             <View style={styles.segmentRow}>
               {SPEED_OPTIONS.map((v) => {
                 const active = audioSpeed === v;
-                const label = v === '1.0' ? '1.0x' : `${v}x`;
+                const label = SPEED_DISPLAY_LABELS[v];
                 return (
                   <Pressable
                     key={v}

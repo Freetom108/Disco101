@@ -110,7 +110,7 @@ export default function OnboardingScreen() {
 
   const goToSlide = useCallback(
     (index: number) => {
-      const clamped = Math.min(3, Math.max(0, index));
+      const clamped = Math.min(2, Math.max(0, index));
       const h = pagerViewportH > 0 ? pagerViewportH : pageHeightFallback;
       scrollRef.current?.scrollTo({
         y: clamped * h,
@@ -127,7 +127,7 @@ export default function OnboardingScreen() {
       const h = pagerViewportH > 0 ? pagerViewportH : pageHeightFallback;
       if (h <= 0) return;
       const idx = Math.round(y / h);
-      setSlideIndex(Math.min(3, Math.max(0, idx)));
+      setSlideIndex(Math.min(2, Math.max(0, idx)));
     },
     [pageHeightFallback, pagerViewportH],
   );
@@ -142,7 +142,7 @@ export default function OnboardingScreen() {
   }, [pagerViewportH]);
 
   const onWeiter = () => {
-    if (slideIndex < 3) goToSlide(slideIndex + 1);
+    if (slideIndex < 2) goToSlide(slideIndex + 1);
   };
 
   const onLos = async () => {
@@ -176,7 +176,7 @@ export default function OnboardingScreen() {
             keyboardShouldPersistTaps="handled"
             bounces={false}
           >
-          <View style={[styles.slide, { width, height: pageH }]}>
+          <View style={[styles.slide, styles.slideWhite, { width, height: pageH }]}>
             <View style={styles.slide1Wrap}>
               <Image
                 source={require('../assets/images/disco-ball.png')}
@@ -272,21 +272,22 @@ export default function OnboardingScreen() {
                 {STRINGS.onboardingSlide2Title}
               </Text>
               <View style={styles.list}>
-                {[STRINGS.onboardingSlide2Item1, STRINGS.onboardingSlide2Item2, STRINGS.onboardingSlide2Item3].map(
-                  (line, idx, arr) => {
-                    const { emoji, body } = splitOnboardingBullet(line);
-                    const isLast = idx === arr.length - 1;
-                    return (
-                      <View
-                        key={idx}
-                        style={[styles.bulletCard, isLast && styles.bulletCardLast]}
-                      >
-                        <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
-                        <Text style={styles.bulletText}>{body}</Text>
-                      </View>
-                    );
-                  },
-                )}
+                {[
+                  'Auf jeder Übungskarte erscheint eine englische Redewendung mit der deutschen Übersetzung darunter',
+                  'Hör dir bei Chris oder Ann die richtige Aussprache an und wiederhole den Satz so oft du möchtest',
+                  'Karten die du noch nicht sicher kennst markierst du einfach mit der blauen Stecknadel und sie wandern in den Repeat-Stapel',
+                  'Im Learn Tab siehst du deinen Fortschritt und kannst jederzeit in ein Kapitel deiner Wahl einsteigen',
+                ].map((line, idx, arr) => {
+                  const isLast = idx === arr.length - 1;
+                  return (
+                    <View
+                      key={idx}
+                      style={[styles.bulletCard, isLast && styles.bulletCardLast]}
+                    >
+                      <Text style={styles.bulletText}>{line}</Text>
+                    </View>
+                  );
+                })}
               </View>
               </View>
             </ScrollView>
@@ -312,62 +313,42 @@ export default function OnboardingScreen() {
               </Text>
               <View style={styles.list}>
                 {[
-                  STRINGS.onboardingSlide3Item1,
-                  STRINGS.onboardingSlide3Item2,
-                  STRINGS.onboardingSlide3Item3,
-                  STRINGS.onboardingSlide3Item4,
-                ].map((line, idx, arr) => {
-                  const { emoji, body } = splitOnboardingBullet(line);
+                  { plain: true as const, text: 'Jeder Test stellt dir 8 zufällige Aufgaben aus dem Kapitel' },
+                  {
+                    plain: false as const,
+                    line: '· 🎧 Test 1: Chris oder Ann lesen dir einen Satz vor – erkenne ihn unter drei englischen Optionen',
+                  },
+                  {
+                    plain: false as const,
+                    line: '· 🇩🇪 Test 2: Chris oder Ann lesen dir einen Satz vor – finde die richtige Bedeutung',
+                  },
+                  {
+                    plain: true as const,
+                    text: 'Falsch beantwortete Karten wandern automatisch in den Repeat-Stapel',
+                  },
+                ].map((item, idx, arr) => {
                   const isLast = idx === arr.length - 1;
-                  return (
-                    <View
-                      key={idx}
-                      style={[styles.bulletCard, isLast && styles.bulletCardLast]}
-                    >
-                      <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
-                      <Text style={styles.bulletText}>{body}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-            </ScrollView>
-          </View>
-          <View style={[styles.slide, styles.slideWhite, { width, height: pageH }]}>
-            <ScrollView
-              style={styles.slideBodyScroll}
-              contentContainerStyle={styles.slideBodyScrollContent}
-              nestedScrollEnabled
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              bounces={false}
-            >
-              <View style={styles.slideInnerCentered}>
-              <Text
-                style={[
-                  styles.titleSection,
-                  styles.titleSectionSpaced,
-                  { fontFamily: FONT_DM_SERIF },
-                ]}
-              >
-                {STRINGS.onboardingSlide4Title}
-              </Text>
-              <View style={styles.list}>
-                {[STRINGS.onboardingSlide4Item1, STRINGS.onboardingSlide4Item2, STRINGS.onboardingSlide4Item3].map(
-                  (line, idx, arr) => {
-                    const { emoji, body } = splitOnboardingBullet(line);
-                    const isLast = idx === arr.length - 1;
+                  if (item.plain) {
                     return (
                       <View
                         key={idx}
                         style={[styles.bulletCard, isLast && styles.bulletCardLast]}
                       >
-                        <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
-                        <Text style={styles.bulletText}>{body}</Text>
+                        <Text style={styles.bulletText}>{item.text}</Text>
                       </View>
                     );
-                  },
-                )}
+                  }
+                  const { emoji, body } = splitOnboardingBullet(item.line);
+                  return (
+                    <View
+                      key={idx}
+                      style={[styles.bulletCard, isLast && styles.bulletCardLast]}
+                    >
+                      <Text style={styles.bulletEmoji}>{emoji}</Text>
+                      <Text style={styles.bulletText}>{body}</Text>
+                    </View>
+                  );
+                })}
               </View>
             </View>
             </ScrollView>
@@ -378,14 +359,14 @@ export default function OnboardingScreen() {
           style={[styles.footerFixed, { paddingBottom: Math.max(insets.bottom, 12) }]}
         >
           <View style={styles.dotsRow}>
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2].map((i) => (
               <View
                 key={i}
                 style={[styles.dot, i === slideIndex && styles.dotActive]}
               />
             ))}
           </View>
-          {slideIndex < 3 ? (
+          {slideIndex < 2 ? (
             <Pressable
               onPress={onWeiter}
               style={({ pressed }) => [
@@ -401,13 +382,17 @@ export default function OnboardingScreen() {
             <Pressable
               onPress={onLos}
               style={({ pressed }) => [
-                styles.btnPrimary,
-                pressed && { opacity: 0.92 },
+                styles.btnGhost,
+                pressed && { opacity: 0.85 },
               ]}
               accessibilityRole="button"
               accessibilityLabel={STRINGS.onboardingLosA11y}
             >
-              <Text style={styles.btnPrimaryText}>{STRINGS.onboardingLos}</Text>
+              <Text
+                style={[styles.btnGhostText, styles.btnLosLinkText]}
+              >
+                {STRINGS.onboardingLos}
+              </Text>
             </Pressable>
           )}
         </View>
@@ -441,16 +426,16 @@ function createOnboardingStyles(c: AppPalette) {
     overflow: 'hidden',
   },
   slideWhite: {
-    backgroundColor: c.cardBg,
+    backgroundColor: c.screenBg,
   },
   slideBodyScroll: {
     flex: 1,
-    backgroundColor: c.cardBg,
+    backgroundColor: c.screenBg,
   },
   slideBodyScrollContent: {
     flexGrow: 1,
     paddingBottom: 24,
-    backgroundColor: c.cardBg,
+    backgroundColor: c.screenBg,
   },
   slide1Wrap: {
     flex: 1,
@@ -458,11 +443,6 @@ function createOnboardingStyles(c: AppPalette) {
     alignItems: 'center',
     paddingHorizontal: '3%',
     paddingBottom: 12,
-  },
-  slide1Logo: {
-    width: 140,
-    height: 140,
-    marginBottom: 16,
   },
   practiceCard: {
     alignSelf: 'stretch',
@@ -540,7 +520,7 @@ function createOnboardingStyles(c: AppPalette) {
     paddingHorizontal: 24,
     width: '100%',
     justifyContent: 'center',
-    backgroundColor: c.cardBg,
+    backgroundColor: c.screenBg,
   },
   /** Slide 2: avoid vertically-centered clipping — pin content below safe/header zone */
   slideInnerLearn: {
@@ -561,17 +541,8 @@ function createOnboardingStyles(c: AppPalette) {
   list: {
     width: '100%',
   },
-  listItem: {
-    color: c.textSecondary,
-    fontSize: 18,
-    lineHeight: 26,
-    marginBottom: 32,
-  },
-  listItemLast: {
-    marginBottom: 0,
-  },
   bulletCard: {
-    backgroundColor: c.screenBg,
+    backgroundColor: c.cardBg,
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -634,18 +605,9 @@ function createOnboardingStyles(c: AppPalette) {
     fontSize: 18,
     fontWeight: '600',
   },
-  btnPrimary: {
-    backgroundColor: c.accentRed,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginHorizontal: 24,
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  btnPrimaryText: {
-    color: c.buttonOnAccent,
-    fontSize: 18,
-    fontWeight: '600',
+  btnLosLinkText: {
+    color: '#CF142B',
+    fontWeight: '700',
   },
 });
 }

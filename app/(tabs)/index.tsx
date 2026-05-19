@@ -441,26 +441,26 @@ export default function HomeScreen() {
   );
 
   const mergeWrongIntoPinned = useCallback(
-    async (wrongIds: number[]) => {
-      try {
-        const toAdd = wrongIds.filter((wid) => {
-          const m = sentences.find((p) => p.id === wid);
-          return (
-            m != null &&
-            !isChapterLockedWithoutPurchase(
+    (wrongIds: number[]) => {
+      setPinnedIds((prev) => {
+        const next = [...prev];
+        for (const wid of wrongIds) {
+          const meta = sentences.find((p) => p.id === wid);
+          if (
+            meta &&
+            isChapterLockedWithoutPurchase(
               learningModule,
-              m.chapterId,
+              meta.chapterId,
               purchaseState,
             )
-          );
-        });
-        const existing = await loadPinnedIdsForModule(learningModule);
-        const merged = Array.from(new Set([...existing, ...toAdd]));
-        setPinnedIds(merged);
-        await persistPinnedIdsForModule(learningModule, merged);
-      } catch {
-        /* ignore */
-      }
+          ) {
+            continue;
+          }
+          if (!next.includes(wid)) next.push(wid);
+        }
+        void persistPinnedIdsForModule(learningModule, next);
+        return next;
+      });
     },
     [purchaseState, learningModule, sentences],
   );

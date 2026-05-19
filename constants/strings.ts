@@ -192,13 +192,6 @@ export const STRINGS = {
     '· ⚡ Jeder Test stellt dir 8 zufällige Aufgaben aus dem Kapitel – bei Wiederholung bekommst du andere Fragen',
   onboardingSlide3Item4:
     '· 🔄 Falsch beantwortete Karten landen automatisch im Repeat-Stapel damit du sie jederzeit üben kannst bis sie sitzen',
-  onboardingSlide4Title: 'Dein Lernplan',
-  onboardingSlide4Item1:
-    '· 📚 Im Learn Tab siehst du deinen Fortschritt und kannst jederzeit in jedes Kapitel einsteigen',
-  onboardingSlide4Item2:
-    '· ⚙️ In Settings kannst du Geschwindigkeit und Anzahl der Wiederholungen der Stimmen anpassen',
-  onboardingSlide4Item3:
-    '· 💡 Alles jederzeit in Settings nachlesen',
   onboardingWeiter: 'Weiter ↑',
   onboardingWeiterA11y: 'Weiter',
   onboardingLos: "Los geht's ↑",

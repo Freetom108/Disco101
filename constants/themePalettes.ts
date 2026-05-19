@@ -19,6 +19,7 @@ export type AppPalette = {
   tabActive: string;
   tabInactive: string;
   borderHairline: string;
+  borderSubtle: string;
   progressTrack: string;
   elevatedSurface: string;
   categoryPillBg: string;
@@ -60,6 +61,7 @@ export function lightPalette(): AppPalette {
     tabActive: '#00247D',
     tabInactive: 'rgba(0,0,0,0.28)',
     borderHairline: '#C6C6C8',
+    borderSubtle: '#F0EDE8',
     progressTrack: 'rgba(0, 0, 0, 0.12)',
     elevatedSurface: '#F2F2F7',
     categoryPillBg: 'rgba(0, 0, 0, 0.06)',
@@ -85,8 +87,8 @@ export function lightPalette(): AppPalette {
 export function darkPalette(): AppPalette {
   return {
     scheme: 'dark',
-    screenBg: '#121212',
-    cardBg: '#1E1E1E',
+    screenBg: '#1C1C1E',
+    cardBg: '#2C2C2E',
     headerBg: '#1B2B6B',
     tabBarBg: '#1E1E1E',
     groupBg: '#1E1E1E',
@@ -102,6 +104,7 @@ export function darkPalette(): AppPalette {
     tabActive: '#CF142B',
     tabInactive: 'rgba(255,255,255,0.45)',
     borderHairline: 'rgba(255,255,255,0.14)',
+    borderSubtle: 'rgba(255,255,255,0.12)',
     progressTrack: 'rgba(255,255,255,0.18)',
     elevatedSurface: '#252525',
     categoryPillBg: 'rgba(255,255,255,0.08)',

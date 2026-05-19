@@ -185,7 +185,7 @@ export default function SettingsScreen() {
   }, []);
 
   return (
-    <View style={[styles.screen, { backgroundColor: '#F7F5F2' }]}>
+    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
@@ -590,7 +590,7 @@ function createSettingsStyles(c: AppPalette) {
     fontWeight: '600',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: '#AAAAAA',
+    color: c.textMuted,
     marginBottom: 12,
     marginTop: 36,
   },
@@ -599,16 +599,16 @@ function createSettingsStyles(c: AppPalette) {
     fontWeight: '600',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: '#AAAAAA',
+    color: c.textMuted,
     marginBottom: 12,
     marginTop: 0,
   },
   group: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.cardBg,
     borderRadius: 14,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: c.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.07,
     shadowRadius: 3,
@@ -656,7 +656,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   playbackDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#F0EDE8',
+    backgroundColor: c.borderSubtle,
     marginHorizontal: 16,
   },
   row: {
@@ -667,7 +667,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F0EDE8',
+    borderBottomColor: c.borderSubtle,
   },
   rowLabel: {
     flex: 1,
@@ -691,7 +691,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   faqAnswerBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F0EDE8',
+    borderBottomColor: c.borderSubtle,
   },
   faqUpgradeBtn: {
     marginTop: 14,

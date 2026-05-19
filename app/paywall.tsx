@@ -227,7 +227,7 @@ function createPaywallStyles(c: AppPalette) {
   return StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#F7F5F2',
+    backgroundColor: c.screenBg,
   },
   safe: {
     flex: 1,
@@ -268,13 +268,13 @@ function createPaywallStyles(c: AppPalette) {
     marginBottom: 28,
   },
   moduleTile: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.cardBg,
     borderRadius: 14,
     padding: 14,
     minHeight: 188,
     justifyContent: 'flex-start',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: c.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.07,
     shadowRadius: 3,

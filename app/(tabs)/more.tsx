@@ -49,7 +49,7 @@ export default function MoreScreen() {
   const styles = useMemo(() => createMoreStyles(colors), [colors]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: '#F7F5F2' }]}>
+    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
@@ -166,12 +166,12 @@ function createMoreStyles(c: AppPalette) {
       paddingHorizontal: '3%',
     },
     tile: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: c.cardBg,
       borderRadius: 14,
       marginBottom: 12,
       padding: 16,
       elevation: 2,
-      shadowColor: '#000',
+      shadowColor: c.shadowColor,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.07,
       shadowRadius: 3,
@@ -185,7 +185,7 @@ function createMoreStyles(c: AppPalette) {
       color: c.textPrimary,
       marginBottom: 8,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: '#F0EDE8',
+      borderBottomColor: c.borderSubtle,
       paddingBottom: 8,
     },
     tileBody: {
@@ -193,7 +193,7 @@ function createMoreStyles(c: AppPalette) {
       lineHeight: 22,
       color: c.textSecondary,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: '#F0EDE8',
+      borderBottomColor: c.borderSubtle,
       paddingBottom: 14,
     },
     unlockBtn: {

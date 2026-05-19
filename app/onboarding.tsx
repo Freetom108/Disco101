@@ -39,6 +39,13 @@ const ONBOARDING_KEY = 'onboarding_done';
 /** Space reserved for dots + primary/ghost button + padding (fixed bottom bar). */
 const FOOTER_ZONE = 140;
 
+/** Split onboarding bullet strings (`· <emoji> <body>`) without altering wording. */
+function splitOnboardingBullet(line: string): { emoji: string; body: string } {
+  const m = line.match(/^·\s+(\S+)\s+(.*)$/s);
+  if (!m) return { emoji: '', body: line };
+  return { emoji: m[1], body: m[2] };
+}
+
 export default function OnboardingScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
@@ -181,7 +188,7 @@ export default function OnboardingScreen() {
                   fontSize: 13,
                   fontWeight: '600',
                   letterSpacing: 3,
-                  color: '#999999',
+                  color: colors.textMuted,
                   textAlign: 'center',
                   marginTop: 6,
                 }}
@@ -245,7 +252,7 @@ export default function OnboardingScreen() {
               </View>
             </View>
           </View>
-          <View style={[styles.slide, { width, height: pageH }]}>
+          <View style={[styles.slide, styles.slideWhite, { width, height: pageH }]}>
             <ScrollView
               style={styles.slideBodyScroll}
               contentContainerStyle={styles.slideBodyScrollContent}
@@ -265,20 +272,26 @@ export default function OnboardingScreen() {
                 {STRINGS.onboardingSlide2Title}
               </Text>
               <View style={styles.list}>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide2Item1}
-                </Text>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide2Item2}
-                </Text>
-                <Text style={[styles.listItem, styles.listItemLast]}>
-                  {STRINGS.onboardingSlide2Item3}
-                </Text>
+                {[STRINGS.onboardingSlide2Item1, STRINGS.onboardingSlide2Item2, STRINGS.onboardingSlide2Item3].map(
+                  (line, idx, arr) => {
+                    const { emoji, body } = splitOnboardingBullet(line);
+                    const isLast = idx === arr.length - 1;
+                    return (
+                      <View
+                        key={idx}
+                        style={[styles.bulletCard, isLast && styles.bulletCardLast]}
+                      >
+                        <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
+                        <Text style={styles.bulletText}>{body}</Text>
+                      </View>
+                    );
+                  },
+                )}
               </View>
               </View>
             </ScrollView>
           </View>
-          <View style={[styles.slide, { width, height: pageH }]}>
+          <View style={[styles.slide, styles.slideWhite, { width, height: pageH }]}>
             <ScrollView
               style={styles.slideBodyScroll}
               contentContainerStyle={styles.slideBodyScrollContent}
@@ -298,23 +311,29 @@ export default function OnboardingScreen() {
                 {STRINGS.onboardingSlide3Title}
               </Text>
               <View style={styles.list}>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide3Item1}
-                </Text>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide3Item2}
-                </Text>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide3Item3}
-                </Text>
-                <Text style={[styles.listItem, styles.listItemLast]}>
-                  {STRINGS.onboardingSlide3Item4}
-                </Text>
+                {[
+                  STRINGS.onboardingSlide3Item1,
+                  STRINGS.onboardingSlide3Item2,
+                  STRINGS.onboardingSlide3Item3,
+                  STRINGS.onboardingSlide3Item4,
+                ].map((line, idx, arr) => {
+                  const { emoji, body } = splitOnboardingBullet(line);
+                  const isLast = idx === arr.length - 1;
+                  return (
+                    <View
+                      key={idx}
+                      style={[styles.bulletCard, isLast && styles.bulletCardLast]}
+                    >
+                      <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
+                      <Text style={styles.bulletText}>{body}</Text>
+                    </View>
+                  );
+                })}
               </View>
             </View>
             </ScrollView>
           </View>
-          <View style={[styles.slide, { width, height: pageH }]}>
+          <View style={[styles.slide, styles.slideWhite, { width, height: pageH }]}>
             <ScrollView
               style={styles.slideBodyScroll}
               contentContainerStyle={styles.slideBodyScrollContent}
@@ -334,15 +353,21 @@ export default function OnboardingScreen() {
                 {STRINGS.onboardingSlide4Title}
               </Text>
               <View style={styles.list}>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide4Item1}
-                </Text>
-                <Text style={styles.listItem}>
-                  {STRINGS.onboardingSlide4Item2}
-                </Text>
-                <Text style={[styles.listItem, styles.listItemLast]}>
-                  {STRINGS.onboardingSlide4Item3}
-                </Text>
+                {[STRINGS.onboardingSlide4Item1, STRINGS.onboardingSlide4Item2, STRINGS.onboardingSlide4Item3].map(
+                  (line, idx, arr) => {
+                    const { emoji, body } = splitOnboardingBullet(line);
+                    const isLast = idx === arr.length - 1;
+                    return (
+                      <View
+                        key={idx}
+                        style={[styles.bulletCard, isLast && styles.bulletCardLast]}
+                      >
+                        <Text style={styles.bulletEmoji}>{'\u00B7 '}{emoji}</Text>
+                        <Text style={styles.bulletText}>{body}</Text>
+                      </View>
+                    );
+                  },
+                )}
               </View>
             </View>
             </ScrollView>
@@ -415,12 +440,17 @@ function createOnboardingStyles(c: AppPalette) {
     minHeight: 200,
     overflow: 'hidden',
   },
+  slideWhite: {
+    backgroundColor: c.cardBg,
+  },
   slideBodyScroll: {
     flex: 1,
+    backgroundColor: c.cardBg,
   },
   slideBodyScrollContent: {
     flexGrow: 1,
     paddingBottom: 24,
+    backgroundColor: c.cardBg,
   },
   slide1Wrap: {
     flex: 1,
@@ -510,6 +540,7 @@ function createOnboardingStyles(c: AppPalette) {
     paddingHorizontal: 24,
     width: '100%',
     justifyContent: 'center',
+    backgroundColor: c.cardBg,
   },
   /** Slide 2: avoid vertically-centered clipping — pin content below safe/header zone */
   slideInnerLearn: {
@@ -538,6 +569,28 @@ function createOnboardingStyles(c: AppPalette) {
   },
   listItemLast: {
     marginBottom: 0,
+  },
+  bulletCard: {
+    backgroundColor: c.screenBg,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  bulletCardLast: {
+    marginBottom: 0,
+  },
+  bulletEmoji: {
+    fontSize: 22,
+    lineHeight: 26,
+  },
+  bulletText: {
+    flex: 1,
+    color: c.textSecondary,
+    fontSize: 18,
+    lineHeight: 26,
   },
   footerFixed: {
     position: 'absolute',

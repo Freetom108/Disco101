@@ -198,10 +198,10 @@ export default function RepeatOverviewScreen() {
             <View style={styles.pinnedEmptyWrap}>
               <Ionicons name="pin" size={40} color={colors.iconMuted} />
               <Text style={styles.pinnedEmptyTitle}>
-                {STRINGS.repeatEmptyTitle}
+                Noch keine Karten zum Üben
               </Text>
               <Text style={styles.pinnedEmptySubtext}>
-                {STRINGS.repeatEmptySubtext}
+                Tippe die Stecknadel auf einer Übungskarte um sie hier zu speichern — oder mach einen Test und falsch beantwortete Karten landen automatisch hier zum Üben.
               </Text>
             </View>
           ) : (

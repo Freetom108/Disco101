@@ -324,7 +324,7 @@ export default function OnboardingScreen() {
                   },
                   {
                     plain: true as const,
-                    text: 'Falsch beantwortete Karten wandern automatisch in den Repeat-Stapel',
+                    text: 'Falsch beantwortete Karten wandern automatisch zum Üben in den Repeat-Stapel',
                   },
                 ].map((item, idx, arr) => {
                   const isLast = idx === arr.length - 1;

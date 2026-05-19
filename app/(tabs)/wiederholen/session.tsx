@@ -249,9 +249,6 @@ export default function RepeatSessionScreen() {
   const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
     INITIAL_MODULE_PURCHASE_STATE,
   );
-  const [sitztConfirmedPhraseIds, setSitztConfirmedPhraseIds] = useState<
-    number[]
-  >([]);
   const [showStackCompleteNote, setShowStackCompleteNote] = useState(false);
   const [initFailed, setInitFailed] = useState(false);
   const [showQuizOptions, setShowQuizOptions] = useState(false);
@@ -268,10 +265,17 @@ export default function RepeatSessionScreen() {
   const sessionTestPlaybackPlayer = useAudioPlayer(null, {
     updateInterval: 100,
   });
+  const correctAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   useEffect(() => {
     return () => {
       isReleasedRef.current = true;
+      if (correctAdvanceTimerRef.current) {
+        clearTimeout(correctAdvanceTimerRef.current);
+        correctAdvanceTimerRef.current = null;
+      }
       try {
         safePlayerPause(sitztFxPlayer);
       } catch {
@@ -354,7 +358,6 @@ export default function RepeatSessionScreen() {
         return;
       }
       setRepeatSession({ phrases: shufflePhrases(phrases), index: 0 });
-      setSitztConfirmedPhraseIds([]);
       setShowStackCompleteNote(false);
       setShowQuizOptions(false);
       setQuizOptions([]);
@@ -403,10 +406,6 @@ export default function RepeatSessionScreen() {
     isReleasedRef.current = false;
   }, [sessionIndex]);
 
-  const sitztDoneForCurrent =
-    currentPhrase != null &&
-    sitztConfirmedPhraseIds.includes(currentPhrase.id);
-
   const chapterPhrasesPool = useMemo(() => {
     if (!currentPhrase) return [];
     return sentencesPack.filter(
@@ -415,6 +414,10 @@ export default function RepeatSessionScreen() {
   }, [currentPhrase, sentencesPack]);
 
   useEffect(() => {
+    if (correctAdvanceTimerRef.current) {
+      clearTimeout(correctAdvanceTimerRef.current);
+      correctAdvanceTimerRef.current = null;
+    }
     try {
       if (isReleasedRef.current) return;
       safePlayerPause(sessionTestPlaybackPlayer);
@@ -439,6 +442,9 @@ export default function RepeatSessionScreen() {
       setAnswerLocked(true);
       setSelectedOptionId(optionPhraseId);
       const isCorrect = optionPhraseId === currentPhrase.id;
+      const phraseId = currentPhrase.id;
+      const stackSizeBefore = sessionPhrases.length;
+
       if (isCorrect) {
         void (async () => {
           try {
@@ -472,6 +478,74 @@ export default function RepeatSessionScreen() {
             }
           }
         })();
+
+        if (correctAdvanceTimerRef.current) {
+          clearTimeout(correctAdvanceTimerRef.current);
+        }
+        correctAdvanceTimerRef.current = setTimeout(() => {
+          correctAdvanceTimerRef.current = null;
+
+          setPinnedIds((prev) => {
+            const next = prev.filter((x) => x !== phraseId);
+            void persistPinnedIdsForModule(sessionModule, next);
+            return next;
+          });
+
+          const celebrateComplete = stackSizeBefore === 1;
+
+          setRepeatSession((prev) => {
+            if (!prev) return prev;
+            const { phrases, index } = prev;
+            if (!phrases.some((p) => p.id === phraseId)) return prev;
+
+            const newPhrases = phrases.filter((p) => p.id !== phraseId);
+            if (newPhrases.length === 0) {
+              return { phrases: [], index: 0 };
+            }
+            const removedAt = phrases.findIndex((p) => p.id === phraseId);
+            let newIndex = index;
+            if (removedAt < index) newIndex = index - 1;
+            else if (removedAt === index)
+              newIndex = Math.min(index, Math.max(0, newPhrases.length - 1));
+            newIndex = Math.max(0, Math.min(newIndex, newPhrases.length - 1));
+            return { phrases: newPhrases, index: newIndex };
+          });
+
+          if (celebrateComplete) {
+            void (async () => {
+              try {
+                await Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+              } catch {
+                /* ignore */
+              }
+              try {
+                if (isReleasedRef.current) return;
+                const tadaSrc = audioAssets['tada'];
+                if (!tadaSrc) throw new Error('missing asset');
+                await setAudioModeAsync({
+                  playsInSilentMode: true,
+                  allowsRecording: false,
+                  interruptionMode: 'duckOthers',
+                  shouldPlayInBackground: false,
+                  shouldRouteThroughEarpiece: false,
+                });
+                if (isReleasedRef.current) return;
+                safePlayerReplace(celebrationPlayer, tadaSrc);
+                if (isReleasedRef.current) return;
+                safePlayerPlay(celebrationPlayer);
+              } catch {
+                try {
+                  if (isReleasedRef.current) return;
+                  safePlayerPause(celebrationPlayer);
+                } catch {
+                  /* ignore */
+                }
+              }
+            })();
+          }
+        }, 1000);
       } else {
         void (async () => {
           try {
@@ -484,7 +558,14 @@ export default function RepeatSessionScreen() {
         })();
       }
     },
-    [answerLocked, currentPhrase, sitztFxPlayer],
+    [
+      answerLocked,
+      celebrationPlayer,
+      currentPhrase,
+      sessionPhrases.length,
+      sessionModule,
+      sitztFxPlayer,
+    ],
   );
 
   const goBack = () => router.back();
@@ -520,58 +601,11 @@ export default function RepeatSessionScreen() {
     setRepeatSession({ phrases: newPhrases, index: newIndex });
   };
 
-  const onSitzt = async () => {
-    if (!repeatSession || !currentPhrase) return;
-    if (
-      !answerLocked ||
-      selectedOptionId !== currentPhrase.id ||
-      sitztDoneForCurrent
-    ) {
-      return;
-    }
-    const id = currentPhrase.id;
-    const isLastCard = sessionPhrases.length === 1;
-
-    const newPinned = pinnedIds.filter((x) => x !== id);
-    await persistPinned(newPinned);
-    setSitztConfirmedPhraseIds((prev) => [...prev, id]);
-
-    if (!isLastCard) return;
-
-    setShowStackCompleteNote(true);
-    try {
-      await Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success,
-      );
-    } catch {
-      /* ignore */
-    }
-    try {
-      if (isReleasedRef.current) return;
-      const tadaSrc = audioAssets['tada'];
-      if (!tadaSrc) throw new Error('missing asset');
-      await setAudioModeAsync({
-        playsInSilentMode: true,
-        allowsRecording: false,
-        interruptionMode: 'duckOthers',
-        shouldPlayInBackground: false,
-        shouldRouteThroughEarpiece: false,
-      });
-      if (isReleasedRef.current) return;
-      safePlayerReplace(celebrationPlayer, tadaSrc);
-      if (isReleasedRef.current) return;
-      safePlayerPlay(celebrationPlayer);
-    } catch {
-      try {
-        if (isReleasedRef.current) return;
-        safePlayerPause(celebrationPlayer);
-      } catch {
-        /* ignore */
-      }
-    }
-  };
-
   const onNaechste = () => {
+    if (correctAdvanceTimerRef.current) {
+      clearTimeout(correctAdvanceTimerRef.current);
+      correctAdvanceTimerRef.current = null;
+    }
     setShowStackCompleteNote(false);
     setShowQuizOptions(false);
     setQuizOptions([]);
@@ -585,23 +619,6 @@ export default function RepeatSessionScreen() {
     }
     if (!repeatSession || !currentPhrase) return;
     const { phrases, index } = repeatSession;
-    const id = currentPhrase.id;
-
-    if (sitztConfirmedPhraseIds.includes(id)) {
-      const newPhrases = phrases.filter((p) => p.id !== id);
-      if (newPhrases.length === 0) {
-        setRepeatSession({ phrases: [], index: 0 });
-        return;
-      }
-      const removedAt = phrases.findIndex((p) => p.id === id);
-      let newIndex = index;
-      if (removedAt < index) newIndex = index - 1;
-      else if (removedAt === index)
-        newIndex = Math.min(index, Math.max(0, newPhrases.length - 1));
-      newIndex = Math.max(0, Math.min(newIndex, newPhrases.length - 1));
-      setRepeatSession({ phrases: newPhrases, index: newIndex });
-      return;
-    }
 
     if (index < phrases.length - 1) {
       setRepeatSession({ phrases, index: index + 1 });
@@ -836,71 +853,28 @@ export default function RepeatSessionScreen() {
                           );
                         })}
                       </View>
-                      {answerLocked ? (
+                      {answerLocked &&
+                      selectedOptionId !== currentPhrase.id ? (
                         <View
                           style={[
                             styles.sessionFooterRow,
                             styles.sessionQuizFooterPinned,
                           ]}
                         >
-                          {selectedOptionId === currentPhrase.id ? (
-                            <>
-                              <Pressable
-                                onPress={() => void onSitzt()}
-                                disabled={sitztDoneForCurrent}
-                                style={({ pressed }) => [
-                                  styles.sitztBtn,
-                                  sitztDoneForCurrent && styles.sitztBtnDone,
-                                  pressed &&
-                                    !sitztDoneForCurrent && {
-                                      opacity: 0.85,
-                                    },
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel={STRINGS.sitztA11y}
-                              >
-                                <Text
-                                  style={[
-                                    styles.sitztBtnText,
-                                    sitztDoneForCurrent &&
-                                      styles.sitztBtnTextDone,
-                                  ]}
-                                >
-                                  {sitztDoneForCurrent
-                                    ? STRINGS.sitztDoneLabel
-                                    : STRINGS.sitztLabel}
-                                </Text>
-                              </Pressable>
-                              <Pressable
-                                onPress={onNaechste}
-                                style={({ pressed }) => [
-                                  styles.naechsteBtn,
-                                  pressed && { opacity: 0.92 },
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel={STRINGS.nextCardA11y}
-                              >
-                                <Text style={styles.naechsteBtnText}>
-                                  {STRINGS.nextArrow}
-                                </Text>
-                              </Pressable>
-                            </>
-                          ) : (
-                            <Pressable
-                              onPress={onNaechste}
-                              style={({ pressed }) => [
-                                styles.naechsteBtn,
-                                styles.naechsteBtnFullWidth,
-                                pressed && { opacity: 0.92 },
-                              ]}
-                              accessibilityRole="button"
-                              accessibilityLabel={STRINGS.nextCardA11y}
-                            >
-                              <Text style={styles.naechsteBtnText}>
-                                {STRINGS.nextArrow}
-                              </Text>
-                            </Pressable>
-                          )}
+                          <Pressable
+                            onPress={onNaechste}
+                            style={({ pressed }) => [
+                              styles.naechsteBtn,
+                              styles.naechsteBtnFullWidth,
+                              pressed && { opacity: 0.92 },
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={STRINGS.nextCardA11y}
+                          >
+                            <Text style={styles.naechsteBtnText}>
+                              {STRINGS.nextArrow}
+                            </Text>
+                          </Pressable>
                         </View>
                       ) : null}
                     </View>
@@ -1178,27 +1152,6 @@ function createRepeatSessionStyles(c: AppPalette) {
   },
   sessionQuizFooterPinned: {
     marginTop: 'auto',
-  },
-  sitztBtn: {
-    borderWidth: 2,
-    borderColor: '#2E7D32',
-    borderRadius: 12,
-    padding: 14,
-    backgroundColor: 'transparent',
-  },
-  sitztBtnDone: {
-    borderColor: '#1B5E20',
-    borderWidth: 2,
-    backgroundColor: '#2E7D32',
-  },
-  sitztBtnText: {
-    color: '#2E7D32',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  sitztBtnTextDone: {
-    color: '#FFFFFF',
-    fontWeight: '700',
   },
   naechsteBtn: {
     flex: 1,

@@ -5,7 +5,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Alert,
   Linking,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -101,12 +100,6 @@ export default function PaywallScreen() {
           <View style={styles.hero}>
             <Text style={[styles.title, { fontFamily: FONT_DM_SERIF }]}>
               {STRINGS.paywallHeroTitle}
-            </Text>
-          </View>
-
-          <View style={styles.infoBox}>
-            <Text style={styles.infoBoxParagraph}>
-              {STRINGS.paywallInfoParagraph}
             </Text>
           </View>
 
@@ -234,7 +227,7 @@ function createPaywallStyles(c: AppPalette) {
   return StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: c.screenBg,
+    backgroundColor: '#F7F5F2',
   },
   safe: {
     flex: 1,
@@ -254,12 +247,12 @@ function createPaywallStyles(c: AppPalette) {
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 4,
+    paddingTop: 16,
   },
   hero: {
     alignItems: 'center',
     marginTop: -4,
-    marginBottom: 0,
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -268,23 +261,6 @@ function createPaywallStyles(c: AppPalette) {
     color: c.textPrimary,
     textAlign: 'center',
   },
-  infoBox: {
-    alignSelf: 'stretch',
-    marginTop: 14,
-    marginBottom: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    backgroundColor: c.categoryPillBg,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: c.borderHairline,
-  },
-  infoBoxParagraph: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: c.textSecondary,
-    textAlign: 'left',
-  },
   moduleGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -292,22 +268,16 @@ function createPaywallStyles(c: AppPalette) {
     marginBottom: 28,
   },
   moduleTile: {
-    backgroundColor: c.cardBg,
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     padding: 14,
     minHeight: 188,
     justifyContent: 'flex-start',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: c.borderHairline,
-    ...Platform.select({
-      android: { elevation: 2 },
-      ios: {
-        shadowColor: c.shadowColor,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 3,
-      },
-    }),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
   },
   moduleTileHighlight: {
     borderColor: c.accentBlue,

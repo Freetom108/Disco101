@@ -78,7 +78,7 @@ export default function TabLayout() {
           title: STRINGS.tabMore,
           tabBarLabel: STRINGS.tabMore,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="lock-closed-outline" size={size} color={color} />
+            <Ionicons name="lock-open-outline" size={size} color={color} />
           ),
         }}
       />

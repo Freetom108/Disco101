@@ -1,4 +1,4 @@
-import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -49,7 +49,7 @@ export default function MoreScreen() {
   const styles = useMemo(() => createMoreStyles(colors), [colors]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
+    <View style={[styles.screen, { backgroundColor: '#F7F5F2' }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
@@ -76,7 +76,16 @@ export default function MoreScreen() {
       >
         {MODULE_TILES.map((m) => (
           <View key={m.code} style={styles.tile}>
-            <Text style={styles.tileTitle}>{m.title}</Text>
+            <Text style={styles.tileTitle}>
+              {m.title.startsWith('🔒')
+                ? [
+                    <Text key="lock" style={styles.tileTitleLockEmoji}>
+                      🔓
+                    </Text>,
+                    <Text key="rest">{m.title.slice('🔒'.length)}</Text>,
+                  ]
+                : m.title}
+            </Text>
             <Text style={styles.tileBody}>{m.body}</Text>
             <Pressable
               onPress={() => {
@@ -157,32 +166,35 @@ function createMoreStyles(c: AppPalette) {
       paddingHorizontal: '3%',
     },
     tile: {
-      backgroundColor: c.cardBg,
-      borderRadius: 12,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 14,
       marginBottom: 12,
       padding: 16,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.chapterTileBorder,
-      ...Platform.select({
-        android: { elevation: 2 },
-        ios: {
-          shadowColor: c.shadowColor,
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: c.scheme === 'dark' ? 0.25 : 0.06,
-          shadowRadius: 3,
-        },
-      }),
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.07,
+      shadowRadius: 3,
+    },
+    tileTitleLockEmoji: {
+      color: '#CF142B',
     },
     tileTitle: {
       fontSize: 17,
       fontWeight: '600',
       color: c.textPrimary,
       marginBottom: 8,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: '#F0EDE8',
+      paddingBottom: 8,
     },
     tileBody: {
       fontSize: 15,
       lineHeight: 22,
       color: c.textSecondary,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: '#F0EDE8',
+      paddingBottom: 14,
     },
     unlockBtn: {
       marginTop: 14,

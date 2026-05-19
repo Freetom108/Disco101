@@ -8,7 +8,6 @@ import {
   Alert,
   Image,
   Linking,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -193,7 +192,7 @@ export default function SettingsScreen() {
   }, []);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
+    <View style={[styles.screen, { backgroundColor: '#F7F5F2' }]}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
@@ -218,19 +217,9 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionLabelFirst}>{STRINGS.settingsSectionAbout}</Text>
-        <View style={styles.group}>
-          <View style={styles.aboutRow}>
-            <Text style={styles.aboutText}>
-              {STRINGS.settingsAboutParagraph}
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.sectionLabel}>{STRINGS.settingsSectionDisplay}</Text>
+        <Text style={styles.sectionLabelFirst}>{STRINGS.settingsSectionDisplay}</Text>
         <View style={styles.group}>
           <View style={styles.playbackBlock}>
-            <Text style={styles.playbackLabel}>{STRINGS.settingsAppearanceLabel}</Text>
             <View style={styles.segmentRow}>
               {DISPLAY_OPTIONS.map(({ value, label }) => {
                 const active = preference === value;
@@ -606,32 +595,32 @@ function createSettingsStyles(c: AppPalette) {
     paddingHorizontal: '3%',
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    color: c.textMuted,
-    marginBottom: 4,
-    marginTop: 20,
+    color: '#AAAAAA',
+    marginBottom: 12,
+    marginTop: 36,
   },
   sectionLabelFirst: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    color: c.textMuted,
-    marginBottom: 4,
+    color: '#AAAAAA',
+    marginBottom: 12,
     marginTop: 0,
   },
   group: {
-    backgroundColor: c.groupBg,
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     overflow: 'hidden',
-    ...Platform.select({
-      android: { elevation: 2 },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
-      },
-    }),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
   },
   playbackBlock: {
     padding: 16,
@@ -676,7 +665,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   playbackDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: c.borderHairline,
+    backgroundColor: '#F0EDE8',
     marginHorizontal: 16,
   },
   row: {
@@ -687,7 +676,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.borderHairline,
+    borderBottomColor: '#F0EDE8',
   },
   rowLabel: {
     flex: 1,
@@ -698,9 +687,6 @@ function createSettingsStyles(c: AppPalette) {
   rowValue: {
     fontSize: 16,
     color: c.iconMuted,
-  },
-  aboutRow: {
-    padding: 16,
   },
   aboutText: {
     fontSize: 15,
@@ -714,7 +700,7 @@ function createSettingsStyles(c: AppPalette) {
   },
   faqAnswerBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.borderHairline,
+    borderBottomColor: '#F0EDE8',
   },
   faqUpgradeBtn: {
     marginTop: 14,

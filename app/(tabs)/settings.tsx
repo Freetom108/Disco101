@@ -49,7 +49,6 @@ type FaqAccordionItem = {
   id: string;
   question: string;
   answer: string;
-  upgradeCta?: boolean;
 };
 
 const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
@@ -82,12 +81,6 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
     id: 'restore',
     question: STRINGS.faqRestoreQuestion,
     answer: STRINGS.faqRestoreAnswer,
-  },
-  {
-    id: 'upgrade_options',
-    question: STRINGS.faqUpgradeQuestion,
-    answer: STRINGS.faqUpgradeAnswer,
-    upgradeCta: true,
   },
 ];
 
@@ -363,7 +356,7 @@ export default function SettingsScreen() {
                   <View
                     style={[
                       styles.row,
-                      !open && !isLast && styles.rowBorder,
+                      !open && styles.rowBorder,
                     ]}
                   >
                     <Text style={styles.rowLabel} numberOfLines={3}>
@@ -387,26 +380,24 @@ export default function SettingsScreen() {
                     ]}
                   >
                     <Text style={styles.aboutText}>{item.answer}</Text>
-                    {item.upgradeCta ? (
-                      <Pressable
-                        onPress={() => router.push('/paywall')}
-                        style={({ pressed }) => [
-                          styles.faqUpgradeBtn,
-                          pressed && { opacity: 0.92 },
-                        ]}
-                        accessibilityRole="button"
-                        accessibilityLabel={STRINGS.upgradeViewCtaA11y}
-                      >
-                        <Text style={styles.faqUpgradeBtnText}>
-                          {STRINGS.upgradeViewCta}
-                        </Text>
-                      </Pressable>
-                    ) : null}
                   </View>
                 ) : null}
               </View>
             );
           })}
+          <Pressable
+            onPress={() => router.push('/paywall')}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Units freischalten"
+          >
+            <View style={styles.row}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                Units freischalten
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
+            </View>
+          </Pressable>
         </View>
 
         <Text style={styles.sectionLabel}>{STRINGS.settingsSectionSupport}</Text>

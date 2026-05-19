@@ -172,10 +172,22 @@ export default function OnboardingScreen() {
           <View style={[styles.slide, { width, height: pageH }]}>
             <View style={styles.slide1Wrap}>
               <Image
-                source={require('../assets/images/logo.png')}
-                style={styles.slide1Logo}
+                source={require('../assets/images/disco-ball.png')}
+                style={{ width: 80, height: 80 }}
                 resizeMode="contain"
               />
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: '600',
+                  letterSpacing: 3,
+                  color: '#999999',
+                  textAlign: 'center',
+                  marginTop: 6,
+                }}
+              >
+                DISCO 101
+              </Text>
               <View style={styles.practiceCard}>
                 <Text
                   style={[styles.slide1English, { fontFamily: FONT_DM_SERIF }]}
@@ -415,7 +427,7 @@ function createOnboardingStyles(c: AppPalette) {
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: '3%',
-    paddingVertical: 12,
+    paddingBottom: 12,
   },
   slide1Logo: {
     width: 140,
@@ -428,6 +440,7 @@ function createOnboardingStyles(c: AppPalette) {
     borderRadius: 28,
     padding: 20,
     overflow: 'hidden',
+    marginTop: 24,
     ...Platform.select({
       android: {
         elevation: 12,

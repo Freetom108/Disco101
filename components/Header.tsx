@@ -1,32 +1,47 @@
-import { STRINGS } from '../constants/strings';
+import type { ModuleCode } from '../constants/products';
 import type { AppPalette } from '../constants/themePalettes';
 import { useAppTheme } from '../context/AppThemeContext';
 import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+function unitNumberFromModuleCode(code: ModuleCode): number {
+  switch (code) {
+    case '101':
+      return 1;
+    case '102':
+      return 2;
+    case '103':
+      return 3;
+    case '104':
+      return 4;
+    default:
+      return 1;
+  }
+}
+
 type HeaderProps = {
-  /** z. B. „Unit 1 Basics“ – aus aktiver Lern-Unit */
-  subtitle: string;
+  moduleCode: ModuleCode;
+  chapterNumber: number;
 };
 
-export default function Header({ subtitle }: HeaderProps) {
+export default function Header({ moduleCode, chapterNumber }: HeaderProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const unitN = unitNumberFromModuleCode(moduleCode);
+  const contextLine = `Let's learn · Unit ${unitN} · Kapitel ${chapterNumber}`;
 
   return (
     <View style={styles.header}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerTextCol}>
-          <Text style={styles.headerLine1}>{STRINGS.headerHelloLetsLearn}</Text>
-          <Text style={styles.headerLine2}>{subtitle}</Text>
-        </View>
+      <View style={styles.headerBrandBlock}>
         <View style={styles.headerLogoMask}>
           <Image
-            source={require('../assets/images/logo.png')}
+            source={require('../assets/images/disco-ball.png')}
             style={styles.headerLogo}
             resizeMode="contain"
           />
         </View>
+        <Text style={styles.headerBrand}>DISCO 101</Text>
+        <Text style={styles.headerContext}>{contextLine}</Text>
       </View>
     </View>
   );
@@ -40,34 +55,31 @@ function createStyles(c: AppPalette) {
       marginHorizontal: '3%',
       borderRadius: 16,
       overflow: 'hidden',
-      paddingTop: 50,
-      paddingBottom: 14,
+      paddingTop: 14,
+      paddingBottom: 12,
       paddingHorizontal: 20,
     },
-    headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
+    headerBrandBlock: {
+      alignItems: 'center',
+      alignSelf: 'stretch',
     },
-    headerTextCol: {
-      flex: 1,
-      marginRight: 10,
-    },
-    headerLine1: {
-      color: c.headerPrimaryText,
-      fontSize: 26,
+    headerBrand: {
+      fontSize: 11,
       fontWeight: '600',
-      lineHeight: 32,
-    },
-    headerLine2: {
-      color: c.headerSecondaryText,
-      fontSize: 14,
+      letterSpacing: 3,
+      color: '#999999',
+      textAlign: 'center',
       marginTop: 4,
-      lineHeight: 20,
+    },
+    headerContext: {
+      fontSize: 13,
+      color: '#666666',
+      marginTop: 4,
+      textAlign: 'center',
     },
     headerLogoMask: {
-      width: 88,
-      height: 88,
+      width: 44,
+      height: 44,
       flexShrink: 0,
     },
     headerLogo: {

@@ -43,7 +43,6 @@ import {
   safePlayerReplace,
   safePlayerSetPlaybackRate,
 } from '../../utils/safeAudioPlayer';
-import { titleForModule } from '../../constants/activeLearningModule';
 import {
   applyChapterProgressUpdatesAsync,
   LAST_POSITION_KEY,
@@ -220,9 +219,6 @@ export default function HomeScreen() {
   );
   const [learningModule, setLearningModule] = useState<ModuleCode>('101');
   const [bootReady, setBootReady] = useState(false);
-  const [homeHeaderSubtitle, setHomeHeaderSubtitle] = useState(() =>
-    titleForModule('101'),
-  );
   const [showTestSelection, setShowTestSelection] = useState(false);
 
   const sentences = useMemo(
@@ -410,7 +406,6 @@ export default function HomeScreen() {
           setLearningModule(module);
           setPinnedIds(await loadPinnedIdsForModule(module));
           void loadModulePurchaseState().then(setPurchaseState);
-          setHomeHeaderSubtitle(titleForModule(module));
           const maxInCh = pack.filter((p) => p.chapterId === chapterId).length;
           const clampedIdx =
             pack.length === 0
@@ -419,7 +414,6 @@ export default function HomeScreen() {
           setCurrentChapter(chapterId);
           setCurrentIndex(clampedIdx);
         } catch {
-          setHomeHeaderSubtitle(titleForModule('101'));
         } finally {
           setBootReady(true);
         }
@@ -689,7 +683,7 @@ export default function HomeScreen() {
   if (sentences.length === 0) {
     return (
       <View style={[styles.home, { backgroundColor: colors.screenBg }]}>
-        <Header subtitle={homeHeaderSubtitle} />
+        <Header moduleCode={learningModule} chapterNumber={currentChapter} />
         <View style={[styles.homeBody, styles.homeEmptyPack]}>
           <Text style={styles.homeEmptyPackText}>
             {STRINGS.homeEmptyPack}
@@ -701,7 +695,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.home, { backgroundColor: colors.screenBg }]}>
-      <Header subtitle={homeHeaderSubtitle} />
+      <Header moduleCode={learningModule} chapterNumber={currentChapter} />
       <View style={styles.homeBody}>
         {showTestSelection ? (
           <View style={styles.testSelectionOuter}>

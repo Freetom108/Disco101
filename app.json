@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "Disco 101 Einfach Englisch Lernen",
+    "slug": "disco101-de-en",
     "version": "1.0.0",
     "scheme": "disco101",
     "orientation": "portrait",

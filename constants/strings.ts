@@ -35,7 +35,7 @@ export const STRINGS = {
   paywallCloseA11y: 'Schließen',
   paywallHeroTitle: 'Alles auf einen Blick',
   paywallInfoParagraph:
-    'Disco 101 ist dein idealer Sprachtrainer für die wichtigsten englischen Redewendungen – egal ob Alltag, Urlaub, Beruf oder Leben im Ausland.',
+    'Disco 101 Einfach Englisch Lernen ist dein idealer Sprachtrainer für die wichtigsten englischen Redewendungen – egal ob Alltag, Urlaub, Beruf oder Leben im Ausland.',
   paywallTilePhrasesCount: '101 Phrasen',
   paywallTileChaptersCount: '7 Kapitel',
   paywallTileChapterOneFree: 'Kapitel 1 gratis',
@@ -209,7 +209,7 @@ export const STRINGS = {
   settingsSubtitle: 'Disco 101 · Deutsch-Englisch',
   settingsSectionAbout: 'Über die App',
   settingsAboutParagraph:
-    'Disco 101 ist dein idealer Sprachtrainer für die wichtigsten englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben im Ausland.',
+    'Disco 101 Einfach Englisch Lernen ist dein idealer Sprachtrainer für die wichtigsten englischen Redewendungen – egal ob Alltag, Urlaub, Job oder Leben im Ausland.',
   settingsSectionDisplay: 'Display',
   settingsAppearanceLabel: 'Erscheinungsbild',
   displayLight: 'Hell',

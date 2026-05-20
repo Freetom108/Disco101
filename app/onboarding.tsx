@@ -195,6 +195,17 @@ export default function OnboardingScreen() {
               >
                 DISCO 101
               </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: '#999999',
+                  textAlign: 'center',
+                  fontWeight: '400',
+                  marginTop: 4,
+                }}
+              >
+                Einfach Englisch lernen
+              </Text>
               <View style={styles.practiceCard}>
                 <Text
                   style={[styles.slide1English, { fontFamily: FONT_DM_SERIF }]}

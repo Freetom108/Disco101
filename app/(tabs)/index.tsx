@@ -29,6 +29,7 @@ import {
 import Header from '../../components/Header';
 import PhraseCard from '../../components/PhraseCard';
 import {
+  preloadFirstPhrasesOfCurrentChapter,
   preloadPhraseAudio,
 } from '../../utils/audioPreloader';
 import type { AppPalette } from '../../constants/themePalettes';
@@ -434,6 +435,12 @@ export default function HomeScreen() {
   );
   const chCount = chPhrases.length;
   const categoryTitle = chPhrases[0]?.category ?? `${STRINGS.chapterWord} ${currentChapter}`;
+
+  useEffect(() => {
+    if (!bootReady) return;
+    if (chPhrases.length === 0) return;
+    preloadFirstPhrasesOfCurrentChapter(chPhrases, learningModule);
+  }, [bootReady, learningModule, currentChapter, chPhrases]);
 
   const phrasesBefore = useMemo(
     () => sentences.filter((p) => p.chapterId < currentChapter).length,

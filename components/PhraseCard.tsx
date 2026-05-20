@@ -165,15 +165,15 @@ export default function PhraseCard({
         onMoveShouldSetPanResponder: (_, g) => {
           if (!swipeGesturesEnabled) return false;
           const { dx, dy } = g;
-          return Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 14;
+          return Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12;
         },
         onPanResponderTerminationRequest: () => false,
         onPanResponderRelease: (_, g) => {
           if (!swipeGesturesEnabled) return;
           const { dy, vy } = g;
-          if (dy < -56 || vy < -0.35) {
+          if (dy < -48 || vy < -0.3) {
             runAnimatedNext();
-          } else if (dy > 56 || vy > 0.35) {
+          } else if (dy > 48 || vy > 0.3) {
             runAnimatedBack();
           }
         },

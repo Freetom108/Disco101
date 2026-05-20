@@ -27,8 +27,9 @@ type HeaderProps = {
 export default function Header({ moduleCode, chapterNumber }: HeaderProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const subtitle = 'Einfach Englisch lernen';
   const unitN = unitNumberFromModuleCode(moduleCode);
-  const contextLine = `Let's learn · Unit ${unitN} · Kapitel ${chapterNumber}`;
+  const learnLine = `Unit ${unitN} · Kapitel ${chapterNumber}`;
 
   return (
     <View style={styles.header}>
@@ -41,7 +42,8 @@ export default function Header({ moduleCode, chapterNumber }: HeaderProps) {
           />
         </View>
         <Text style={styles.headerBrand}>DISCO 101</Text>
-        <Text style={styles.headerContext}>{contextLine}</Text>
+        <Text style={styles.headerContext}>{subtitle}</Text>
+        <Text style={styles.headerLearnLine}>{learnLine}</Text>
       </View>
     </View>
   );
@@ -73,9 +75,17 @@ function createStyles(c: AppPalette) {
     },
     headerContext: {
       fontSize: 13,
-      color: '#666666',
+      color: c.textMuted,
+      fontWeight: '400',
       marginTop: 4,
       textAlign: 'center',
+    },
+    headerLearnLine: {
+      fontSize: 13,
+      color: c.textMuted,
+      fontWeight: '400',
+      textAlign: 'center',
+      marginTop: 4,
     },
     headerLogoMask: {
       width: 44,

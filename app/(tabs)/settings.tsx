@@ -25,8 +25,14 @@ import {
   parseAudioRepeat,
   parseAudioSpeed,
 } from '../../constants/audioSettingsStorage';
+import type { ModuleCode } from '../../constants/products';
 import type { AppPalette } from '../../constants/themePalettes';
-import { restorePurchases } from '../../constants/chapterUnlock';
+import {
+  INITIAL_MODULE_PURCHASE_STATE,
+  loadModulePurchaseState,
+  restorePurchases,
+  type ModulePurchaseState,
+} from '../../constants/chapterUnlock';
 import { STRINGS } from '../../constants/strings';
 import { useAppTheme } from '../../context/AppThemeContext';
 
@@ -84,6 +90,16 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
   },
 ];
 
+const MODULE_CODES_ORDER: ModuleCode[] = ['101', '102', '103', '104'];
+
+function purchaseStatusLabel(state: ModulePurchaseState): string {
+  if (state.allUnitsUnlocked) return 'Alle Units';
+  const unlocked = MODULE_CODES_ORDER.filter((m) => state.units[m]);
+  if (unlocked.length >= 4) return 'Alle Units';
+  if (unlocked.length === 0) return 'Gratis';
+  return `Unit ${unlocked.map((m) => m.slice(-1)).join(' · ')}`;
+}
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -97,10 +113,18 @@ export default function SettingsScreen() {
     DEFAULT_AUDIO_REPEAT,
   );
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
+  const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
+    INITIAL_MODULE_PURCHASE_STATE,
+  );
 
   const toggleFaq = useCallback((id: string) => {
     setFaqOpenId((prev) => (prev === id ? null : id));
   }, []);
+
+  const purchaseStatusText = useMemo(
+    () => purchaseStatusLabel(purchaseState),
+    [purchaseState],
+  );
 
   const loadAudioSettings = useCallback(async () => {
     try {
@@ -119,6 +143,7 @@ export default function SettingsScreen() {
   useFocusEffect(
     useCallback(() => {
       void loadAudioSettings();
+      void loadModulePurchaseState().then(setPurchaseState);
     }, [loadAudioSettings]),
   );
 
@@ -190,7 +215,7 @@ export default function SettingsScreen() {
         <View style={styles.headerRow}>
           <View style={styles.headerTextCol}>
             <Text style={styles.headerLine1}>{STRINGS.settingsTitle}</Text>
-            <Text style={styles.headerLine2}>{STRINGS.settingsSubtitle}</Text>
+            <Text style={styles.headerLine2}>Einstellungen</Text>
           </View>
           <View style={styles.headerLogoMask}>
             <Image
@@ -341,6 +366,19 @@ export default function SettingsScreen() {
               <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
             </View>
           </Pressable>
+          <Pressable
+            onPress={() => Alert.alert('Video kommt in Kürze!')}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="App-Erklärung ansehen"
+          >
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                App-Erklärung ansehen
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
+            </View>
+          </Pressable>
           {FAQ_ACCORDION_ITEMS.map((item, index) => {
             const open = faqOpenId === item.id;
             const isLast = index === FAQ_ACCORDION_ITEMS.length - 1;
@@ -469,6 +507,7 @@ export default function SettingsScreen() {
         <View style={styles.group}>
           <Row sx={styles} label={STRINGS.appInfoVersion} value={version} />
           <Row sx={styles} label={STRINGS.appInfoLanguage} value={STRINGS.appInfoLanguageValue} />
+          <Row sx={styles} label="Status" value={purchaseStatusText} />
           <Pressable
             onPress={handleRestorePurchases}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}

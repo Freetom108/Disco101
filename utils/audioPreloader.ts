@@ -27,6 +27,20 @@ export function preloadPhraseAudio(
   }
 }
 
+/** Warm the first `maxCount` phrases of the current chapter (both voices) before any tap — reduces first-play glitches. */
+export function preloadFirstPhrasesOfCurrentChapter(
+  phrasesInChapterSorted: readonly { id: number }[],
+  moduleCode: ModuleCode,
+  maxCount = 5,
+): void {
+  const ids = phrasesInChapterSorted
+    .slice(0, maxCount)
+    .map((p) => p.id)
+    .filter((id) => typeof id === 'number' && id > 0);
+  if (ids.length === 0) return;
+  preloadPhraseAudio(ids, moduleCode);
+}
+
 export function getPreloadedSource(
   phraseId: number,
   voice: 'm' | 'f',

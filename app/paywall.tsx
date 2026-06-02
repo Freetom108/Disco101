@@ -23,9 +23,76 @@ import type { AppPalette } from '../constants/themePalettes';
 import { STRINGS } from '../constants/strings';
 import { FONT_DM_SERIF } from '../constants/theme';
 import { useAppTheme } from '../context/AppThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Purchases from 'react-native-purchases';
+import {
+  PURCHASE_ALL_UNITS,
+  PURCHASE_UNIT_1,
+  PURCHASE_UNIT_2,
+  PURCHASE_UNIT_3,
+  PURCHASE_UNIT_4,
+} from '../constants/chapterUnlock';
 
-function showPurchasePlaceholder() {
-  Alert.alert(STRINGS.paywallComingSoonTitle, STRINGS.paywallComingSoonBody);
+async function purchaseProduct(productId: string, router: ReturnType<typeof useRouter>) {
+  try {
+    const offerings = await Purchases.getOfferings();
+    const allPackages = offerings.current?.availablePackages ?? [];
+    const pkg = allPackages.find((p) => p.product.identifier === productId);
+    if (!pkg) {
+      Alert.alert('Fehler', 'Produkt nicht gefunden.');
+      return;
+    }
+    const { customerInfo } = await Purchases.purchasePackage(pkg);
+    const entitlements = customerInfo.entitlements.active;
+    const pairs: [string, string][] = [];
+    if (entitlements['all_units']) {
+      pairs.push([PURCHASE_ALL_UNITS, 'true']);
+      pairs.push([PURCHASE_UNIT_1, 'true']);
+      pairs.push([PURCHASE_UNIT_2, 'true']);
+      pairs.push([PURCHASE_UNIT_3, 'true']);
+      pairs.push([PURCHASE_UNIT_4, 'true']);
+    } else {
+      if (entitlements['unit_1']) pairs.push([PURCHASE_UNIT_1, 'true']);
+      if (entitlements['unit_2']) pairs.push([PURCHASE_UNIT_2, 'true']);
+      if (entitlements['unit_3']) pairs.push([PURCHASE_UNIT_3, 'true']);
+      if (entitlements['unit_4']) pairs.push([PURCHASE_UNIT_4, 'true']);
+    }
+    if (pairs.length > 0) await AsyncStorage.multiSet(pairs);
+    if (router.canGoBack()) router.back();
+    else router.replace('/(tabs)');
+  } catch (e: any) {
+    if (e?.code !== 'PURCHASE_CANCELLED') {
+      Alert.alert('Fehler', 'Kauf fehlgeschlagen. Bitte versuche es erneut.');
+    }
+  }
+}
+
+async function restoreFromPaywall() {
+  try {
+    const customerInfo = await Purchases.restorePurchases();
+    const entitlements = customerInfo.entitlements.active;
+    const pairs: [string, string][] = [];
+    if (entitlements['all_units']) {
+      pairs.push([PURCHASE_ALL_UNITS, 'true']);
+      pairs.push([PURCHASE_UNIT_1, 'true']);
+      pairs.push([PURCHASE_UNIT_2, 'true']);
+      pairs.push([PURCHASE_UNIT_3, 'true']);
+      pairs.push([PURCHASE_UNIT_4, 'true']);
+    } else {
+      if (entitlements['unit_1']) pairs.push([PURCHASE_UNIT_1, 'true']);
+      if (entitlements['unit_2']) pairs.push([PURCHASE_UNIT_2, 'true']);
+      if (entitlements['unit_3']) pairs.push([PURCHASE_UNIT_3, 'true']);
+      if (entitlements['unit_4']) pairs.push([PURCHASE_UNIT_4, 'true']);
+    }
+    if (pairs.length > 0) {
+      await AsyncStorage.multiSet(pairs);
+      Alert.alert('Käufe wiederhergestellt', 'Deine Käufe wurden erfolgreich wiederhergestellt.');
+    } else {
+      Alert.alert('Keine Käufe gefunden', 'Es wurden keine früheren Käufe gefunden.');
+    }
+  } catch {
+    Alert.alert('Fehler', 'Wiederherstellung fehlgeschlagen.');
+  }
 }
 
 function parseFocusModule(raw: unknown): ModuleCode | undefined {
@@ -109,7 +176,7 @@ export default function PaywallScreen() {
               return (
                 <Pressable
                   key={m.code}
-                  onPress={showPurchasePlaceholder}
+                  onPress={() => void purchaseProduct(m.productId, router)}
                   style={({ pressed }) => [
                     styles.moduleTile,
                     {
@@ -150,7 +217,7 @@ export default function PaywallScreen() {
 
           <View style={styles.ctaSection}>
             <Pressable
-              onPress={showPurchasePlaceholder}
+              onPress={() => void purchaseProduct(focusModule ? `purchase_unit_${focusModule.slice(-1)}` : 'purchase_unit_1', router)}
               style={({ pressed }) => [
                 styles.singleBtn,
                 pressed && { opacity: 0.9 },
@@ -167,7 +234,7 @@ export default function PaywallScreen() {
 
           <View style={[styles.ctaSection, styles.ctaSectionBelow]}>
             <Pressable
-              onPress={showPurchasePlaceholder}
+              onPress={() => void purchaseProduct('purchase_all_units', router)}
               style={({ pressed }) => [
                 styles.bundleBtn,
                 pressed && { opacity: 0.92 },
@@ -185,7 +252,7 @@ export default function PaywallScreen() {
           <TouchableOpacity
             style={styles.footerRestore}
             activeOpacity={0.75}
-            onPress={showPurchasePlaceholder}
+            onPress={() => void restoreFromPaywall()}
             accessibilityRole="button"
             accessibilityLabel={STRINGS.restorePurchases}
           >

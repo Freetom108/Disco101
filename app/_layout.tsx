@@ -3,10 +3,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 import {
   AppThemeProvider,
   useAppTheme,
 } from '../context/AppThemeContext';
+import Purchases from 'react-native-purchases';
 
 const ONBOARDING_KEY = 'onboarding_done';
 
@@ -43,6 +45,14 @@ function RootGate() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    const apiKey =
+      Platform.OS === 'ios'
+        ? 'appl_sLmZLIxRasTzJfDGuVcKSCcKCqc'
+        : 'goog_TsByQhkEIZIRrsjgeHeFONyembn';
+    Purchases.configure({ apiKey });
+  }, []);
+
   return (
     <SafeAreaProvider>
       <AppThemeProvider>

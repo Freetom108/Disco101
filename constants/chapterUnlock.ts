@@ -39,7 +39,7 @@ export const INITIAL_MODULE_PURCHASE_STATE: ModulePurchaseState = {
  * Vor Store-Launch zwingend auf `false` setzen und die echte Logik in
  * `isChapterLockedWithoutPurchase` wieder aktiv lassen.
  */
-export const TEMP_UNLOCK_ALL_CHAPTERS_FOR_TESTING = true;
+export const TEMP_UNLOCK_ALL_CHAPTERS_FOR_TESTING = false;
 
 /** Bundle oder Legacy „full“-Schalter */
 export async function hasPurchaseAllUnits(): Promise<boolean> {
@@ -106,7 +106,24 @@ function hasAnyUnlockedPurchase(state: ModulePurchaseState): boolean {
  */
 export async function restorePurchases(): Promise<RestorePurchasesResult> {
   try {
-    // TODO: Sobald IAP aktiv ist: hier z. B. getAvailablePurchases / restoreCompletedTransactions aufrufen und Keys in AsyncStorage spiegeln.
+    const { CustomerInfo } = await import('react-native-purchases');
+    const Purchases = (await import('react-native-purchases')).default;
+    const customerInfo = await Purchases.restorePurchases();
+    const entitlements = customerInfo.entitlements.active;
+    const pairs: [string, string][] = [];
+    if (entitlements['all_units']) {
+      pairs.push([PURCHASE_ALL_UNITS, 'true']);
+      pairs.push([PURCHASE_UNIT_1, 'true']);
+      pairs.push([PURCHASE_UNIT_2, 'true']);
+      pairs.push([PURCHASE_UNIT_3, 'true']);
+      pairs.push([PURCHASE_UNIT_4, 'true']);
+    } else {
+      if (entitlements['unit_1']) pairs.push([PURCHASE_UNIT_1, 'true']);
+      if (entitlements['unit_2']) pairs.push([PURCHASE_UNIT_2, 'true']);
+      if (entitlements['unit_3']) pairs.push([PURCHASE_UNIT_3, 'true']);
+      if (entitlements['unit_4']) pairs.push([PURCHASE_UNIT_4, 'true']);
+    }
+    if (pairs.length > 0) await AsyncStorage.multiSet(pairs);
     const state = await loadModulePurchaseState();
     return hasAnyUnlockedPurchase(state) ? 'restored' : 'none';
   } catch {

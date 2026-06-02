@@ -1,19 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Clipboard from 'expo-clipboard';
 import Constants from 'expo-constants';
+import * as StoreReview from 'expo-store-review';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
   Image,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import Purchases from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AUDIO_REPEAT_KEY,
@@ -88,6 +92,11 @@ const FAQ_ACCORDION_ITEMS: FaqAccordionItem[] = [
     question: STRINGS.faqRestoreQuestion,
     answer: STRINGS.faqRestoreAnswer,
   },
+  {
+    id: 'userid',
+    question: 'Was ist meine User ID?',
+    answer: 'Deine User ID ist ein eindeutiger Bezeichner für dein Konto. Wenn du den Support kontaktierst, werden wir möglicherweise danach fragen. Du findest sie in den Einstellungen unter Support & Feedback – tippe darauf um sie zu kopieren.',
+  },
 ];
 
 const MODULE_CODES_ORDER: ModuleCode[] = ['101', '102', '103', '104'];
@@ -116,6 +125,7 @@ export default function SettingsScreen() {
   const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
     INITIAL_MODULE_PURCHASE_STATE,
   );
+  const [appUserId, setAppUserId] = useState<string>('...');
 
   const toggleFaq = useCallback((id: string) => {
     setFaqOpenId((prev) => (prev === id ? null : id));
@@ -144,6 +154,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       void loadAudioSettings();
       void loadModulePurchaseState().then(setPurchaseState);
+      void Purchases.getAppUserID().then((id) => setAppUserId(id)).catch(() => setAppUserId('n/a'));
     }, [loadAudioSettings]),
   );
 
@@ -206,6 +217,30 @@ export default function SettingsScreen() {
           ? STRINGS.restoreSuccessTitle
           : STRINGS.restoreNoneTitle,
       );
+    })();
+  }, []);
+
+  const handleCopyUserId = useCallback(() => {
+    void Clipboard.setStringAsync(appUserId).then(() => {
+      Alert.alert('Kopiert!', 'User ID wurde in die Zwischenablage kopiert.');
+    });
+  }, [appUserId]);
+
+  const truncatedUserId = useMemo(() => {
+    if (appUserId.length <= 10) return appUserId;
+    return appUserId.slice(0, 6) + '...' + appUserId.slice(-4);
+  }, [appUserId]);
+
+  const handleRateApp = useCallback(() => {
+    void (async () => {
+      const available = await StoreReview.isAvailableAsync();
+      if (available) {
+        await StoreReview.requestReview();
+      } else if (Platform.OS === 'android') {
+        void Linking.openURL('https://play.google.com/store/apps/details?id=com.tommi07051967.disco101deen&showAllReviews=true');
+      } else {
+        void Linking.openURL('https://apps.apple.com/app/id0000000000?action=write-review');
+      }
     })();
   }, []);
 
@@ -366,19 +401,6 @@ export default function SettingsScreen() {
               <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
             </View>
           </Pressable>
-          <Pressable
-            onPress={() => Alert.alert('Video kommt in Kürze!')}
-            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
-            accessibilityRole="button"
-            accessibilityLabel="App-Erklärung ansehen"
-          >
-            <View style={[styles.row, styles.rowBorder]}>
-              <Text style={styles.rowLabel} numberOfLines={2}>
-                App-Erklärung ansehen
-              </Text>
-              <Ionicons name="arrow-forward" size={20} color={colors.iconMuted} />
-            </View>
-          </Pressable>
           {FAQ_ACCORDION_ITEMS.map((item, index) => {
             const open = faqOpenId === item.id;
             const isLast = index === FAQ_ACCORDION_ITEMS.length - 1;
@@ -441,6 +463,18 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>{STRINGS.settingsSectionSupport}</Text>
         <View style={styles.group}>
           <Pressable
+            onPress={handleCopyUserId}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="User ID kopieren"
+          >
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel} numberOfLines={1}>User ID</Text>
+              <Text style={[styles.rowValue, { marginRight: 8 }]}>{truncatedUserId}</Text>
+              <Ionicons name="copy-outline" size={18} color={colors.iconMuted} />
+            </View>
+          </Pressable>
+          <Pressable
             onPress={() => openExternalUrl(STRINGS.urlContact)}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
@@ -454,12 +488,7 @@ export default function SettingsScreen() {
             </View>
           </Pressable>
           <Pressable
-            onPress={() =>
-              Alert.alert(
-                STRINGS.rateAppTitle,
-                STRINGS.rateAppMessage,
-              )
-            }
+            onPress={handleRateApp}
             style={({ pressed }) => [pressed && { opacity: 0.75 }]}
             accessibilityRole="button"
             accessibilityLabel={STRINGS.rateAppA11y}

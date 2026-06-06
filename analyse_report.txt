@@ -1,0 +1,370 @@
+================================================================================
+VOLLSTÄNDIGE CODE-ANALYSE: DISCO101 APP
+================================================================================
+Analysiert:   16. Mai 2026
+Analysiert von: Claude Code (claude-sonnet-4-6)
+Dateien geprüft: 18 Quelldateien, 4 JSON-Packs, audioAssets.ts
+Keine Änderungen vorgenommen.
+================================================================================
+
+
+1. ORDNERSTRUKTUR
+--------------------------------------------------------------------------------
+Insgesamt logisch und sauber. Die Trennung in app/, components/, constants/,
+utils/ und data/ ist nachvollziehbar.
+
+  app/(tabs)/         Navigation + Screens
+  components/         Wiederverwendbare UI-Komponenten
+  constants/          App-weite Konfiguration & Storage-Keys
+  utils/              Technische Hilfsfunktionen (Audio, Pfade)
+  data/               sentences1-4.json
+  assets/audio/       808 + 8 Spezial-MP3s
+
+Kleinere Inkonsistenz: sentencePacks.ts liegt in constants/, ist aber eine
+Datenzugriffs-Hilfsfunktion — konzeptuell passender in utils/. Das ist kein
+Fehler, aber erwähnenswert wenn Entwickler neue Dateien anlegen und sich fragen
+wo etwas hingehört.
+
+
+2. MP3-REFERENZEN
+--------------------------------------------------------------------------------
+Ergebnis: Vollständig korrekt und konsistent.
+
+  Unit   Schema                              Anzahl
+  ---    ------                              ------
+  101    phrase_001_m.mp3 / _f.mp3           202
+  102    102_phrase_001_m.mp3 / _f.mp3       202
+  103    103_phrase_001_m.mp3 / _f.mp3       202
+  104    104_phrase_001_m.mp3 / _f.mp3       202
+  UI     correct1, correct2, tada,           8
+         chris-das-war-spitze, ann-gut-gemacht,
+         complete, welcome_m, welcome_f
+
+Alle 816 Einträge in utils/audioAssets.ts registriert. Die Mapping-Funktion
+phraseAudioAssetKey() in utils/phraseAudioKey.ts funktioniert korrekt für alle
+4 Module.
+
+KEINE FEHLERHAFTEN MP3-REFERENZEN GEFUNDEN.
+
+
+3. DEAD CODE — 2 GANZE DATEIEN WERDEN NIE IMPORTIERT
+--------------------------------------------------------------------------------
+
+BEFUND 3.1 — utils/chaptersConfig.ts (62 Zeilen, komplett tot)
+
+  Datei:   utils/chaptersConfig.ts
+  Imports: 0 Stellen im gesamten Projekt
+
+  Die Datei definiert `chapters` (die Phrasen-Ranges für Unit 101, hardcoded)
+  und ein `packages`-Objekt. Beide werden nirgendwo importiert. lernen.tsx
+  leitet Kapitel-Daten dynamisch aus getSentencesForModule() ab und braucht
+  diese Datei nicht.
+
+  Sie war vermutlich die ursprüngliche Lösung aus Unit-101-Zeiten, wurde dann
+  durch die dynamische Variante ersetzt — aber nie gelöscht.
+
+  Empfehlung: Datei löschen.
+
+--
+
+BEFUND 3.2 — utils/getAudioPath.ts (12 Zeilen, komplett tot)
+
+  Datei:   utils/getAudioPath.ts
+  Imports: 0 Stellen im gesamten Projekt
+
+  Inhalt der Datei:
+    export function getAudioPath(packageId: string, phraseId: number, gender: 'm' | 'f'): string {
+      void packageId;   // "reserved for future use" — nie aufgerufen
+      return `phrase_${String(phraseId).padStart(3, '0')}_${gender}`;
+    }
+
+  Ersetzt worden durch phraseAudioAssetKey() in utils/phraseAudioKey.ts,
+  aber nicht gelöscht. Außerdem funktioniert sie nur für Unit 101 (kein
+  Präfix für Units 102–104) — wäre also auch inhaltlich falsch.
+
+  Empfehlung: Datei löschen.
+
+
+4. REGISTRIERTE ABER UNGENUTZTE AUDIO-ASSETS
+--------------------------------------------------------------------------------
+
+BEFUND 4.1 — 'correct2' und 'complete' werden nie abgespielt
+
+  utils/audioAssets.ts:812   'correct2': require('../assets/audio/correct2.mp3'),
+  utils/audioAssets.ts:815   'complete': require('../assets/audio/complete.mp3'),
+
+  Beide Keys existieren im Asset-Map, werden aber nirgendwo im Code mit
+  audioAssets['correct2'] oder audioAssets['complete'] aufgerufen. Wahrscheinlich
+  für geplante Features vorgesehen, aber aktuell toter Ballast im Bundle.
+
+  Zum Vergleich: welcome_m und welcome_f werden korrekt in
+  app/onboarding.tsx:73 genutzt — die sind sauber.
+
+  Empfehlung: Entweder einbauen oder Keys + MP3-Dateien entfernen.
+
+
+5. DUPLIKATE — GLEICHER CODE IN ZWEI DATEIEN
+--------------------------------------------------------------------------------
+Drei Funktionspaare sind zwischen app/(tabs)/index.tsx und
+app/(tabs)/wiederholen/session.tsx kopiert worden:
+
+BEFUND 5.1 — shufflePhrases() dupliziert
+
+  Datei                                Zeile
+  -----                                -----
+  app/(tabs)/index.tsx                 75–84
+  app/(tabs)/wiederholen/session.tsx   76–85
+
+  Identische Fisher-Yates-Implementierung. Wird ein Bug gefunden (z.B.
+  Off-by-one), muss er an zwei Stellen gefixt werden.
+
+--
+
+BEFUND 5.2 — Quiz-Options-Builder dupliziert (andere Namen, gleiche Logik)
+
+  Datei                                Funktionsname            Zeile
+  -----                                -------------            -----
+  app/(tabs)/index.tsx                 buildTestOptions()       87–92
+  app/(tabs)/wiederholen/session.tsx   buildSessionQuizOptions()  87–92
+
+  Beide Funktionen sind identisch:
+    const others = shufflePhrases(pool.filter((p) => p.id !== correct.id));
+    const w1 = others[0] ?? correct;
+    const w2 = others[1] ?? others[0] ?? correct;
+    return shufflePhrases([correct, w1, w2]);
+
+--
+
+BEFUND 5.3 — Audio-Source-Lookup dupliziert (andere Namen, gleiche Logik)
+
+  Datei                                Funktionsname                Zeile
+  -----                                -------------                -----
+  app/(tabs)/index.tsx                 testPhraseAudioSource()      94–101
+  app/(tabs)/wiederholen/session.tsx   sessionPhraseAudioSource()   94–101
+
+  Beide Funktionen sind identisch:
+    const key = phraseAudioAssetKey(moduleCode, phraseId, gender);
+    return audioAssets[key] ?? null;
+
+  Empfehlung (alle drei): In utils/phraseUtils.ts extrahieren und
+  in beiden Dateien importieren.
+
+
+6. HARDCODED KAPITELZAHL = 7 AN 5 STELLEN
+--------------------------------------------------------------------------------
+Alle 4 Units haben derzeit 7 Kapitel — das stimmt. Aber die Zahl 7 ist im
+Code fest verdrahtet, nicht aus den Daten abgeleitet. Das ist kein Bug, aber
+ein Wartungsrisiko wenn zukünftige Units mal 6 oder 8 Kapitel bekommen.
+
+  Datei                          Zeile   Code
+  -----                          -----   ----
+  app/(tabs)/lernen.tsx          60      [1, 2, 3, 4, 5, 6, 7].map(...)
+  app/(tabs)/index.tsx           567     isAllPhrasesComplete = isChapterComplete && currentChapter === 7
+  app/(tabs)/index.tsx           587     if (currentChapter < 7)  [in advanceToNextChapter]
+  app/(tabs)/index.tsx           638     if (currentChapter < 7)  [in onNext]
+  components/PhraseCard.tsx      267     {chapterNumber < 7 ? <NächstesKapitelButton>}
+
+BEFUND 6.1 — Zusätzlich: Hardcoded "101 Phrasen" im Abschluss-Text
+
+  components/PhraseCard.tsx:247
+  Text: 'Alle 101 Phrasen gelernt! 🎉'
+
+  Erscheint nach dem letzten Kapitel — für alle 4 Units. Für Unit 2, 3, 4
+  stimmt "101 Phrasen" zufällig (alle haben 101 Phrasen), aber der Text sagt
+  nichts darüber in welcher Unit der Nutzer gerade ist.
+
+  Empfehlung: Dynamisch aus den Daten ableiten, z.B.:
+    `Alle ${sentences.length} Phrasen gelernt!`
+
+
+7. IRREFÜHRENDER PROP-NAME
+--------------------------------------------------------------------------------
+
+BEFUND 7.1 — ch1Count heißt eigentlich "current chapter count"
+
+  components/PhraseCard.tsx:40   ch1Count: number;
+  app/(tabs)/index.tsx:1111      ch1Count={chCount}
+
+  Der Name ch1Count klingt wie "Anzahl der Phrasen in Kapitel 1", ist aber
+  chCount — die Phrasenanzahl des aktuellen Kapitels. Sichtbar in der
+  Kartenansicht:
+    "/ {ch1Count}  Phrase im Kapitel"
+  Das ist die Anzahl des aktuellen Kapitels, nicht Kapitel 1.
+
+  Empfehlung: Umbenennen zu currentChapterCount oder chapterPhraseCount.
+
+
+8. IAP/FREISCHALT-LOGIK: STRUKTURELLER MISMATCH
+--------------------------------------------------------------------------------
+Das ist der inhaltlich wichtigste Befund für die Businesslogik.
+
+constants/products.ts definiert 4 separate kaufbare Module:
+  { code: '101', title: 'Unit 1 Basics',  priceLabel: '5,99 €' },
+  { code: '102', title: 'Unit 2 Urlaub',  priceLabel: '5,99 €' },
+  { code: '103', title: 'Unit 3 Job',     priceLabel: '5,99 €' },
+  { code: '104', title: 'Unit 4 Expat',   priceLabel: '5,99 €' },
+
+constants/chapterUnlock.ts hat aber nur EINEN Purchase-Key:
+  export const DISC101_FULL_KEY = 'purchase_disc101_full';
+
+  export function isChapterLockedWithoutPurchase(chapterId: number): boolean {
+    return chapterId > 1;   // gilt für ALLE 4 Units
+  }
+
+Das bedeutet: Ein einziger Kauf (disc101_full) schaltet Kapitel 2–7 in allen
+4 Units frei. Es gibt keine separaten Kaufkeys für Units 102–104.
+
+Mögliche Szenarien:
+  A) ABSICHTLICH: Das Geschäftsmodell ist "eine Zahlung = alles", die 4
+     Preisschilder sind nur Platzhalter. Dann sollte die UI klarstellen, dass
+     ein Kauf alle Units freischaltet.
+
+  B) UNFERTIG: Per-Unit-Käufe sind geplant, aber chapterUnlock.ts wurde noch
+     nicht für Units 102–104 erweitert. Dann fehlen separate Keys und
+     Prüflogik pro Modul.
+
+Empfehlung: Diese Frage VOR dem App-Store-Launch mit dem Entwickler klären.
+Das ist keine technische Fehlfunktion, aber eine offene Designentscheidung
+mit direkter Auswirkung auf die Monetarisierung.
+
+
+9. TEST-LOGIK NACH JEDEM KAPITEL — VOLLSTÄNDIGE ANALYSE
+--------------------------------------------------------------------------------
+Die Test-Logik ist VORHANDEN UND FUNKTIONAL.
+
+Ablauf:
+  1. Nutzer lernt alle Phrasen eines Kapitels durch Wischen
+  2. Nach der letzten Phrase: Kapitel-Abschluss-Screen ("Kapitel abgeschlossen!")
+  3. Zwei Buttons: "Tests starten" und "Nächstes Kapitel →"
+  4. "Tests starten" öffnet Auswahl zwischen Test 1 und Test 2
+
+Test 1 — Hören → Englisch erkennen
+  Chris/Ann liest einen Satz vor. Nutzer wählt den gehörten Satz aus 3
+  englischen Optionen.
+
+Test 2 — Hören → Deutsch erkennen
+  Chris/Ann liest einen Satz vor. Nutzer findet die deutsche Übersetzung
+  aus 3 Optionen.
+
+Feedback bei Abschluss:
+  100% richtig     → Confetti + Audio "chris-das-war-spitze"
+  ≥ 80% richtig    → Audio "ann-gut-gemacht" + rotierende Discokugel
+  < 80%            → kein Sound, keine Animation
+  Falsche Antworten → automatisch in den Repeat-Stapel gepinnt (sehr gut!)
+
+--
+
+BEFUND 9.1 — Test ist auf 8 Phrasen gedeckelt
+
+  app/(tabs)/index.tsx:601-602
+    const shuffled = shufflePhrases(chPhrases);
+    const limited = shuffled.slice(0, 8);   // maximal 8 Phrasen
+
+  Für kleine Kapitel wird alles abgefragt. Für große Kapitel ist die
+  Abdeckung lückenhaft:
+
+  Kapitel   Phrasen   Im Test   Abdeckung
+  -------   -------   -------   ---------
+  Kap. 1    15        8         53%
+  Kap. 2    12        8         67%
+  Kap. 3    20        8         40%   ← niedrigste Abdeckung
+  Kap. 4    18        8         44%
+  Kap. 5    15        8         53%
+  Kap. 6    8         8         100%
+  Kap. 7    13        8         62%
+
+  Kein Bug — kann eine bewusste UX-Entscheidung sein (kurze Tests = weniger
+  Frustration). Pädagogisch werden in Kap. 3 und 4 aber mehr als die Hälfte
+  der Phrasen nie getestet.
+
+  Empfehlung zur Diskussion: Cap auf 10-12 erhöhen, oder adaptiv gestalten
+  (alle Phrasen aus kleinen Kapiteln, Sample aus großen).
+
+--
+
+BEFUND 9.2 — activeTestKind ref und state sind redundant
+
+  app/(tabs)/index.tsx:239
+    const [activeTestKind, setActiveTestKind] = useState<1 | 2 | null>(null);
+  app/(tabs)/index.tsx:249
+    const activeTestKindRef = useRef<1 | 2 | null>(null);
+
+  Beide werden synchron gesetzt. Der Ref wird jedoch nie in einem Async-
+  Callback genutzt, wo er einen veralteten State-Wert vermeiden müsste.
+  activeTestKindRef ist überflüssig.
+
+  Empfehlung: activeTestKindRef und alle activeTestKindRef.current-Zuweisungen
+  entfernen.
+
+
+10. IRREFÜHRENDES "PRELOADING" IN utils/audioPreloader.ts
+--------------------------------------------------------------------------------
+
+  utils/audioPreloader.ts:16-28
+    export function preloadPhraseAudio(phraseIds: number[], moduleCode: ModuleCode): void {
+      for (const phraseId of phraseIds) {
+        const mSrc = audioAssets[mKey];
+        if (mSrc != null) preloadedCache[mKey] = mSrc;   // kopiert nur eine Referenz
+      }
+    }
+
+Das "Preloading" kopiert lediglich Referenzen von audioAssets (einem statischen
+Objekt) in preloadedCache. Da Expo-Audio-Assets via require() im Bundle liegen,
+passiert kein echtes Vorausladen von Audiodaten. Die Funktion ist funktional
+harmlos (schadet nicht), aber der Name preloadPhraseAudio suggeriert eine
+Optimierung die nicht stattfindet.
+
+Empfehlung: Entweder echtes Preloading implementieren (AudioPlayer vorab
+initialisieren) oder die Funktion umbenennen und den Kommentar korrigieren.
+
+
+================================================================================
+GESAMTÜBERSICHT ALLER BEFUNDE
+================================================================================
+
+Nr.   Datei(en)                                        Schwere    Typ
+----  -------                                          -------    ---
+3.1   utils/chaptersConfig.ts                          Gering     Dead Code
+      Ganze Datei ungenutzt (62 Zeilen)
+
+3.2   utils/getAudioPath.ts                            Gering     Dead Code
+      Ganze Datei ungenutzt (12 Zeilen)
+
+4.1   utils/audioAssets.ts:812,815                     Gering     Ungenutzt
+      'correct2' + 'complete' registriert aber nie abgespielt
+
+5.1   index.tsx:75 / session.tsx:76                    Gering     Duplikat
+      shufflePhrases() zweimal implementiert
+
+5.2   index.tsx:87 / session.tsx:87                    Gering     Duplikat
+      Quiz-Options-Builder zweimal (buildTestOptions vs buildSessionQuizOptions)
+
+5.3   index.tsx:94 / session.tsx:94                    Gering     Duplikat
+      Audio-Source-Lookup zweimal (andere Namen, gleiche Logik)
+
+6.1   lernen.tsx:60 / index.tsx:567,587,638 /          Mittel     Hardcode
+      PhraseCard.tsx:267
+      Kapitelzahl 7 an 5 Stellen fest verdrahtet
+
+6.2   PhraseCard.tsx:247                               Gering     Hardcode
+      "Alle 101 Phrasen" — stimmt zufällig für alle Units
+
+7.1   PhraseCard.tsx:40 / index.tsx:1111               Gering     Naming
+      ch1Count heißt eigentlich "current chapter count"
+
+8.1   chapterUnlock.ts + products.ts                   HOCH       Design
+      4 Preisschilder, 1 Purchase-Key — Businesslogik ungeklärt
+
+9.1   index.tsx:602                                    Mittel     Design
+      Test-Cap bei 8 Phrasen — Kap. 3 nur 40% abgedeckt
+
+9.2   index.tsx:239,249                                Gering     Redundanz
+      activeTestKindRef überflüssig neben activeTestKind state
+
+10.1  utils/audioPreloader.ts                          Gering     Irreführend
+      "Preloading" kopiert nur Referenzen, lädt kein Audio vor
+
+--------------------------------------------------------------------------------
+KEINE FEHLERHAFTEN MP3-REFERENZEN GEFUNDEN.
+Alle 808 Phrasen-MP3s + 8 Gamification-Sounds sind korrekt verdrahtet.
+================================================================================

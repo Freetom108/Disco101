@@ -530,6 +530,19 @@ export default function SettingsScreen() {
               <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
             </View>
           </Pressable>
+          <Pressable
+            onPress={() => openExternalUrl(STRINGS.urlImpressum)}
+            style={({ pressed }) => [pressed && { opacity: 0.75 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Impressum"
+          >
+            <View style={styles.row}>
+              <Text style={styles.rowLabel} numberOfLines={2}>
+                Impressum
+              </Text>
+              <Ionicons name="open-outline" size={22} color={colors.iconMuted} />
+            </View>
+          </Pressable>
         </View>
 
         <Text style={styles.sectionLabel}>{STRINGS.settingsSectionAppInfo}</Text>

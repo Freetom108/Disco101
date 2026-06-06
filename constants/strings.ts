@@ -53,6 +53,7 @@ export const STRINGS = {
   footerDotSeparator: ' · ',
   urlPrivacy: 'https://freetom108.github.io/Disco101/datenschutz/',
   urlTerms: 'https://freetom108.github.io/Disco101/agb/',
+  urlImpressum: 'https://freetom108.github.io/Disco101/impressum/',
 
   // More screen
   moreTitle: 'More',

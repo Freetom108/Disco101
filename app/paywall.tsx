@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Alert,
@@ -111,6 +111,24 @@ export default function PaywallScreen() {
   const params = useLocalSearchParams<{ focusModule?: string }>();
   const focusModule = parseFocusModule(params.focusModule);
 
+  const [prices, setPrices] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const offerings = await Purchases.getOfferings();
+        const allPackages = offerings.current?.availablePackages ?? [];
+        const map: Record<string, string> = {};
+        for (const pkg of allPackages) {
+          map[pkg.product.identifier] = pkg.product.priceString;
+        }
+        setPrices(map);
+      } catch {
+        // Fallback: leer lassen, dann zeigen wir nichts
+      }
+    })();
+  }, []);
+
   const [fontsLoaded] = useFonts({
     [FONT_DM_SERIF]: require('../assets/fonts/DMSerifDisplay-Regular.ttf'),
   });
@@ -204,7 +222,7 @@ export default function PaywallScreen() {
                       {STRINGS.paywallTileChapterOneFree}
                     </Text>
                     <Text style={[styles.moduleTileBold, styles.moduleTilePriceGap]}>
-                      {m.priceLabel}
+                      {prices[m.productId] ?? '...'}
                     </Text>
                     <Text style={[styles.moduleTileMuted, styles.moduleTileEinmalGap]}>
                       {STRINGS.paywallTileOneTimePayment}

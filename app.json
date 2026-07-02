@@ -14,7 +14,9 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tommi07051967.disco101deen",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {

@@ -110,6 +110,9 @@ export default function PaywallScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const params = useLocalSearchParams<{ focusModule?: string }>();
   const focusModule = parseFocusModule(params.focusModule);
+  const [selectedModule, setSelectedModule] = useState<string | null>(
+    focusModule ? `purchase_unit_${focusModule.slice(-1)}` : 'purchase_unit_1',
+  );
 
   const [prices, setPrices] = useState<Record<string, string>>({});
 
@@ -190,11 +193,11 @@ export default function PaywallScreen() {
 
           <View style={[styles.moduleGrid, { width: gridInnerWidth }]}>
             {MODULE_PRODUCTS.map((m, index) => {
-              const highlighted = focusModule === m.code;
+              const highlighted = m.productId === selectedModule;
               return (
                 <Pressable
                   key={m.code}
-                  onPress={() => void purchaseProduct(m.productId, router)}
+                  onPress={() => setSelectedModule(m.productId)}
                   style={({ pressed }) => [
                     styles.moduleTile,
                     {
@@ -235,7 +238,7 @@ export default function PaywallScreen() {
 
           <View style={styles.ctaSection}>
             <Pressable
-              onPress={() => void purchaseProduct(focusModule ? `purchase_unit_${focusModule.slice(-1)}` : 'purchase_unit_1', router)}
+              onPress={() => void purchaseProduct(selectedModule ?? 'purchase_unit_1', router)}
               style={({ pressed }) => [
                 styles.singleBtn,
                 pressed && { opacity: 0.9 },
@@ -243,7 +246,9 @@ export default function PaywallScreen() {
               accessibilityRole="button"
               accessibilityLabel={STRINGS.paywallSingleUnitA11y}
             >
-              <Text style={styles.singleBtnText}>{STRINGS.paywallSingleUnitCta}</Text>
+              <Text style={styles.singleBtnText}>
+                {`${STRINGS.paywallSingleUnitCta} – ${prices[selectedModule ?? 'purchase_unit_1'] ?? '...'}`}
+              </Text>
             </Pressable>
             <Text style={styles.ctaSubcaption}>
               {STRINGS.paywallSingleUnitSubcaption}

@@ -19,6 +19,12 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "brantinggasse65@gmail.com",
+        "ascAppId": "6711660469",
+        "appleTeamId": "A5MT6S6MFA"
+      }
+    }
   }
 }

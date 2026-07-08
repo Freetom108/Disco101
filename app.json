@@ -34,7 +34,7 @@
         "com.android.vending.BILLING"
       ],
       "package": "com.tommi07051967.disco101deen",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

@@ -18,7 +18,9 @@
       "bundleIdentifier": "com.tommi07051967.disco101deen",
       "buildNumber": "2",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "de",
+        "CFBundleLocalizations": ["de"]
       }
     },
     "android": {
@@ -34,7 +36,8 @@
         "com.android.vending.BILLING"
       ],
       "package": "com.tommi07051967.disco101deen",
-      "versionCode": 3
+      "versionCode": 3,
+      "locales": ["de"]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

@@ -1,10 +1,16 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ModuleCode } from '../../constants/products';
 import { STRINGS } from '../../constants/strings';
 import { setActiveLearningModule } from '../../constants/activeLearningModule';
+import {
+  INITIAL_MODULE_PURCHASE_STATE,
+  loadModulePurchaseState,
+  type ModulePurchaseState,
+} from '../../constants/chapterUnlock';
 import type { AppPalette } from '../../constants/themePalettes';
 import { useAppTheme } from '../../context/AppThemeContext';
 
@@ -48,6 +54,16 @@ export default function MoreScreen() {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createMoreStyles(colors), [colors]);
 
+  const [purchaseState, setPurchaseState] = useState<ModulePurchaseState>(
+    INITIAL_MODULE_PURCHASE_STATE,
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadModulePurchaseState().then(setPurchaseState);
+    }, []),
+  );
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.screenBg }]}>
       <View style={styles.header}>
@@ -74,38 +90,58 @@ export default function MoreScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {MODULE_TILES.map((m) => (
-          <View key={m.code} style={styles.tile}>
-            <Text style={styles.tileTitle}>
-              {m.title.startsWith('🔒')
-                ? [
-                    <Text key="lock" style={styles.tileTitleLockEmoji}>
-                      🔓
-                    </Text>,
-                    <Text key="rest">{m.title.slice('🔒'.length)}</Text>,
-                  ]
-                : m.title}
-            </Text>
-            <Text style={styles.tileBody}>{m.body}</Text>
-            <Pressable
-              onPress={() => {
-                void setActiveLearningModule(m.code);
-                router.push({
-                  pathname: '/paywall',
-                  params: { focusModule: m.code },
-                });
-              }}
-              style={({ pressed }) => [
-                styles.unlockBtn,
-                pressed && { opacity: 0.92 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`${STRINGS.unlockVerb} ${m.title}`}
-            >
-              <Text style={styles.unlockBtnText}>{m.buttonLabel}</Text>
-            </Pressable>
-          </View>
-        ))}
+        {MODULE_TILES.map((m) => {
+          const isUnlocked = purchaseState.allUnitsUnlocked || purchaseState.units[m.code];
+          return (
+            <View key={m.code} style={styles.tile}>
+              <Text style={styles.tileTitle}>
+                {m.title.startsWith('🔒')
+                  ? [
+                      <Text key="lock" style={styles.tileTitleLockEmoji}>
+                        {isUnlocked ? '✅' : '🔒'}
+                      </Text>,
+                      <Text key="rest">{m.title.slice('🔒'.length)}</Text>,
+                    ]
+                  : m.title}
+              </Text>
+              <Text style={styles.tileBody}>{m.body}</Text>
+              {isUnlocked ? (
+                <Pressable
+                  onPress={() => {
+                    void setActiveLearningModule(m.code);
+                    router.push('/(tabs)');
+                  }}
+                  style={({ pressed }) => [
+                    styles.unlockedBtn,
+                    pressed && { opacity: 0.92 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${m.title} öffnen`}
+                >
+                  <Text style={styles.unlockedBtnText}>✅ Bereits freigeschaltet</Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    void setActiveLearningModule(m.code);
+                    router.push({
+                      pathname: '/paywall',
+                      params: { focusModule: m.code },
+                    });
+                  }}
+                  style={({ pressed }) => [
+                    styles.unlockBtn,
+                    pressed && { opacity: 0.92 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${STRINGS.unlockVerb} ${m.title}`}
+                >
+                  <Text style={styles.unlockBtnText}>{m.buttonLabel}</Text>
+                </Pressable>
+              )}
+            </View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -211,6 +247,24 @@ function createMoreStyles(c: AppPalette) {
       fontSize: 15,
       fontWeight: '700',
       color: c.buttonOnAccent,
+    },
+    unlockedBtn: {
+      marginTop: 14,
+      alignSelf: 'stretch',
+      backgroundColor: c.cardBg,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 44,
+      borderWidth: 1.5,
+      borderColor: c.borderSubtle,
+    },
+    unlockedBtnText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: c.textMuted,
     },
   });
 }

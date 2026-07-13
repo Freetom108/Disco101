@@ -20,7 +20,9 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDevelopmentRegion": "de",
-        "CFBundleLocalizations": ["de"]
+        "CFBundleLocalizations": [
+          "de"
+        ]
       }
     },
     "android": {
@@ -36,8 +38,10 @@
         "com.android.vending.BILLING"
       ],
       "package": "com.tommi07051967.disco101deen",
-      "versionCode": 3,
-      "locales": ["de"]
+      "versionCode": 4,
+      "locales": [
+        "de"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

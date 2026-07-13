@@ -2,7 +2,7 @@
   "expo": {
     "name": "Disco 101 Einfach Englisch Lernen",
     "slug": "app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "disco101",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tommi07051967.disco101deen",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDevelopmentRegion": "de",
